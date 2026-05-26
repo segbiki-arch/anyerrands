@@ -445,6 +445,48 @@ paths:
                 items:
                   $ref: "#/components/schemas/Errand"
 
+  /stripe/connect/onboard/{helperId}:
+    post:
+      operationId: stripeConnectOnboard
+      tags: [helpers]
+      summary: Start Stripe Connect onboarding for a helper
+      parameters:
+        - name: helperId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Onboarding URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StripeConnectOnboardResponse"
+        "404":
+          description: Helper not found
+
+  /stripe/connect/status/{helperId}:
+    get:
+      operationId: stripeConnectStatus
+      tags: [helpers]
+      summary: Get Stripe Connect account status for a helper
+      parameters:
+        - name: helperId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Connect account status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StripeConnectStatusResponse"
+        "404":
+          description: Helper not found
+
   /categories:
     get:
       operationId: listCategories
@@ -741,8 +783,32 @@ components:
           type: boolean
         avatarInitials:
           type: ["string", "null"]
+        stripeAccountId:
+          type: ["string", "null"]
+        stripeOnboardingComplete:
+          type: ["boolean", "null"]
         createdAt:
           type: string
+
+    StripeConnectOnboardResponse:
+      type: object
+      required: [url]
+      properties:
+        url:
+          type: string
+
+    StripeConnectStatusResponse:
+      type: object
+      required: [connected, detailsSubmitted, chargesEnabled]
+      properties:
+        connected:
+          type: boolean
+        detailsSubmitted:
+          type: boolean
+        chargesEnabled:
+          type: boolean
+        accountId:
+          type: ["string", "null"]
 
     HelperInput:
       type: object

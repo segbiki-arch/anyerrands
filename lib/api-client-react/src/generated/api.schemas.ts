@@ -137,7 +137,23 @@ export interface Helper {
   available: boolean;
   /** @nullable */
   avatarInitials?: string | null;
+  /** @nullable */
+  stripeAccountId?: string | null;
+  /** @nullable */
+  stripeOnboardingComplete?: boolean | null;
   createdAt: string;
+}
+
+export interface StripeConnectOnboardResponse {
+  url: string;
+}
+
+export interface StripeConnectStatusResponse {
+  connected: boolean;
+  detailsSubmitted: boolean;
+  chargesEnabled: boolean;
+  /** @nullable */
+  accountId?: string | null;
 }
 
 export interface HelperInput {

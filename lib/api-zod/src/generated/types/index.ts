@@ -34,3 +34,5 @@ export * from './markAllNotificationsReadBody';
 export * from './mobileTokenExchangeRequest';
 export * from './mobileTokenExchangeSuccess';
 export * from './notification';
+export * from './stripeConnectOnboardResponse';
+export * from './stripeConnectStatusResponse';

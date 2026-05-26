@@ -317,6 +317,8 @@ export const ListHelpersResponseItem = zod.object({
   "rating": zod.number().nullable(),
   "available": zod.boolean(),
   "avatarInitials": zod.string().nullish(),
+  "stripeAccountId": zod.string().nullish(),
+  "stripeOnboardingComplete": zod.boolean().nullish(),
   "createdAt": zod.string()
 })
 export const ListHelpersResponse = zod.array(ListHelpersResponseItem)
@@ -351,6 +353,8 @@ export const GetHelperResponse = zod.object({
   "rating": zod.number().nullable(),
   "available": zod.boolean(),
   "avatarInitials": zod.string().nullish(),
+  "stripeAccountId": zod.string().nullish(),
+  "stripeOnboardingComplete": zod.boolean().nullish(),
   "createdAt": zod.string()
 })
 
@@ -380,6 +384,8 @@ export const UpdateHelperResponse = zod.object({
   "rating": zod.number().nullable(),
   "available": zod.boolean(),
   "avatarInitials": zod.string().nullish(),
+  "stripeAccountId": zod.string().nullish(),
+  "stripeOnboardingComplete": zod.boolean().nullish(),
   "createdAt": zod.string()
 })
 
@@ -407,6 +413,33 @@ export const GetHelperErrandsResponseItem = zod.object({
   "updatedAt": zod.string().nullish()
 })
 export const GetHelperErrandsResponse = zod.array(GetHelperErrandsResponseItem)
+
+
+/**
+ * @summary Start Stripe Connect onboarding for a helper
+ */
+export const StripeConnectOnboardParams = zod.object({
+  "helperId": zod.coerce.number()
+})
+
+export const StripeConnectOnboardResponse = zod.object({
+  "url": zod.string()
+})
+
+
+/**
+ * @summary Get Stripe Connect account status for a helper
+ */
+export const StripeConnectStatusParams = zod.object({
+  "helperId": zod.coerce.number()
+})
+
+export const StripeConnectStatusResponse = zod.object({
+  "connected": zod.boolean(),
+  "detailsSubmitted": zod.boolean(),
+  "chargesEnabled": zod.boolean(),
+  "accountId": zod.string().nullish()
+})
 
 
 /**

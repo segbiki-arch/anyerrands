@@ -18,5 +18,9 @@ export interface Helper {
   available: boolean;
   /** @nullable */
   avatarInitials?: string | null;
+  /** @nullable */
+  stripeAccountId?: string | null;
+  /** @nullable */
+  stripeOnboardingComplete?: boolean | null;
   createdAt: string;
 }

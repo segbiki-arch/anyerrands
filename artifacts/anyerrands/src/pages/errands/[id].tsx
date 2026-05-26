@@ -261,19 +261,24 @@ export default function ErrandDetailPage() {
                 {errand.status === ErrandStatus.accepted && (
                   <>
                     {errand.budgetAmount != null && Number(errand.budgetAmount) > 0 && (
-                      <Button
-                        className="w-full rounded-full"
-                        size="lg"
-                        onClick={() => redirectToCheckout(errandId)}
-                        disabled={isCheckoutPending}
-                        data-testid="btn-pay-errand"
-                      >
-                        {isCheckoutPending ? (
-                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirecting...</>
-                        ) : (
-                          <><CreditCard className="w-4 h-4 mr-2" /> Pay €{errand.budgetAmount}</>
-                        )}
-                      </Button>
+                      <>
+                        <Button
+                          className="w-full rounded-full"
+                          size="lg"
+                          onClick={() => redirectToCheckout(errandId)}
+                          disabled={isCheckoutPending}
+                          data-testid="btn-pay-errand"
+                        >
+                          {isCheckoutPending ? (
+                            <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirecting...</>
+                          ) : (
+                            <><CreditCard className="w-4 h-4 mr-2" /> Pay €{errand.budgetAmount}</>
+                          )}
+                        </Button>
+                        <p className="text-xs text-center text-muted-foreground">
+                          90% goes to the helper · 10% platform fee
+                        </p>
+                      </>
                     )}
                     <Button 
                       className="w-full rounded-full" 

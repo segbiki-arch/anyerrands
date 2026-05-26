@@ -42,7 +42,9 @@ import type {
   MarkAllNotificationsReadBody,
   MobileTokenExchangeRequest,
   MobileTokenExchangeSuccess,
-  Notification
+  Notification,
+  StripeConnectOnboardResponse,
+  StripeConnectStatusResponse
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1637,6 +1639,153 @@ export function useGetHelperErrands<TData = Awaited<ReturnType<typeof getHelperE
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetHelperErrandsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getStripeConnectOnboardUrl = (helperId: number,) => {
+
+
+
+
+  return `/api/stripe/connect/onboard/${helperId}`
+}
+
+/**
+ * @summary Start Stripe Connect onboarding for a helper
+ */
+export const stripeConnectOnboard = async (helperId: number, options?: RequestInit): Promise<StripeConnectOnboardResponse> => {
+
+  return customFetch<StripeConnectOnboardResponse>(getStripeConnectOnboardUrl(helperId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getStripeConnectOnboardMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stripeConnectOnboard>>, TError,{helperId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof stripeConnectOnboard>>, TError,{helperId: number}, TContext> => {
+
+const mutationKey = ['stripeConnectOnboard'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof stripeConnectOnboard>>, {helperId: number}> = (props) => {
+          const {helperId} = props ?? {};
+
+          return  stripeConnectOnboard(helperId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StripeConnectOnboardMutationResult = NonNullable<Awaited<ReturnType<typeof stripeConnectOnboard>>>
+
+    export type StripeConnectOnboardMutationError = ErrorType<void>
+
+    /**
+ * @summary Start Stripe Connect onboarding for a helper
+ */
+export const useStripeConnectOnboard = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stripeConnectOnboard>>, TError,{helperId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof stripeConnectOnboard>>,
+        TError,
+        {helperId: number},
+        TContext
+      > => {
+      return useMutation(getStripeConnectOnboardMutationOptions(options));
+    }
+
+export const getStripeConnectStatusUrl = (helperId: number,) => {
+
+
+
+
+  return `/api/stripe/connect/status/${helperId}`
+}
+
+/**
+ * @summary Get Stripe Connect account status for a helper
+ */
+export const stripeConnectStatus = async (helperId: number, options?: RequestInit): Promise<StripeConnectStatusResponse> => {
+
+  return customFetch<StripeConnectStatusResponse>(getStripeConnectStatusUrl(helperId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getStripeConnectStatusQueryKey = (helperId: number,) => {
+    return [
+    `/api/stripe/connect/status/${helperId}`
+    ] as const;
+    }
+
+
+export const getStripeConnectStatusQueryOptions = <TData = Awaited<ReturnType<typeof stripeConnectStatus>>, TError = ErrorType<void>>(helperId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof stripeConnectStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getStripeConnectStatusQueryKey(helperId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof stripeConnectStatus>>> = ({ signal }) => stripeConnectStatus(helperId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(helperId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof stripeConnectStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type StripeConnectStatusQueryResult = NonNullable<Awaited<ReturnType<typeof stripeConnectStatus>>>
+export type StripeConnectStatusQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get Stripe Connect account status for a helper
+ */
+
+export function useStripeConnectStatus<TData = Awaited<ReturnType<typeof stripeConnectStatus>>, TError = ErrorType<void>>(
+ helperId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof stripeConnectStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getStripeConnectStatusQueryOptions(helperId,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

@@ -14,6 +14,7 @@ export const helpersTable = pgTable("helpers", {
   rating: numeric("rating", { precision: 3, scale: 1 }),
   available: boolean("available").notNull().default(true),
   avatarInitials: text("avatar_initials"),
+  stripeAccountId: text("stripe_account_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
