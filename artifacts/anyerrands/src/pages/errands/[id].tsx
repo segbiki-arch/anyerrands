@@ -35,8 +35,12 @@ import {
   CalendarDays, 
   CheckCircle2, 
   ArrowLeft,
-  Info
+  Info,
+  CreditCard,
+  Loader2
 } from "lucide-react";
+
+import { useStripeCheckout } from "@/hooks/use-stripe-checkout";
 
 export default function ErrandDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -44,6 +48,7 @@ export default function ErrandDetailPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { redirectToCheckout, isPending: isCheckoutPending } = useStripeCheckout();
   
   const [isAcceptOpen, setIsAcceptOpen] = useState(false);
   const [selectedHelperId, setSelectedHelperId] = useState<string>("");
@@ -241,7 +246,7 @@ export default function ErrandDetailPage() {
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-border/40">
+              <div className="pt-6 border-t border-border/40 space-y-3">
                 {errand.status === ErrandStatus.open && (
                   <Button 
                     className="w-full rounded-full" 
@@ -254,17 +259,34 @@ export default function ErrandDetailPage() {
                 )}
 
                 {errand.status === ErrandStatus.accepted && (
-                  <Button 
-                    className="w-full rounded-full" 
-                    size="lg" 
-                    variant="default"
-                    onClick={handleComplete}
-                    disabled={completeErrand.isPending}
-                    data-testid="btn-complete-errand"
-                  >
-                    {completeErrand.isPending ? "Marking..." : "Mark as Completed"}
-                    <CheckCircle2 className="w-4 h-4 ml-2" />
-                  </Button>
+                  <>
+                    {errand.budgetAmount != null && Number(errand.budgetAmount) > 0 && (
+                      <Button
+                        className="w-full rounded-full"
+                        size="lg"
+                        onClick={() => redirectToCheckout(errandId)}
+                        disabled={isCheckoutPending}
+                        data-testid="btn-pay-errand"
+                      >
+                        {isCheckoutPending ? (
+                          <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Redirecting...</>
+                        ) : (
+                          <><CreditCard className="w-4 h-4 mr-2" /> Pay €{errand.budgetAmount}</>
+                        )}
+                      </Button>
+                    )}
+                    <Button 
+                      className="w-full rounded-full" 
+                      size="lg" 
+                      variant="outline"
+                      onClick={handleComplete}
+                      disabled={completeErrand.isPending}
+                      data-testid="btn-complete-errand"
+                    >
+                      {completeErrand.isPending ? "Marking..." : "Mark as Completed"}
+                      <CheckCircle2 className="w-4 h-4 ml-2" />
+                    </Button>
+                  </>
                 )}
 
                 {errand.status === ErrandStatus.completed && (

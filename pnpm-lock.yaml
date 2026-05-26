@@ -173,6 +173,9 @@ importers:
 
   artifacts/anyerrands:
     dependencies:
+      '@stripe/stripe-js':
+        specifier: ^9.6.0
+        version: 9.6.0
       '@types/leaflet':
         specifier: ^1.9.21
         version: 1.9.21
@@ -1588,6 +1591,10 @@ packages:
   '@sindresorhus/merge-streams@4.0.0':
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
+
+  '@stripe/stripe-js@9.6.0':
+    resolution: {integrity: sha512-v5MebYvJbddSRn15fknxTVwypJPzjeIXI1Q2HBxCBrQieWna8PC+RXEVUZ3F4ANAeILEj97HzFlr0r7CXvG7ZA==}
+    engines: {node: '>=12.16'}
 
   '@tabby_ai/hijri-converter@1.0.5':
     resolution: {integrity: sha512-r5bClKrcIusDoo049dSL8CawnHR6mRdDwhlQuIgZRNty68q0x8k3Lf1BtPAMxRf/GgnHBnIO4ujd3+GQdLWzxQ==}
@@ -4322,6 +4329,8 @@ snapshots:
   '@shikijs/vscode-textmate@10.0.2': {}
 
   '@sindresorhus/merge-streams@4.0.0': {}
+
+  '@stripe/stripe-js@9.6.0': {}
 
   '@tabby_ai/hijri-converter@1.0.5': {}
 

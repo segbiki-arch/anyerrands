@@ -4,6 +4,7 @@ import errandsRouter from "./errands";
 import helpersRouter from "./helpers";
 import categoriesRouter from "./categories";
 import notificationsRouter from "./notifications";
+import stripeRouter from "./stripe";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(errandsRouter);
 router.use(helpersRouter);
 router.use(categoriesRouter);
 router.use(notificationsRouter);
+router.use(stripeRouter);
 
 export default router;
