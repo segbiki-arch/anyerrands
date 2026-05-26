@@ -30,7 +30,7 @@ import {
 import { 
   MapPin, 
   Clock, 
-  DollarSign, 
+  Euro, 
   User, 
   CalendarDays, 
   CheckCircle2, 
@@ -231,12 +231,12 @@ export default function ErrandDetailPage() {
               
               <div className="flex gap-4">
                 <div className="w-10 h-10 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                  <DollarSign className="w-5 h-5 text-green-600" />
+                  <Euro className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground font-medium">Budget</p>
                   <p className="text-foreground font-medium">
-                    {errand.budgetAmount != null ? `$${errand.budgetAmount}` : "Volunteer / Unpaid"}
+                    {errand.budgetAmount != null ? `€${errand.budgetAmount}` : "Volunteer / Unpaid"}
                   </p>
                 </div>
               </div>

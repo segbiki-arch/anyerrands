@@ -11,6 +11,7 @@ import ErrandDetailPage from "@/pages/errands/[id]";
 import HelpersPage from "@/pages/helpers/index";
 import NewHelperPage from "@/pages/helpers/new";
 import HelperProfilePage from "@/pages/helpers/[id]";
+import MapPage from "@/pages/map";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -33,6 +34,7 @@ function Router() {
         <Route path="/helpers" component={HelpersPage} />
         <Route path="/helpers/new" component={NewHelperPage} />
         <Route path="/helpers/:id" component={HelperProfilePage} />
+        <Route path="/map" component={MapPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

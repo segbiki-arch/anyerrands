@@ -4,7 +4,8 @@ import {
   ClipboardList, 
   Users, 
   PlusCircle, 
-  UserPlus
+  UserPlus,
+  Map
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -64,6 +65,18 @@ export function AppSidebar() {
               <Link href="/helpers" data-testid="link-nav-helpers">
                 <Users className="w-4 h-4" />
                 <span>Find Helpers</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={location === "/map"}
+              tooltip="Errands Map"
+            >
+              <Link href="/map" data-testid="link-nav-map">
+                <Map className="w-4 h-4" />
+                <span>Errands Map</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
