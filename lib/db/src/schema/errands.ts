@@ -49,3 +49,14 @@ export type InsertErrand = z.infer<typeof insertErrandSchema>;
 export type Errand = typeof errandsTable.$inferSelect;
 
 export type Category = typeof categoriesTable.$inferSelect;
+
+export const notificationsTable = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  helperId: integer("helper_id").references(() => helpersTable.id).notNull(),
+  errandId: integer("errand_id").references(() => errandsTable.id).notNull(),
+  message: text("message").notNull(),
+  read: boolean("read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type Notification = typeof notificationsTable.$inferSelect;

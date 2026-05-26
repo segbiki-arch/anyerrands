@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { errandsTable, helpersTable } from "@workspace/db";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { errandsTable, helpersTable, notificationsTable } from "@workspace/db";
+import { eq, desc, and, sql, ilike } from "drizzle-orm";
 import {
   ListErrandsQueryParams,
   CreateErrandBody,
@@ -58,6 +58,24 @@ router.post("/errands", async (req, res) => {
     .insert(errandsTable)
     .values({ ...rest, budgetAmount: budgetAmount != null ? String(budgetAmount) : null })
     .returning();
+
+  // Fire notifications to available helpers in the same area
+  const locationKeyword = rest.requesterLocation.split(",")[0].trim();
+  const nearbyHelpers = await db
+    .select({ id: helpersTable.id })
+    .from(helpersTable)
+    .where(and(eq(helpersTable.available, true), ilike(helpersTable.location, `%${locationKeyword}%`)));
+
+  if (nearbyHelpers.length > 0) {
+    await db.insert(notificationsTable).values(
+      nearbyHelpers.map((h) => ({
+        helperId: h.id,
+        errandId: row.id,
+        message: `New errand in ${locationKeyword}: "${row.title}"`,
+      }))
+    );
+  }
+
   return res.status(201).json(formatErrand(row));
 });
 

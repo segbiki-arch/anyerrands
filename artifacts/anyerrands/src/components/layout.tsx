@@ -4,6 +4,7 @@ import { AppSidebar } from "./app-sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "./notification-bell";
 
 function getPageTitle(location: string) {
   if (location === "/") return "Dashboard";
@@ -28,7 +29,8 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="flex-1 flex flex-col min-w-0">
           <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card px-6">
             <h1 className="text-lg font-semibold font-sans tracking-tight">{pageTitle}</h1>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <NotificationBell />
               <Button asChild variant="outline" size="sm" className="hidden sm:flex rounded-md shadow-xs">
                 <Link href="/helpers/new">Become a Helper</Link>
               </Button>

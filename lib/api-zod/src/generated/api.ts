@@ -342,3 +342,51 @@ export const ListCategoriesResponseItem = zod.object({
 export const ListCategoriesResponse = zod.array(ListCategoriesResponseItem)
 
 
+/**
+ * @summary List notifications for a helper
+ */
+export const ListNotificationsQueryParams = zod.object({
+  "helperId": zod.coerce.number().optional(),
+  "unreadOnly": zod.coerce.boolean().optional()
+})
+
+export const ListNotificationsResponseItem = zod.object({
+  "id": zod.number(),
+  "helperId": zod.number(),
+  "errandId": zod.number(),
+  "message": zod.string(),
+  "read": zod.boolean(),
+  "createdAt": zod.string()
+})
+export const ListNotificationsResponse = zod.array(ListNotificationsResponseItem)
+
+
+/**
+ * @summary Mark a notification as read
+ */
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const MarkNotificationReadResponse = zod.object({
+  "id": zod.number(),
+  "helperId": zod.number(),
+  "errandId": zod.number(),
+  "message": zod.string(),
+  "read": zod.boolean(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Mark all notifications as read for a helper
+ */
+export const MarkAllNotificationsReadBody = zod.object({
+  "helperId": zod.number()
+})
+
+export const MarkAllNotificationsReadResponse = zod.object({
+  "updated": zod.number()
+})
+
+

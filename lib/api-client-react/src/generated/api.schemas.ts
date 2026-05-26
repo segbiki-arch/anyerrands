@@ -121,6 +121,15 @@ export interface Category {
   description: string;
 }
 
+export interface Notification {
+  id: number;
+  helperId: number;
+  errandId: number;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export type ListErrandsParams = {
 status?: ListErrandsStatus;
 category?: string;
@@ -139,5 +148,18 @@ export const ListErrandsStatus = {
 
 export type GetRecentErrandsParams = {
 limit?: number;
+};
+
+export type ListNotificationsParams = {
+helperId?: number;
+unreadOnly?: boolean;
+};
+
+export type MarkAllNotificationsReadBody = {
+  helperId: number;
+};
+
+export type MarkAllNotificationsRead200 = {
+  updated: number;
 };
 

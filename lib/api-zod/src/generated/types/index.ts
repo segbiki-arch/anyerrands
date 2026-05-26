@@ -21,3 +21,7 @@ export * from './helperInput';
 export * from './helperUpdate';
 export * from './listErrandsParams';
 export * from './listErrandsStatus';
+export * from './listNotificationsParams';
+export * from './markAllNotificationsRead200';
+export * from './markAllNotificationsReadBody';
+export * from './notification';
