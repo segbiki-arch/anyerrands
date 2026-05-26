@@ -502,6 +502,35 @@ paths:
                 items:
                   $ref: "#/components/schemas/Category"
 
+  /errands/{id}/report:
+    post:
+      operationId: reportHelper
+      tags: [errands]
+      summary: Report a helper for an errand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportHelperInput"
+      responses:
+        "201":
+          description: Report submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "400":
+          description: Invalid input or errand not in reportable state
+        "404":
+          description: Errand not found
+
   /notifications:
     get:
       operationId: listNotifications
@@ -854,6 +883,43 @@ components:
         icon:
           type: string
         description:
+          type: string
+
+    ReportHelperInput:
+      type: object
+      required: [reporterName, reason, description]
+      properties:
+        reporterName:
+          type: string
+          minLength: 2
+        reason:
+          type: string
+          enum: [work_not_done, work_poor_quality, no_show, late, other]
+        description:
+          type: string
+          minLength: 10
+
+    Report:
+      type: object
+      required: [id, errandId, helperId, reporterName, reason, description, status, createdAt]
+      properties:
+        id:
+          type: integer
+        errandId:
+          type: integer
+        helperId:
+          type: integer
+        reporterName:
+          type: string
+        reason:
+          type: string
+          enum: [work_not_done, work_poor_quality, no_show, late, other]
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, reviewed, resolved]
+        createdAt:
           type: string
 
     Notification:

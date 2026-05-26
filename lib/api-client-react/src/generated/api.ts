@@ -43,6 +43,8 @@ import type {
   MobileTokenExchangeRequest,
   MobileTokenExchangeSuccess,
   Notification,
+  Report,
+  ReportHelperInput,
   StripeConnectOnboardResponse,
   StripeConnectStatusResponse
 } from './api.schemas';
@@ -1874,6 +1876,78 @@ export function useListCategories<TData = Awaited<ReturnType<typeof listCategori
 
 
 
+
+export const getReportHelperUrl = (id: number,) => {
+
+
+
+
+  return `/api/errands/${id}/report`
+}
+
+/**
+ * @summary Report a helper for an errand
+ */
+export const reportHelper = async (id: number,
+    reportHelperInput: ReportHelperInput, options?: RequestInit): Promise<Report> => {
+
+  return customFetch<Report>(getReportHelperUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      reportHelperInput,)
+  }
+);}
+
+
+
+
+export const getReportHelperMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reportHelper>>, TError,{id: number;data: BodyType<ReportHelperInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reportHelper>>, TError,{id: number;data: BodyType<ReportHelperInput>}, TContext> => {
+
+const mutationKey = ['reportHelper'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reportHelper>>, {id: number;data: BodyType<ReportHelperInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  reportHelper(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReportHelperMutationResult = NonNullable<Awaited<ReturnType<typeof reportHelper>>>
+    export type ReportHelperMutationBody = BodyType<ReportHelperInput>
+    export type ReportHelperMutationError = ErrorType<void>
+
+    /**
+ * @summary Report a helper for an errand
+ */
+export const useReportHelper = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reportHelper>>, TError,{id: number;data: BodyType<ReportHelperInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reportHelper>>,
+        TError,
+        {id: number;data: BodyType<ReportHelperInput>},
+        TContext
+      > => {
+      return useMutation(getReportHelperMutationOptions(options));
+    }
 
 export const getListNotificationsUrl = (params?: ListNotificationsParams,) => {
   const normalizedParams = new URLSearchParams();

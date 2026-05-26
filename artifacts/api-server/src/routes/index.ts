@@ -6,6 +6,7 @@ import categoriesRouter from "./categories";
 import notificationsRouter from "./notifications";
 import stripeRouter from "./stripe";
 import authRouter from "./auth";
+import reportsRouter from "./reports";
 
 const router: IRouter = Router();
 
@@ -16,5 +17,6 @@ router.use(helpersRouter);
 router.use(categoriesRouter);
 router.use(notificationsRouter);
 router.use(stripeRouter);
+router.use(reportsRouter);
 
 export default router;

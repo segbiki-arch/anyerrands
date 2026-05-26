@@ -1,4 +1,6 @@
 import { pgTable, serial, text, numeric, integer, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
+export const reportReasonEnum = pgEnum("report_reason", ["work_not_done", "work_poor_quality", "no_show", "late", "other"]);
+export const reportStatusEnum = pgEnum("report_status", ["pending", "reviewed", "resolved"]);
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -61,3 +63,22 @@ export const notificationsTable = pgTable("notifications", {
 });
 
 export type Notification = typeof notificationsTable.$inferSelect;
+
+export const reportsTable = pgTable("reports", {
+  id: serial("id").primaryKey(),
+  errandId: integer("errand_id").references(() => errandsTable.id).notNull(),
+  helperId: integer("helper_id").references(() => helpersTable.id).notNull(),
+  reporterName: text("reporter_name").notNull(),
+  reason: reportReasonEnum("reason").notNull(),
+  description: text("description").notNull(),
+  status: reportStatusEnum("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertReportSchema = z.object({
+  reporterName: z.string().min(2),
+  reason: z.enum(["work_not_done", "work_poor_quality", "no_show", "late", "other"]),
+  description: z.string().min(10),
+});
+export type InsertReport = z.infer<typeof insertReportSchema>;
+export type Report = typeof reportsTable.$inferSelect;

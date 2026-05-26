@@ -179,6 +179,56 @@ export interface Category {
   description: string;
 }
 
+export type ReportHelperInputReason = typeof ReportHelperInputReason[keyof typeof ReportHelperInputReason];
+
+
+export const ReportHelperInputReason = {
+  work_not_done: 'work_not_done',
+  work_poor_quality: 'work_poor_quality',
+  no_show: 'no_show',
+  late: 'late',
+  other: 'other',
+} as const;
+
+export interface ReportHelperInput {
+  /** @minLength 2 */
+  reporterName: string;
+  reason: ReportHelperInputReason;
+  /** @minLength 10 */
+  description: string;
+}
+
+export type ReportReason = typeof ReportReason[keyof typeof ReportReason];
+
+
+export const ReportReason = {
+  work_not_done: 'work_not_done',
+  work_poor_quality: 'work_poor_quality',
+  no_show: 'no_show',
+  late: 'late',
+  other: 'other',
+} as const;
+
+export type ReportStatus = typeof ReportStatus[keyof typeof ReportStatus];
+
+
+export const ReportStatus = {
+  pending: 'pending',
+  reviewed: 'reviewed',
+  resolved: 'resolved',
+} as const;
+
+export interface Report {
+  id: number;
+  errandId: number;
+  helperId: number;
+  reporterName: string;
+  reason: ReportReason;
+  description: string;
+  status: ReportStatus;
+  createdAt: string;
+}
+
 export interface Notification {
   id: number;
   helperId: number;

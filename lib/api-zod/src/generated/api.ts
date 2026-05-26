@@ -455,6 +455,26 @@ export const ListCategoriesResponse = zod.array(ListCategoriesResponseItem)
 
 
 /**
+ * @summary Report a helper for an errand
+ */
+export const ReportHelperParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const reportHelperBodyReporterNameMin = 2;
+
+export const reportHelperBodyDescriptionMin = 10;
+
+
+
+export const ReportHelperBody = zod.object({
+  "reporterName": zod.string().min(reportHelperBodyReporterNameMin),
+  "reason": zod.enum(['work_not_done', 'work_poor_quality', 'no_show', 'late', 'other']),
+  "description": zod.string().min(reportHelperBodyDescriptionMin)
+})
+
+
+/**
  * @summary List notifications for a helper
  */
 export const ListNotificationsQueryParams = zod.object({
