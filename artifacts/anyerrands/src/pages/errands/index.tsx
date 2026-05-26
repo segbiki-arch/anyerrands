@@ -3,20 +3,23 @@ import { useListErrands, useListCategories, ErrandStatus } from "@workspace/api-
 import { ErrandCard } from "@/components/errand-card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, FilterX, Euro } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Search, SlidersHorizontal, X, ClipboardList } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Link } from "wouter";
+
+const STATUS_OPTIONS = [
+  { label: "All", value: "all" },
+  { label: "Open", value: ErrandStatus.open },
+  { label: "In Progress", value: ErrandStatus.accepted },
+  { label: "Completed", value: ErrandStatus.completed },
+];
 
 export default function ErrandsPage() {
   const [status, setStatus] = useState<ErrandStatus | "all">("all");
   const [category, setCategory] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [showBudget, setShowBudget] = useState(false);
   const [minBudget, setMinBudget] = useState("");
   const [maxBudget, setMaxBudget] = useState("");
 
@@ -24,11 +27,11 @@ export default function ErrandsPage() {
     status: status !== "all" ? status : undefined,
     category: category !== "all" ? category : undefined,
   });
-
   const { data: categories } = useListCategories();
 
   const filteredErrands = errands?.filter(e => {
     const matchesSearch =
+      !search ||
       e.title.toLowerCase().includes(search.toLowerCase()) ||
       e.description.toLowerCase().includes(search.toLowerCase()) ||
       e.requesterLocation.toLowerCase().includes(search.toLowerCase());
@@ -38,124 +41,168 @@ export default function ErrandsPage() {
     return matchesSearch && aboveMin && belowMax;
   });
 
-  const resetFilters = () => {
+  const hasFilters = status !== "all" || category !== "all" || search !== "" || minBudget !== "" || maxBudget !== "";
+
+  const reset = () => {
     setStatus("all");
     setCategory("all");
     setSearch("");
     setMinBudget("");
     setMaxBudget("");
+    setShowBudget(false);
   };
 
-  const hasFilters = status !== "all" || category !== "all" || search !== "" || minBudget !== "" || maxBudget !== "";
-
   return (
-    <div className="max-w-6xl mx-auto p-6 md:p-8 space-y-8">
-      <div>
-        <h1 className="text-4xl font-serif font-bold tracking-tight mb-2">Browse Errands</h1>
-        <p className="text-lg text-muted-foreground">Find ways to help out in your community.</p>
+    <div className="max-w-6xl mx-auto px-6 md:px-10 py-10 space-y-8">
+
+      {/* Page heading */}
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-serif font-bold tracking-tight">Browse Errands</h1>
+          <p className="text-muted-foreground mt-1">Find ways to help out in your community.</p>
+        </div>
+        <Button asChild size="sm" className="rounded-full shrink-0 hidden sm:flex">
+          <Link href="/errands/new">+ Post an Errand</Link>
+        </Button>
       </div>
 
-      <div className="flex flex-col gap-4 p-4 bg-card border border-border/60 rounded-xl shadow-xs">
-        <div className="flex flex-col md:flex-row gap-4">
+      {/* Filter bar */}
+      <div className="space-y-3">
+        {/* Search + budget toggle */}
+        <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
-              placeholder="Search by keyword or location..."
-              className="pl-9 bg-background/50"
+              placeholder="Search errands or location…"
+              className="pl-9 bg-card border-border h-10 rounded-xl"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={e => setSearch(e.target.value)}
               data-testid="input-search-errands"
             />
+            {search && (
+              <button
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                onClick={() => setSearch("")}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-full md:w-[200px] bg-background/50" data-testid="select-category-filter">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {categories?.map(c => (
-                <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={status} onValueChange={(v) => setStatus(v as ErrandStatus | "all")}>
-            <SelectTrigger className="w-full md:w-[160px] bg-background/50" data-testid="select-status-filter">
-              <SelectValue placeholder="All Statuses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value={ErrandStatus.open}>Open</SelectItem>
-              <SelectItem value={ErrandStatus.accepted}>Accepted</SelectItem>
-              <SelectItem value={ErrandStatus.completed}>Completed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-1 border-t border-border/40">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground shrink-0">
-            <Euro className="w-4 h-4" />
-            <span className="font-medium">Budget range</span>
-          </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <div className="relative w-28">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
-              <Input
-                type="number"
-                min={0}
-                placeholder="Min"
-                className="pl-7 bg-background/50 h-9 text-sm"
-                value={minBudget}
-                onChange={e => setMinBudget(e.target.value)}
-                data-testid="input-min-budget"
-              />
-            </div>
-            <span className="text-muted-foreground text-sm">to</span>
-            <div className="relative w-28">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">€</span>
-              <Input
-                type="number"
-                min={0}
-                placeholder="Max"
-                className="pl-7 bg-background/50 h-9 text-sm"
-                value={maxBudget}
-                onChange={e => setMaxBudget(e.target.value)}
-                data-testid="input-max-budget"
-              />
-            </div>
-            <span className="text-xs text-muted-foreground italic hidden sm:block">Leave blank for any</span>
-          </div>
+          <Button
+            variant={showBudget ? "default" : "outline"}
+            size="icon"
+            className="h-10 w-10 rounded-xl shrink-0"
+            onClick={() => setShowBudget(v => !v)}
+            title="Budget filter"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+          </Button>
           {hasFilters && (
-            <Button variant="ghost" onClick={resetFilters} className="shrink-0 text-muted-foreground hover:text-foreground ml-auto" data-testid="btn-clear-filters">
-              <FilterX className="w-4 h-4 mr-2" />
-              Clear all
+            <Button variant="ghost" size="sm" onClick={reset} className="h-10 rounded-xl text-muted-foreground hover:text-foreground gap-1.5 px-3" data-testid="btn-clear-filters">
+              <X className="w-3.5 h-3.5" />
+              Clear
             </Button>
           )}
         </div>
+
+        {/* Budget row (expandable) */}
+        {showBudget && (
+          <div className="flex items-center gap-3 px-4 py-3 bg-card border border-border rounded-xl">
+            <span className="text-sm font-medium text-muted-foreground shrink-0">Budget</span>
+            <div className="relative w-24">
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">€</span>
+              <Input type="number" min={0} placeholder="Min" className="pl-6 h-8 text-sm rounded-lg" value={minBudget} onChange={e => setMinBudget(e.target.value)} data-testid="input-min-budget" />
+            </div>
+            <span className="text-muted-foreground text-sm">–</span>
+            <div className="relative w-24">
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">€</span>
+              <Input type="number" min={0} placeholder="Max" className="pl-6 h-8 text-sm rounded-lg" value={maxBudget} onChange={e => setMaxBudget(e.target.value)} data-testid="input-max-budget" />
+            </div>
+          </div>
+        )}
+
+        {/* Status pills */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {STATUS_OPTIONS.map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setStatus(opt.value as ErrandStatus | "all")}
+              data-testid={`filter-status-${opt.value}`}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
+                status === opt.value
+                  ? "bg-foreground text-background border-transparent"
+                  : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+              )}
+            >
+              {opt.label}
+            </button>
+          ))}
+
+          {/* Divider */}
+          <span className="w-px h-5 bg-border mx-1" />
+
+          {/* Category pills */}
+          <button
+            onClick={() => setCategory("all")}
+            className={cn(
+              "px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
+              category === "all"
+                ? "bg-primary text-primary-foreground border-transparent"
+                : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+            )}
+          >
+            All categories
+          </button>
+          {categories?.map(c => (
+            <button
+              key={c.id}
+              onClick={() => setCategory(c.name)}
+              data-testid={`filter-cat-${c.name.toLowerCase().replace(/\s+/g, "-")}`}
+              className={cn(
+                "px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
+                category === c.name
+                  ? "bg-primary text-primary-foreground border-transparent"
+                  : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
+              )}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Results */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-64 w-full rounded-xl" />
+            <Skeleton key={i} className="h-60 w-full rounded-xl" />
           ))}
         </div>
       ) : filteredErrands && filteredErrands.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredErrands.map(errand => (
-            <ErrandCard key={errand.id} errand={errand} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-24 bg-card border border-border/60 border-dashed rounded-xl">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
-            <Search className="w-8 h-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-xl font-medium mb-2">No errands found</h3>
-          <p className="text-muted-foreground max-w-md mx-auto mb-6">
-            We couldn't find any errands matching your current filters. Try adjusting them or check back later.
+        <>
+          <p className="text-sm text-muted-foreground -mb-2">
+            {filteredErrands.length} errand{filteredErrands.length !== 1 ? "s" : ""} found
           </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredErrands.map(errand => (
+              <ErrandCard key={errand.id} errand={errand} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-24 border border-dashed border-border rounded-2xl text-center gap-4">
+          <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center">
+            <ClipboardList className="w-7 h-7 text-muted-foreground/50" />
+          </div>
+          <div>
+            <p className="text-lg font-bold">No errands found</p>
+            <p className="text-sm text-muted-foreground mt-1 max-w-xs">
+              {hasFilters ? "Try adjusting your filters." : "No errands posted yet."}
+            </p>
+          </div>
           {hasFilters && (
-            <Button variant="outline" onClick={resetFilters}>
+            <Button variant="outline" size="sm" onClick={reset} className="rounded-full">
               Clear filters
             </Button>
           )}

@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
 import { Toaster } from "@/components/ui/toaster";
-import { useLocation, Link } from "wouter";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./notification-bell";
 import { useAuth } from "@workspace/replit-auth-web";
@@ -16,29 +16,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User } from "lucide-react";
 
-function getPageTitle(location: string) {
-  if (location === "/") return "Dashboard";
-  if (location === "/errands") return "Browse Errands";
-  if (location.startsWith("/errands/new")) return "Post an Errand";
-  if (location.startsWith("/errands/")) return "Errand Details";
-  if (location === "/helpers") return "Find Helpers";
-  if (location.startsWith("/helpers/new")) return "Become a Helper";
-  if (location.startsWith("/helpers/")) return "Helper Profile";
-  if (location === "/map") return "Errands Map";
-  if (location === "/profile") return "My Profile";
-  return "AnyErrands";
-}
-
 function UserMenu() {
   const { user, isLoading, isAuthenticated, login, logout } = useAuth();
 
-  if (isLoading) {
-    return <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />;
-  }
+  if (isLoading) return <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />;
 
   if (!isAuthenticated) {
     return (
-      <Button size="sm" variant="outline" className="rounded-md shadow-xs" onClick={login}>
+      <Button size="sm" variant="outline" className="rounded-full h-8 px-4 text-sm font-medium" onClick={login}>
         Log in
       </Button>
     );
@@ -52,7 +37,7 @@ function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+        <button className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
           <Avatar className="w-8 h-8 cursor-pointer">
             <AvatarImage src={user?.profileImageUrl ?? undefined} alt={user?.firstName ?? "User"} />
             <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
@@ -62,12 +47,12 @@ function UserMenu() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
-        <div className="px-3 py-2">
+        <div className="px-3 py-2.5">
           <p className="text-sm font-semibold truncate">
             {[user?.firstName, user?.lastName].filter(Boolean).join(" ") || "My Account"}
           </p>
           {user?.email && (
-            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            <p className="text-xs text-muted-foreground truncate mt-0.5">{user.email}</p>
           )}
         </div>
         <DropdownMenuSeparator />
@@ -79,7 +64,7 @@ function UserMenu() {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          className="text-destructive focus:text-destructive flex items-center gap-2 cursor-pointer"
+          className="text-destructive focus:text-destructive gap-2 cursor-pointer"
           onClick={logout}
         >
           <LogOut className="w-4 h-4" />
@@ -91,26 +76,17 @@ function UserMenu() {
 }
 
 export function Layout({ children }: { children: ReactNode }) {
-  const [location] = useLocation();
-  const pageTitle = getPageTitle(location);
-
   return (
     <SidebarProvider>
       <div className="min-h-screen w-full flex bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-card px-6">
-            <h1 className="text-lg font-semibold font-sans tracking-tight">{pageTitle}</h1>
-            <div className="flex items-center gap-2">
-              <NotificationBell />
-              <Button asChild variant="outline" size="sm" className="hidden sm:flex rounded-md shadow-xs">
-                <Link href="/helpers/new">Become a Helper</Link>
-              </Button>
-              <Button asChild size="sm" className="rounded-md shadow-xs">
-                <Link href="/errands/new">Post an Errand</Link>
-              </Button>
-              <UserMenu />
-            </div>
+          <header className="sticky top-0 z-30 flex h-13 items-center justify-end border-b border-border bg-card px-5 gap-2">
+            <NotificationBell />
+            <Button asChild size="sm" className="rounded-full h-8 px-4 text-sm font-medium">
+              <Link href="/errands/new">Post an Errand</Link>
+            </Button>
+            <UserMenu />
           </header>
           <main className="flex-1 overflow-y-auto">
             {children}

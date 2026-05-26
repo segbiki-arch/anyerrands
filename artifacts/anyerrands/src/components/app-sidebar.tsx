@@ -6,7 +6,6 @@ import {
   PlusCircle, 
   UserPlus,
   Map,
-  User,
   LogIn,
   LogOut
 } from "lucide-react";
@@ -23,9 +22,26 @@ import {
 import { useAuth } from "@workspace/replit-auth-web";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+const navItems = [
+  { href: "/", label: "Dashboard", icon: Home, exact: true },
+  { href: "/errands", label: "Browse Errands", icon: ClipboardList },
+  { href: "/helpers", label: "Find Helpers", icon: Users },
+  { href: "/map", label: "Errands Map", icon: Map },
+];
+
+const actionItems = [
+  { href: "/errands/new", label: "Post an Errand", icon: PlusCircle },
+  { href: "/helpers/new", label: "Become a Helper", icon: UserPlus },
+];
+
+const NAV_BTN = "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-white/8 data-[active=true]:bg-primary/15 data-[active=true]:text-primary data-[active=true]:font-semibold";
+
 export function AppSidebar() {
   const [location] = useLocation();
   const { user, isAuthenticated, login, logout } = useAuth();
+
+  const isActive = (href: string, exact?: boolean) =>
+    exact ? location === href : location === href || location.startsWith(href + "/");
 
   const initials =
     [user?.firstName?.[0], user?.lastName?.[0]].filter(Boolean).join("") ||
@@ -34,104 +50,66 @@ export function AppSidebar() {
 
   return (
     <Sidebar className="border-r-0 bg-sidebar text-sidebar-foreground" data-testid="app-sidebar">
-      <SidebarHeader className="px-6 py-5">
+
+      {/* Logo */}
+      <SidebarHeader className="px-5 py-5">
         <Link href="/" className="flex items-center gap-2.5" data-testid="link-home-logo">
-          <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground shadow-sm">
-            <ClipboardList className="w-5 h-5" />
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm shrink-0">
+            <ClipboardList className="w-4 h-4 text-primary-foreground" />
           </div>
-          <span className="font-sans font-bold tracking-tight text-xl text-white">AnyErrands</span>
+          <span className="font-bold tracking-tight text-[17px] text-sidebar-foreground">AnyErrands</span>
         </Link>
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarMenu className="px-4 space-y-1">
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location === "/"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
-            >
-              <Link href="/" data-testid="link-nav-dashboard">
-                <Home className="w-4 h-4" />
-                <span>Dashboard</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location === "/errands"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
-            >
-              <Link href="/errands" data-testid="link-nav-errands">
-                <ClipboardList className="w-4 h-4" />
-                <span>Browse Errands</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location === "/helpers"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
-            >
-              <Link href="/helpers" data-testid="link-nav-helpers">
-                <Users className="w-4 h-4" />
-                <span>Find Helpers</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={location === "/map"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
-            >
-              <Link href="/map" data-testid="link-nav-map">
-                <Map className="w-4 h-4" />
-                <span>Errands Map</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          
-          <div className="pt-8 pb-3 px-2 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-widest">
-            Actions
-          </div>
-          
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location === "/errands/new"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
-            >
-              <Link href="/errands/new" data-testid="link-nav-post-errand">
-                <PlusCircle className="w-4 h-4" />
-                <span>Post an Errand</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location === "/helpers/new"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
-            >
-              <Link href="/helpers/new" data-testid="link-nav-become-helper">
-                <UserPlus className="w-4 h-4" />
-                <span>Become a Helper</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+
+      <SidebarContent className="px-3">
+        {/* Main nav */}
+        <SidebarMenu className="space-y-0.5">
+          {navItems.map(item => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.href, item.exact)}
+                className={NAV_BTN}
+              >
+                <Link href={item.href} data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <item.icon className="w-4 h-4 shrink-0" />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+
+        {/* Separator */}
+        <div className="mx-2 my-4 h-px bg-sidebar-border" />
+
+        {/* Action items */}
+        <SidebarMenu className="space-y-0.5">
+          {actionItems.map(item => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.href)}
+                className={NAV_BTN}
+              >
+                <Link href={item.href} data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <item.icon className="w-4 h-4 shrink-0" />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
         </SidebarMenu>
       </SidebarContent>
 
-      <SidebarFooter className="px-4 py-4 border-t border-sidebar-border">
+      {/* Footer — user */}
+      <SidebarFooter className="px-3 py-4 border-t border-sidebar-border">
         {isAuthenticated && user ? (
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <SidebarMenuButton
               asChild
               isActive={location === "/profile"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary w-full"
+              className={cn(NAV_BTN, "h-auto py-2.5")}
             >
               <Link href="/profile" className="flex items-center gap-3">
                 <Avatar className="w-7 h-7 shrink-0">
@@ -141,17 +119,17 @@ export function AppSidebar() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-sidebar-foreground truncate">
+                  <p className="text-[13px] font-semibold text-sidebar-foreground truncate leading-tight">
                     {[user.firstName, user.lastName].filter(Boolean).join(" ") || "My Account"}
                   </p>
                   {user.email && (
-                    <p className="text-xs text-sidebar-foreground/50 truncate">{user.email}</p>
+                    <p className="text-[11px] text-sidebar-foreground/45 truncate">{user.email}</p>
                   )}
                 </div>
               </Link>
             </SidebarMenuButton>
             <SidebarMenuButton
-              className="text-sidebar-foreground/60 hover:text-white hover:bg-white/10 w-full cursor-pointer"
+              className="text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-white/8 cursor-pointer text-sm"
               onClick={logout}
             >
               <LogOut className="w-4 h-4" />
@@ -160,7 +138,7 @@ export function AppSidebar() {
           </div>
         ) : (
           <SidebarMenuButton
-            className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 w-full cursor-pointer"
+            className="text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-white/8 cursor-pointer"
             onClick={login}
           >
             <LogIn className="w-4 h-4" />
