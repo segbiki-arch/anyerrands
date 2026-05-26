@@ -16,7 +16,6 @@ const TOWN_COORDS: Record<string, Coords> = {
   "cashel": [52.5160, -7.8896],
   "cahir": [52.3758, -7.9247],
   "birr": [53.0970, -7.9130],
-  "roscrea": [52.9530, -7.7960],
   "limerick": [52.6638, -8.6267],
   "galway": [53.2707, -9.0568],
   "dublin": [53.3498, -6.2603],

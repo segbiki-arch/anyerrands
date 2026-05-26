@@ -21,22 +21,22 @@ export function AppSidebar() {
   const [location] = useLocation();
 
   return (
-    <Sidebar className="border-r border-border bg-sidebar" data-testid="app-sidebar">
-      <SidebarHeader className="p-4">
-        <Link href="/" className="flex items-center gap-2 px-2" data-testid="link-home-logo">
-          <div className="bg-primary text-primary-foreground p-1.5 rounded-md">
+    <Sidebar className="border-r-0 bg-sidebar text-sidebar-foreground" data-testid="app-sidebar">
+      <SidebarHeader className="px-6 py-5">
+        <Link href="/" className="flex items-center gap-2.5" data-testid="link-home-logo">
+          <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-primary-foreground shadow-sm">
             <ClipboardList className="w-5 h-5" />
           </div>
-          <span className="font-serif font-bold text-xl text-sidebar-foreground">AnyErrands</span>
+          <span className="font-sans font-bold tracking-tight text-xl text-white">AnyErrands</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu className="px-2 space-y-1">
+        <SidebarMenu className="px-4 space-y-1">
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
               isActive={location === "/"}
-              tooltip="Dashboard"
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/" data-testid="link-nav-dashboard">
                 <Home className="w-4 h-4" />
@@ -48,7 +48,7 @@ export function AppSidebar() {
             <SidebarMenuButton 
               asChild 
               isActive={location === "/errands"}
-              tooltip="Browse Errands"
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/errands" data-testid="link-nav-errands">
                 <ClipboardList className="w-4 h-4" />
@@ -60,7 +60,7 @@ export function AppSidebar() {
             <SidebarMenuButton 
               asChild 
               isActive={location === "/helpers"}
-              tooltip="Find Helpers"
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/helpers" data-testid="link-nav-helpers">
                 <Users className="w-4 h-4" />
@@ -72,7 +72,7 @@ export function AppSidebar() {
             <SidebarMenuButton
               asChild
               isActive={location === "/map"}
-              tooltip="Errands Map"
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/map" data-testid="link-nav-map">
                 <Map className="w-4 h-4" />
@@ -81,7 +81,7 @@ export function AppSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           
-          <div className="pt-6 pb-2 px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <div className="pt-8 pb-3 px-2 text-xs font-semibold text-sidebar-foreground/50 uppercase tracking-widest">
             Actions
           </div>
           
@@ -89,6 +89,7 @@ export function AppSidebar() {
             <SidebarMenuButton 
               asChild 
               isActive={location === "/errands/new"}
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/errands/new" data-testid="link-nav-post-errand">
                 <PlusCircle className="w-4 h-4" />
@@ -101,6 +102,7 @@ export function AppSidebar() {
             <SidebarMenuButton 
               asChild 
               isActive={location === "/helpers/new"}
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/helpers/new" data-testid="link-nav-become-helper">
                 <UserPlus className="w-4 h-4" />
