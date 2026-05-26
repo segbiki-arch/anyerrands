@@ -5,20 +5,32 @@ import {
   Users, 
   PlusCircle, 
   UserPlus,
-  Map
+  Map,
+  User,
+  LogIn,
+  LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
+  SidebarFooter,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@workspace/replit-auth-web";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function AppSidebar() {
   const [location] = useLocation();
+  const { user, isAuthenticated, login, logout } = useAuth();
+
+  const initials =
+    [user?.firstName?.[0], user?.lastName?.[0]].filter(Boolean).join("") ||
+    user?.email?.[0]?.toUpperCase() ||
+    "U";
 
   return (
     <Sidebar className="border-r-0 bg-sidebar text-sidebar-foreground" data-testid="app-sidebar">
@@ -36,7 +48,7 @@ export function AppSidebar() {
             <SidebarMenuButton 
               asChild 
               isActive={location === "/"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/" data-testid="link-nav-dashboard">
                 <Home className="w-4 h-4" />
@@ -48,7 +60,7 @@ export function AppSidebar() {
             <SidebarMenuButton 
               asChild 
               isActive={location === "/errands"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/errands" data-testid="link-nav-errands">
                 <ClipboardList className="w-4 h-4" />
@@ -60,7 +72,7 @@ export function AppSidebar() {
             <SidebarMenuButton 
               asChild 
               isActive={location === "/helpers"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/helpers" data-testid="link-nav-helpers">
                 <Users className="w-4 h-4" />
@@ -72,7 +84,7 @@ export function AppSidebar() {
             <SidebarMenuButton
               asChild
               isActive={location === "/map"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/map" data-testid="link-nav-map">
                 <Map className="w-4 h-4" />
@@ -89,7 +101,7 @@ export function AppSidebar() {
             <SidebarMenuButton 
               asChild 
               isActive={location === "/errands/new"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/errands/new" data-testid="link-nav-post-errand">
                 <PlusCircle className="w-4 h-4" />
@@ -102,7 +114,7 @@ export function AppSidebar() {
             <SidebarMenuButton 
               asChild 
               isActive={location === "/helpers/new"}
-              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-white/10 data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary data-[active=true]:border-l-2 data-[active=true]:border-primary data-[active=true]:rounded-l-none"
             >
               <Link href="/helpers/new" data-testid="link-nav-become-helper">
                 <UserPlus className="w-4 h-4" />
@@ -112,6 +124,50 @@ export function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
+
+      <SidebarFooter className="px-4 py-4 border-t border-sidebar-border">
+        {isAuthenticated && user ? (
+          <div className="space-y-1">
+            <SidebarMenuButton
+              asChild
+              isActive={location === "/profile"}
+              className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-primary/20 data-[active=true]:text-primary w-full"
+            >
+              <Link href="/profile" className="flex items-center gap-3">
+                <Avatar className="w-7 h-7 shrink-0">
+                  <AvatarImage src={user.profileImageUrl ?? undefined} />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-sidebar-foreground truncate">
+                    {[user.firstName, user.lastName].filter(Boolean).join(" ") || "My Account"}
+                  </p>
+                  {user.email && (
+                    <p className="text-xs text-sidebar-foreground/50 truncate">{user.email}</p>
+                  )}
+                </div>
+              </Link>
+            </SidebarMenuButton>
+            <SidebarMenuButton
+              className="text-sidebar-foreground/60 hover:text-white hover:bg-white/10 w-full cursor-pointer"
+              onClick={logout}
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign out</span>
+            </SidebarMenuButton>
+          </div>
+        ) : (
+          <SidebarMenuButton
+            className="text-sidebar-foreground/80 hover:text-white hover:bg-white/10 w-full cursor-pointer"
+            onClick={login}
+          >
+            <LogIn className="w-4 h-4" />
+            <span>Log in</span>
+          </SidebarMenuButton>
+        )}
+      </SidebarFooter>
     </Sidebar>
   );
 }
