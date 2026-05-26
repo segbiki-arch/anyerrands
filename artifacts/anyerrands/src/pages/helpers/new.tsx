@@ -117,7 +117,7 @@ export default function NewHelperPage() {
                       <FormControl>
                         <div className="relative">
                           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input placeholder="e.g., Northside" className="pl-9" {...field} data-testid="input-helper-location" />
+                          <Input placeholder="e.g., Nenagh, Roscrea, Thurles..." className="pl-9" {...field} data-testid="input-helper-location" />
                         </div>
                       </FormControl>
                       <FormMessage />

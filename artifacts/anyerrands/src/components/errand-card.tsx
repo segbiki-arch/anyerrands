@@ -4,7 +4,7 @@ import { Errand, ErrandStatus } from "@workspace/api-client-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Clock, CircleDollarSign } from "lucide-react";
+import { MapPin, Clock, Euro } from "lucide-react";
 
 export function ErrandCard({ errand }: { errand: Errand }) {
   const getStatusColor = (status: string) => {
@@ -52,8 +52,8 @@ export function ErrandCard({ errand }: { errand: Errand }) {
         
         {errand.budgetAmount != null && (
           <div className="flex items-center text-sm text-foreground/80 gap-2">
-            <CircleDollarSign className="w-4 h-4 text-muted-foreground shrink-0" />
-            <span className="font-medium">${errand.budgetAmount}</span>
+            <Euro className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="font-medium">€{errand.budgetAmount}</span>
           </div>
         )}
       </CardContent>

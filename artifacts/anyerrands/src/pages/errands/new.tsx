@@ -11,7 +11,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Send, MapPin, DollarSign, Clock } from "lucide-react";
+import { Send, MapPin, Euro, Clock } from "lucide-react";
 
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title is too long"),
@@ -94,7 +94,7 @@ export default function NewErrandPage() {
                     <FormItem>
                       <FormLabel className="text-base">What do you need help with?</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Pick up groceries from Trader Joe's" className="text-lg py-6" {...field} data-testid="input-title" />
+                        <Input placeholder="e.g., Pick up groceries from Dunnes Stores" className="text-lg py-6" {...field} data-testid="input-title" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -134,7 +134,7 @@ export default function NewErrandPage() {
                         <FormControl>
                           <div className="relative">
                             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="e.g., 123 Main St or 'Downtown'" className="pl-9" {...field} data-testid="input-location" />
+                            <Input placeholder="e.g., Nenagh, Roscrea, Thurles..." className="pl-9" {...field} data-testid="input-location" />
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -174,10 +174,10 @@ export default function NewErrandPage() {
                     name="budgetAmount"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Budget ($)</FormLabel>
+                        <FormLabel>Budget (€)</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             <Input type="number" placeholder="0.00" className="pl-9" {...field} value={field.value ?? ""} data-testid="input-budget" />
                           </div>
                         </FormControl>
