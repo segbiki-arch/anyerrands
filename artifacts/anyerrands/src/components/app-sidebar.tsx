@@ -7,7 +7,8 @@ import {
   UserPlus,
   Map,
   LogIn,
-  LogOut
+  LogOut,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -32,6 +33,10 @@ const navItems = [
 const actionItems = [
   { href: "/errands/new", label: "Post an Errand", icon: PlusCircle },
   { href: "/helpers/new", label: "Become a Helper", icon: UserPlus },
+];
+
+const adminItems = [
+  { href: "/admin/reports", label: "Reports Admin", icon: ShieldAlert },
 ];
 
 const NAV_BTN = "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-white/8 data-[active=true]:bg-primary/15 data-[active=true]:text-primary data-[active=true]:font-semibold";
@@ -86,6 +91,26 @@ export function AppSidebar() {
         {/* Action items */}
         <SidebarMenu className="space-y-0.5">
           {actionItems.map(item => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.href)}
+                className={NAV_BTN}
+              >
+                <Link href={item.href} data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <item.icon className="w-4 h-4 shrink-0" />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+
+        {/* Admin */}
+        <div className="mx-2 my-4 h-px bg-sidebar-border" />
+        <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/30 mb-1">Admin</p>
+        <SidebarMenu className="space-y-0.5">
+          {adminItems.map(item => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild

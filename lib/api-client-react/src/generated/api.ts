@@ -37,6 +37,7 @@ import type {
   HelperUpdate,
   ListErrandsParams,
   ListNotificationsParams,
+  ListReportsParams,
   LogoutSuccess,
   MarkAllNotificationsRead200,
   MarkAllNotificationsReadBody,
@@ -45,8 +46,10 @@ import type {
   Notification,
   Report,
   ReportHelperInput,
+  ReportWithContext,
   StripeConnectOnboardResponse,
-  StripeConnectStatusResponse
+  StripeConnectStatusResponse,
+  UpdateReportStatusInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -1947,6 +1950,162 @@ export const useReportHelper = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getReportHelperMutationOptions(options));
+    }
+
+export const getListReportsUrl = (params?: ListReportsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/reports?${stringifiedParams}` : `/api/admin/reports`
+}
+
+/**
+ * @summary List all reports (admin)
+ */
+export const listReports = async (params?: ListReportsParams, options?: RequestInit): Promise<ReportWithContext[]> => {
+
+  return customFetch<ReportWithContext[]>(getListReportsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListReportsQueryKey = (params?: ListReportsParams,) => {
+    return [
+    `/api/admin/reports`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListReportsQueryOptions = <TData = Awaited<ReturnType<typeof listReports>>, TError = ErrorType<unknown>>(params?: ListReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListReportsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listReports>>> = ({ signal }) => listReports(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listReports>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListReportsQueryResult = NonNullable<Awaited<ReturnType<typeof listReports>>>
+export type ListReportsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all reports (admin)
+ */
+
+export function useListReports<TData = Awaited<ReturnType<typeof listReports>>, TError = ErrorType<unknown>>(
+ params?: ListReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListReportsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateReportStatusUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/reports/${id}`
+}
+
+/**
+ * @summary Update a report status (admin)
+ */
+export const updateReportStatus = async (id: number,
+    updateReportStatusInput: UpdateReportStatusInput, options?: RequestInit): Promise<ReportWithContext> => {
+
+  return customFetch<ReportWithContext>(getUpdateReportStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateReportStatusInput,)
+  }
+);}
+
+
+
+
+export const getUpdateReportStatusMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateReportStatus>>, TError,{id: number;data: BodyType<UpdateReportStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateReportStatus>>, TError,{id: number;data: BodyType<UpdateReportStatusInput>}, TContext> => {
+
+const mutationKey = ['updateReportStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateReportStatus>>, {id: number;data: BodyType<UpdateReportStatusInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateReportStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateReportStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateReportStatus>>>
+    export type UpdateReportStatusMutationBody = BodyType<UpdateReportStatusInput>
+    export type UpdateReportStatusMutationError = ErrorType<void>
+
+    /**
+ * @summary Update a report status (admin)
+ */
+export const useUpdateReportStatus = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateReportStatus>>, TError,{id: number;data: BodyType<UpdateReportStatusInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateReportStatus>>,
+        TError,
+        {id: number;data: BodyType<UpdateReportStatusInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateReportStatusMutationOptions(options));
     }
 
 export const getListNotificationsUrl = (params?: ListNotificationsParams,) => {

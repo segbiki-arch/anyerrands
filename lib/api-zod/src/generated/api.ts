@@ -475,6 +475,53 @@ export const ReportHelperBody = zod.object({
 
 
 /**
+ * @summary List all reports (admin)
+ */
+export const ListReportsQueryParams = zod.object({
+  "status": zod.enum(['pending', 'reviewed', 'resolved']).optional()
+})
+
+export const ListReportsResponseItem = zod.object({
+  "id": zod.number(),
+  "errandId": zod.number(),
+  "helperId": zod.number(),
+  "reporterName": zod.string(),
+  "reason": zod.enum(['work_not_done', 'work_poor_quality', 'no_show', 'late', 'other']),
+  "description": zod.string(),
+  "status": zod.enum(['pending', 'reviewed', 'resolved']),
+  "createdAt": zod.string(),
+  "errandTitle": zod.string().optional(),
+  "helperName": zod.string().optional()
+})
+export const ListReportsResponse = zod.array(ListReportsResponseItem)
+
+
+/**
+ * @summary Update a report status (admin)
+ */
+export const UpdateReportStatusParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateReportStatusBody = zod.object({
+  "status": zod.enum(['pending', 'reviewed', 'resolved'])
+})
+
+export const UpdateReportStatusResponse = zod.object({
+  "id": zod.number(),
+  "errandId": zod.number(),
+  "helperId": zod.number(),
+  "reporterName": zod.string(),
+  "reason": zod.enum(['work_not_done', 'work_poor_quality', 'no_show', 'late', 'other']),
+  "description": zod.string(),
+  "status": zod.enum(['pending', 'reviewed', 'resolved']),
+  "createdAt": zod.string(),
+  "errandTitle": zod.string().optional(),
+  "helperName": zod.string().optional()
+})
+
+
+/**
  * @summary List notifications for a helper
  */
 export const ListNotificationsQueryParams = zod.object({

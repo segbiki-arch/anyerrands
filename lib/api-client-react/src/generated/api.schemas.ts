@@ -229,6 +229,52 @@ export interface Report {
   createdAt: string;
 }
 
+export type UpdateReportStatusInputStatus = typeof UpdateReportStatusInputStatus[keyof typeof UpdateReportStatusInputStatus];
+
+
+export const UpdateReportStatusInputStatus = {
+  pending: 'pending',
+  reviewed: 'reviewed',
+  resolved: 'resolved',
+} as const;
+
+export interface UpdateReportStatusInput {
+  status: UpdateReportStatusInputStatus;
+}
+
+export type ReportWithContextReason = typeof ReportWithContextReason[keyof typeof ReportWithContextReason];
+
+
+export const ReportWithContextReason = {
+  work_not_done: 'work_not_done',
+  work_poor_quality: 'work_poor_quality',
+  no_show: 'no_show',
+  late: 'late',
+  other: 'other',
+} as const;
+
+export type ReportWithContextStatus = typeof ReportWithContextStatus[keyof typeof ReportWithContextStatus];
+
+
+export const ReportWithContextStatus = {
+  pending: 'pending',
+  reviewed: 'reviewed',
+  resolved: 'resolved',
+} as const;
+
+export interface ReportWithContext {
+  id: number;
+  errandId: number;
+  helperId: number;
+  reporterName: string;
+  reason: ReportWithContextReason;
+  description: string;
+  status: ReportWithContextStatus;
+  createdAt: string;
+  errandTitle?: string;
+  helperName?: string;
+}
+
 export interface Notification {
   id: number;
   helperId: number;
@@ -275,6 +321,19 @@ export const ListErrandsStatus = {
 export type GetRecentErrandsParams = {
 limit?: number;
 };
+
+export type ListReportsParams = {
+status?: ListReportsStatus;
+};
+
+export type ListReportsStatus = typeof ListReportsStatus[keyof typeof ListReportsStatus];
+
+
+export const ListReportsStatus = {
+  pending: 'pending',
+  reviewed: 'reviewed',
+  resolved: 'resolved',
+} as const;
 
 export type ListNotificationsParams = {
 helperId?: number;

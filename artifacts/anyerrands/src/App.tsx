@@ -13,6 +13,7 @@ import NewHelperPage from "@/pages/helpers/new";
 import HelperProfilePage from "@/pages/helpers/[id]";
 import MapPage from "@/pages/map";
 import ProfilePage from "@/pages/profile";
+import AdminReportsPage from "@/pages/admin/reports";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -37,6 +38,7 @@ function Router() {
         <Route path="/helpers/:id" component={HelperProfilePage} />
         <Route path="/map" component={MapPage} />
         <Route path="/profile" component={ProfilePage} />
+        <Route path="/admin/reports" component={AdminReportsPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
