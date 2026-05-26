@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AnyErrands"
+version = "1.0.0"
+id = "artifacts/anyerrands"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24820
+
+[services.development]
+run = "pnpm --filter @workspace/anyerrands run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/anyerrands", "run", "build" ]
+publicDir = "artifacts/anyerrands/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24820"
+BASE_PATH = "/"

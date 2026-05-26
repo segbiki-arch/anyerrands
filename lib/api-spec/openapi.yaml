@@ -3,13 +3,20 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AnyErrands API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: errands
+    description: Errand operations
+  - name: helpers
+    description: Helper profile operations
+  - name: categories
+    description: Errand category operations
+
 paths:
   /healthz:
     get:
@@ -24,6 +31,314 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /errands:
+    get:
+      operationId: listErrands
+      tags: [errands]
+      summary: List all errands
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, accepted, completed]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: List of errands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Errand"
+    post:
+      operationId: createErrand
+      tags: [errands]
+      summary: Post a new errand
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ErrandInput"
+      responses:
+        "201":
+          description: Errand created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errand"
+        "400":
+          description: Invalid input
+
+  /errands/{id}:
+    get:
+      operationId: getErrand
+      tags: [errands]
+      summary: Get errand by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Errand details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errand"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateErrand
+      tags: [errands]
+      summary: Update an errand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ErrandUpdate"
+      responses:
+        "200":
+          description: Updated errand
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errand"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteErrand
+      tags: [errands]
+      summary: Delete an errand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /errands/{id}/accept:
+    post:
+      operationId: acceptErrand
+      tags: [errands]
+      summary: Accept an errand as a helper
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AcceptErrandInput"
+      responses:
+        "200":
+          description: Errand accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errand"
+        "404":
+          description: Not found
+
+  /errands/{id}/complete:
+    post:
+      operationId: completeErrand
+      tags: [errands]
+      summary: Mark an errand as completed
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Errand completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errand"
+        "404":
+          description: Not found
+
+  /errands/stats/summary:
+    get:
+      operationId: getErrandStats
+      tags: [errands]
+      summary: Get aggregate errand statistics
+      responses:
+        "200":
+          description: Stats summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrandStats"
+
+  /errands/recent:
+    get:
+      operationId: getRecentErrands
+      tags: [errands]
+      summary: Get recently posted errands
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+      responses:
+        "200":
+          description: Recent errands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Errand"
+
+  /helpers:
+    get:
+      operationId: listHelpers
+      tags: [helpers]
+      summary: List available helpers
+      responses:
+        "200":
+          description: List of helpers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Helper"
+    post:
+      operationId: createHelper
+      tags: [helpers]
+      summary: Register as a helper
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HelperInput"
+      responses:
+        "201":
+          description: Helper profile created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Helper"
+
+  /helpers/{id}:
+    get:
+      operationId: getHelper
+      tags: [helpers]
+      summary: Get helper profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Helper profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Helper"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateHelper
+      tags: [helpers]
+      summary: Update helper profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HelperUpdate"
+      responses:
+        "200":
+          description: Updated helper
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Helper"
+
+  /helpers/{id}/errands:
+    get:
+      operationId: getHelperErrands
+      tags: [helpers]
+      summary: Get errands accepted by a helper
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Helper's errands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Errand"
+
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List errand categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +349,169 @@ components:
       required:
         - status
 
+    Errand:
+      type: object
+      required: [id, title, description, category, status, requesterName, requesterLocation, createdAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+          enum: [open, accepted, completed]
+        requesterName:
+          type: string
+        requesterLocation:
+          type: string
+        estimatedDuration:
+          type: ["string", "null"]
+        budgetAmount:
+          type: ["number", "null"]
+        helperId:
+          type: ["integer", "null"]
+        helperName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: ["string", "null"]
+
+    ErrandInput:
+      type: object
+      required: [title, description, category, requesterName, requesterLocation]
+      properties:
+        title:
+          type: string
+          minLength: 3
+        description:
+          type: string
+          minLength: 10
+        category:
+          type: string
+        requesterName:
+          type: string
+        requesterLocation:
+          type: string
+        estimatedDuration:
+          type: string
+        budgetAmount:
+          type: number
+
+    ErrandUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        requesterLocation:
+          type: string
+        estimatedDuration:
+          type: string
+        budgetAmount:
+          type: number
+        status:
+          type: string
+          enum: [open, accepted, completed]
+
+    AcceptErrandInput:
+      type: object
+      required: [helperId]
+      properties:
+        helperId:
+          type: integer
+
+    ErrandStats:
+      type: object
+      required: [totalOpen, totalAccepted, totalCompleted, totalErrands, topCategory]
+      properties:
+        totalOpen:
+          type: integer
+        totalAccepted:
+          type: integer
+        totalCompleted:
+          type: integer
+        totalErrands:
+          type: integer
+        topCategory:
+          type: ["string", "null"]
+
+    Helper:
+      type: object
+      required: [id, name, location, bio, skills, errandsCompleted, rating, available, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        location:
+          type: string
+        bio:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        errandsCompleted:
+          type: integer
+        rating:
+          type: ["number", "null"]
+        available:
+          type: boolean
+        avatarInitials:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    HelperInput:
+      type: object
+      required: [name, location, bio, skills]
+      properties:
+        name:
+          type: string
+        location:
+          type: string
+        bio:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        available:
+          type: boolean
+
+    HelperUpdate:
+      type: object
+      properties:
+        bio:
+          type: string
+        location:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        available:
+          type: boolean
+        rating:
+          type: number
+
+    Category:
+      type: object
+      required: [id, name, icon, description]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        icon:
+          type: string
+        description:
+          type: string
