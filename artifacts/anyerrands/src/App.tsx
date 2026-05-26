@@ -14,6 +14,7 @@ import HelperProfilePage from "@/pages/helpers/[id]";
 import MapPage from "@/pages/map";
 import ProfilePage from "@/pages/profile";
 import AdminReportsPage from "@/pages/admin/reports";
+import TermsPage from "@/pages/terms";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -39,6 +40,7 @@ function Router() {
         <Route path="/map" component={MapPage} />
         <Route path="/profile" component={ProfilePage} />
         <Route path="/admin/reports" component={AdminReportsPage} />
+        <Route path="/terms" component={TermsPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

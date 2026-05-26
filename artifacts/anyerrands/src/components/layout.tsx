@@ -91,6 +91,12 @@ export function Layout({ children }: { children: ReactNode }) {
           <main className="flex-1 overflow-y-auto">
             {children}
           </main>
+          <footer className="border-t border-border bg-card px-6 py-3 flex items-center justify-between gap-4">
+            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} AnyErrands · Nenagh, Co. Tipperary</p>
+            <Link href="/terms" className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors">
+              Terms & Privacy
+            </Link>
+          </footer>
         </div>
       </div>
       <Toaster />
