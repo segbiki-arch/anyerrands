@@ -1,0 +1,8 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "Hp-kYRotTDREkvNG_oLbn"
+uri = "file://artifacts/anyerrands/public/hero-bg.png"
+type = "image"
+title = "community errands hero background"

@@ -1,7 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { 
   Home, 
-  ClipboardList, 
   Users, 
   PlusCircle, 
   UserPlus,
@@ -9,8 +8,10 @@ import {
   LogIn,
   LogOut,
   ShieldAlert,
+  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AnyErrandsLogo } from "./anyerrands-logo";
 import {
   Sidebar,
   SidebarContent,
@@ -58,11 +59,8 @@ export function AppSidebar() {
 
       {/* Logo */}
       <SidebarHeader className="px-5 py-5">
-        <Link href="/" className="flex items-center gap-2.5" data-testid="link-home-logo">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm shrink-0">
-            <ClipboardList className="w-4 h-4 text-primary-foreground" />
-          </div>
-          <span className="font-bold tracking-tight text-[17px] text-sidebar-foreground">AnyErrands</span>
+        <Link href="/" data-testid="link-home-logo">
+          <AnyErrandsLogo size="sm" variant="light" />
         </Link>
       </SidebarHeader>
 
