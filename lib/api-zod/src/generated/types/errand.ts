@@ -5,6 +5,7 @@
  * AnyErrands API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { ErrandPaymentStatus } from './errandPaymentStatus';
 import type { ErrandStatus } from './errandStatus';
 
 export interface Errand {
@@ -23,6 +24,13 @@ export interface Errand {
   helperId?: number | null;
   /** @nullable */
   helperName?: string | null;
+  paymentStatus?: ErrandPaymentStatus;
+  /** @nullable */
+  paidAmount?: number | null;
+  /** @nullable */
+  platformFee?: number | null;
+  /** @nullable */
+  paidAt?: string | null;
   createdAt: string;
   /** @nullable */
   updatedAt?: string | null;

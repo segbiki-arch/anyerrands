@@ -21,6 +21,9 @@ function formatErrand(e: typeof errandsTable.$inferSelect) {
   return {
     ...e,
     budgetAmount: e.budgetAmount ? Number(e.budgetAmount) : null,
+    paidAmount: e.paidAmount ? Number(e.paidAmount) : null,
+    platformFee: e.platformFee ? Number(e.platformFee) : null,
+    paidAt: e.paidAt ? e.paidAt.toISOString() : null,
     createdAt: e.createdAt.toISOString(),
     updatedAt: e.updatedAt ? e.updatedAt.toISOString() : null,
   };
@@ -175,6 +178,13 @@ router.post("/errands/:id/complete", async (req, res) => {
 
   const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, parsed.data.id));
   if (!errand) return res.status(404).json({ error: "Not found" });
+
+  // Block completion of paid errands until payment is confirmed
+  if (errand.budgetAmount && Number(errand.budgetAmount) > 0 && errand.paymentStatus !== "paid") {
+    return res.status(400).json({
+      error: "Payment not yet received. The requester must pay before this errand can be marked completed.",
+    });
+  }
 
   const [row] = await db
     .update(errandsTable)

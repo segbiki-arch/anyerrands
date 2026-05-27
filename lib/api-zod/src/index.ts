@@ -1,4 +1,6 @@
 export * from "./generated/api";
+export * from "./generated/types/authUser";
+export * from "./generated/types/authUserEnvelope";
 export type { MarkAllNotificationsReadBody } from "./generated/types/markAllNotificationsReadBody";
 export * from "./generated/types/acceptErrandInput";
 export * from "./generated/types/category";

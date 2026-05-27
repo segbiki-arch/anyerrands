@@ -121,6 +121,10 @@ export const ListErrandsResponseItem = zod.object({
   "budgetAmount": zod.number().nullish(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
+  "paidAmount": zod.number().nullish(),
+  "platformFee": zod.number().nullish(),
+  "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })
@@ -166,6 +170,10 @@ export const GetErrandResponse = zod.object({
   "budgetAmount": zod.number().nullish(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
+  "paidAmount": zod.number().nullish(),
+  "platformFee": zod.number().nullish(),
+  "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })
@@ -200,6 +208,10 @@ export const UpdateErrandResponse = zod.object({
   "budgetAmount": zod.number().nullish(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
+  "paidAmount": zod.number().nullish(),
+  "platformFee": zod.number().nullish(),
+  "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })
@@ -236,6 +248,10 @@ export const AcceptErrandResponse = zod.object({
   "budgetAmount": zod.number().nullish(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
+  "paidAmount": zod.number().nullish(),
+  "platformFee": zod.number().nullish(),
+  "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })
@@ -260,6 +276,10 @@ export const CompleteErrandResponse = zod.object({
   "budgetAmount": zod.number().nullish(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
+  "paidAmount": zod.number().nullish(),
+  "platformFee": zod.number().nullish(),
+  "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })
@@ -298,6 +318,10 @@ export const GetRecentErrandsResponseItem = zod.object({
   "budgetAmount": zod.number().nullish(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
+  "paidAmount": zod.number().nullish(),
+  "platformFee": zod.number().nullish(),
+  "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })
@@ -409,6 +433,10 @@ export const GetHelperErrandsResponseItem = zod.object({
   "budgetAmount": zod.number().nullish(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
+  "paidAmount": zod.number().nullish(),
+  "platformFee": zod.number().nullish(),
+  "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish()
 })

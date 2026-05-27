@@ -770,6 +770,15 @@ components:
           type: ["integer", "null"]
         helperName:
           type: ["string", "null"]
+        paymentStatus:
+          type: string
+          enum: [unpaid, paid, refunded]
+        paidAmount:
+          type: ["number", "null"]
+        platformFee:
+          type: ["number", "null"]
+        paidAt:
+          type: ["string", "null"]
         createdAt:
           type: string
         updatedAt:

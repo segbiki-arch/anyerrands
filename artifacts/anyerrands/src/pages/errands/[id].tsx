@@ -300,34 +300,76 @@ export default function ErrandDetailPage() {
                   <>
                     {errand.budgetAmount != null && Number(errand.budgetAmount) > 0 && (
                       <>
-                        <Button
-                          className="w-full rounded-full" size="lg"
-                          onClick={() => redirectToCheckout(errandId)}
-                          disabled={isCheckoutPending}
-                          data-testid="btn-pay-errand"
-                        >
-                          {isCheckoutPending
-                            ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Redirecting...</>
-                            : <><CreditCard className="w-4 h-4 mr-2" />Pay €{errand.budgetAmount}</>}
-                        </Button>
-                        <p className="text-xs text-center text-muted-foreground">90% goes to the helper · 10% platform fee</p>
+                        {errand.paymentStatus === "paid" ? (
+                          <div className="rounded-lg bg-green-50 border border-green-200 p-3 space-y-1" data-testid="payment-badge-paid">
+                            <div className="flex items-center gap-2 text-green-700 font-medium">
+                              <CheckCircle2 className="w-4 h-4" />
+                              <span>Paid €{errand.paidAmount?.toFixed(2) ?? errand.budgetAmount}</span>
+                            </div>
+                            {errand.platformFee != null && errand.paidAmount != null && (
+                              <p className="text-xs text-green-700/80">
+                                €{(errand.paidAmount - errand.platformFee).toFixed(2)} to helper · €{errand.platformFee.toFixed(2)} platform fee
+                              </p>
+                            )}
+                            {errand.paidAt && (
+                              <p className="text-xs text-green-700/70">
+                                {format(new Date(errand.paidAt), "MMM d, yyyy 'at' h:mm a")}
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            <Button
+                              className="w-full rounded-full" size="lg"
+                              onClick={() => redirectToCheckout(errandId)}
+                              disabled={isCheckoutPending}
+                              data-testid="btn-pay-errand"
+                            >
+                              {isCheckoutPending
+                                ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Redirecting...</>
+                                : <><CreditCard className="w-4 h-4 mr-2" />Pay €{errand.budgetAmount}</>}
+                            </Button>
+                            <p className="text-xs text-center text-muted-foreground">90% goes to the helper · 10% platform fee</p>
+                          </>
+                        )}
                       </>
                     )}
-                    <Button
-                      className="w-full rounded-full" size="lg" variant="outline"
-                      onClick={handleComplete}
-                      disabled={completeErrand.isPending}
-                      data-testid="btn-complete-errand"
-                    >
-                      {completeErrand.isPending ? "Marking..." : "Mark as Completed"}
-                      <CheckCircle2 className="w-4 h-4 ml-2" />
-                    </Button>
+                    {(() => {
+                      const requiresPayment = errand.budgetAmount != null && Number(errand.budgetAmount) > 0;
+                      const paymentMissing = requiresPayment && errand.paymentStatus !== "paid";
+                      return (
+                        <>
+                          <Button
+                            className="w-full rounded-full" size="lg" variant="outline"
+                            onClick={handleComplete}
+                            disabled={completeErrand.isPending || paymentMissing}
+                            data-testid="btn-complete-errand"
+                          >
+                            {completeErrand.isPending ? "Marking..." : "Mark as Completed"}
+                            <CheckCircle2 className="w-4 h-4 ml-2" />
+                          </Button>
+                          {paymentMissing && (
+                            <p className="text-xs text-center text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
+                              Waiting for payment — the requester needs to pay before this can be marked complete.
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()}
                   </>
                 )}
 
                 {errand.status === ErrandStatus.completed && (
-                  <div className="flex items-center justify-center gap-2 text-green-600 font-medium py-2 bg-green-50 rounded-lg">
-                    <CheckCircle2 className="w-5 h-5" /> This errand is done!
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center gap-2 text-green-600 font-medium py-2 bg-green-50 rounded-lg">
+                      <CheckCircle2 className="w-5 h-5" /> This errand is done!
+                    </div>
+                    {errand.paymentStatus === "paid" && errand.paidAmount != null && (
+                      <p className="text-xs text-center text-muted-foreground">
+                        Paid €{errand.paidAmount.toFixed(2)}
+                        {errand.platformFee != null && ` · €${(errand.paidAmount - errand.platformFee).toFixed(2)} to helper`}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

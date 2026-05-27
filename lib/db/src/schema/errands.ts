@@ -27,6 +27,8 @@ export const categoriesTable = pgTable("categories", {
   description: text("description").notNull(),
 });
 
+export const paymentStatusEnum = pgEnum("payment_status", ["unpaid", "paid", "refunded"]);
+
 export const errandsTable = pgTable("errands", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -39,6 +41,12 @@ export const errandsTable = pgTable("errands", {
   budgetAmount: numeric("budget_amount", { precision: 10, scale: 2 }),
   helperId: integer("helper_id").references(() => helpersTable.id),
   helperName: text("helper_name"),
+  paymentStatus: paymentStatusEnum("payment_status").notNull().default("unpaid"),
+  paidAmount: numeric("paid_amount", { precision: 10, scale: 2 }),
+  platformFee: numeric("platform_fee", { precision: 10, scale: 2 }),
+  paymentIntentId: text("payment_intent_id"),
+  checkoutSessionId: text("checkout_session_id"),
+  paidAt: timestamp("paid_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at"),
 });

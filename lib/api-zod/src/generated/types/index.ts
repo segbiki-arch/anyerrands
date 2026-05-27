@@ -14,6 +14,7 @@ export * from './beginBrowserLoginParams';
 export * from './category';
 export * from './errand';
 export * from './errandInput';
+export * from './errandPaymentStatus';
 export * from './errandStats';
 export * from './errandStatus';
 export * from './errandUpdate';

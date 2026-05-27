@@ -137,6 +137,13 @@ router.post('/stripe/checkout', async (req, res) => {
   }
 
   const session = await stripe.checkout.sessions.create(sessionParams);
+
+  // Record the session ID so we can correlate the upcoming webhook even if
+  // metadata is somehow stripped.
+  await db.update(errandsTable)
+    .set({ checkoutSessionId: session.id, updatedAt: new Date() })
+    .where(eq(errandsTable.id, errandId));
+
   return res.json({
     url: session.url,
     sessionId: session.id,

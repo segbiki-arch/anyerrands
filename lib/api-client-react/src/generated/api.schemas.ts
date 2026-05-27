@@ -60,6 +60,15 @@ export const ErrandStatus = {
   completed: 'completed',
 } as const;
 
+export type ErrandPaymentStatus = typeof ErrandPaymentStatus[keyof typeof ErrandPaymentStatus];
+
+
+export const ErrandPaymentStatus = {
+  unpaid: 'unpaid',
+  paid: 'paid',
+  refunded: 'refunded',
+} as const;
+
 export interface Errand {
   id: number;
   title: string;
@@ -76,6 +85,13 @@ export interface Errand {
   helperId?: number | null;
   /** @nullable */
   helperName?: string | null;
+  paymentStatus?: ErrandPaymentStatus;
+  /** @nullable */
+  paidAmount?: number | null;
+  /** @nullable */
+  platformFee?: number | null;
+  /** @nullable */
+  paidAt?: string | null;
   createdAt: string;
   /** @nullable */
   updatedAt?: string | null;
