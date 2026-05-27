@@ -22,7 +22,9 @@ export function ErrandCard({ errand }: { errand: Errand }) {
 
   return (
     <Link href={`/errands/${errand.id}`} data-testid={`card-errand-${errand.id}`}>
-      <div className="group relative flex flex-col h-full bg-card border border-border rounded-xl p-5 gap-4 hover:border-foreground/20 hover:shadow-md transition-all duration-200 cursor-pointer">
+      <div className="group relative flex flex-col h-full bg-card border border-border rounded-2xl p-5 gap-4 hover:border-primary/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden">
+        {/* hover glow */}
+        <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary/0 group-hover:bg-primary/20 blur-3xl transition-colors duration-300" />
 
         {/* Top row */}
         <div className="flex items-center justify-between gap-3">

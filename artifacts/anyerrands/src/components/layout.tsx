@@ -95,11 +95,18 @@ export function Layout({ children }: { children: ReactNode }) {
           <main className="flex-1 overflow-y-auto">
             {children}
           </main>
-          <footer className="border-t border-border bg-card px-6 py-3 flex items-center justify-between gap-4">
-            <p className="text-xs text-muted-foreground">© {new Date().getFullYear()} AnyErrands · Nenagh, Co. Tipperary</p>
-            <Link href="/terms" className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2 transition-colors">
-              Terms & Privacy
-            </Link>
+          <footer className="border-t border-border bg-foreground text-background/80 px-6 py-6">
+            <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+                <p>© {new Date().getFullYear()} <span className="font-bold text-background">AnyErrands</span> · Made with <span className="text-primary">♥</span> in Nenagh, Co. Tipperary</p>
+              </div>
+              <div className="flex items-center gap-5 text-xs">
+                <Link href="/errands" className="hover:text-primary transition-colors">Browse errands</Link>
+                <Link href="/helpers/new" className="hover:text-primary transition-colors">Become a helper</Link>
+                <Link href="/terms" className="hover:text-primary transition-colors">Terms & Privacy</Link>
+              </div>
+            </div>
           </footer>
         </div>
       </div>
