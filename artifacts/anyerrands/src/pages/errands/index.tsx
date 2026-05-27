@@ -121,15 +121,15 @@ export default function ErrandsPage() {
           </div>
         )}
 
-        {/* Status pills */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Status + category pills — horizontal scroll on mobile */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide flex-nowrap sm:flex-wrap">
           {STATUS_OPTIONS.map(opt => (
             <button
               key={opt.value}
               onClick={() => setStatus(opt.value as ErrandStatus | "all")}
               data-testid={`filter-status-${opt.value}`}
               className={cn(
-                "px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
+                "shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
                 status === opt.value
                   ? "bg-foreground text-background border-transparent"
                   : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
@@ -140,13 +140,13 @@ export default function ErrandsPage() {
           ))}
 
           {/* Divider */}
-          <span className="w-px h-5 bg-border mx-1" />
+          <span className="shrink-0 w-px h-5 bg-border mx-1" />
 
           {/* Category pills */}
           <button
             onClick={() => setCategory("all")}
             className={cn(
-              "px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
+              "shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
               category === "all"
                 ? "bg-primary text-primary-foreground border-transparent"
                 : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"
@@ -160,7 +160,7 @@ export default function ErrandsPage() {
               onClick={() => setCategory(c.name)}
               data-testid={`filter-cat-${c.name.toLowerCase().replace(/\s+/g, "-")}`}
               className={cn(
-                "px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
+                "shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all border",
                 category === c.name
                   ? "bg-primary text-primary-foreground border-transparent"
                   : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-foreground/30"

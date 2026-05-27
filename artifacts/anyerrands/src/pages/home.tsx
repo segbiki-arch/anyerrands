@@ -94,7 +94,7 @@ export default function Home() {
               asChild
               variant="ghost"
               size="sm"
-              className="hidden sm:flex text-muted-foreground hover:text-foreground font-semibold gap-1.5"
+              className="text-muted-foreground hover:text-foreground font-semibold gap-1.5"
               data-testid="btn-view-all"
             >
               <Link href="/errands">
@@ -130,9 +130,6 @@ export default function Home() {
             </div>
           )}
 
-          <Button asChild variant="outline" className="w-full sm:hidden rounded-full">
-            <Link href="/errands">View all errands</Link>
-          </Button>
         </div>
       </div>
     </div>

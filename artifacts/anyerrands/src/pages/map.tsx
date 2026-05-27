@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Euro, Clock, MapPin, ExternalLink } from "lucide-react";
+import { Euro, Clock, MapPin, ExternalLink, Locate } from "lucide-react";
 
 const NENAGH: [number, number] = [52.8647, -8.1985];
 const DEFAULT_ZOOM = 10;
@@ -123,6 +123,19 @@ export default function MapPage() {
 
   const unmappedCount = errands ? errands.length - pinned.length : 0;
 
+  const locateMe = () => {
+    if (!navigator.geolocation || !leafletMapRef.current) return;
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        leafletMapRef.current?.setView([pos.coords.latitude, pos.coords.longitude], 13);
+      },
+      () => {
+        leafletMapRef.current?.setView(NENAGH, DEFAULT_ZOOM);
+      },
+      { enableHighAccuracy: true, timeout: 8000 },
+    );
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="p-6 pb-4 border-b border-border/60 bg-background space-y-4">
@@ -156,7 +169,18 @@ export default function MapPage() {
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-4 ml-auto text-sm text-muted-foreground">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={locateMe}
+            className="rounded-full gap-1.5"
+            data-testid="btn-locate-me"
+          >
+            <Locate className="w-3.5 h-3.5" />
+            Locate me
+          </Button>
+
+          <div className="hidden md:flex items-center gap-4 ml-auto text-sm text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-full bg-[#e05c2a] inline-block" /> Open
             </span>
@@ -183,10 +207,6 @@ export default function MapPage() {
             <Skeleton className="w-32 h-8" />
           </div>
         )}
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        />
         <div
           ref={mapRef}
           className="w-full h-full"
