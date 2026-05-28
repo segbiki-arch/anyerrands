@@ -49,7 +49,7 @@ export default function TermsPage() {
   const [activeTab, setActiveTab] = useState<"terms" | "privacy">("terms");
 
   const EFFECTIVE_DATE = "26 May 2026";
-  const CONTACT_EMAIL = "hello@anyerrands.ie";
+  const CONTACT_EMAIL = "hello@anyerrands.live";
   const COMPANY = "AnyErrands";
   const LOCATION = "Nenagh, Co. Tipperary, Ireland";
 
