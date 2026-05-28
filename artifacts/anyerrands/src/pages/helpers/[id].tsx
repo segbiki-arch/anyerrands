@@ -10,7 +10,8 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { helperPhotoUrl } from "@/lib/avatars";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -105,6 +106,7 @@ export default function HelperProfilePage() {
         <CardContent className="p-6 md:p-8 relative pt-0">
           <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
             <Avatar className="w-28 h-28 border-4 border-card -mt-14 bg-card shrink-0">
+              <AvatarImage src={helperPhotoUrl(helper.id, 320)} alt={helper.name} />
               <AvatarFallback className="bg-primary text-primary-foreground text-4xl font-bold">
                 {helper.avatarInitials || helper.name.substring(0, 2).toUpperCase()}
               </AvatarFallback>

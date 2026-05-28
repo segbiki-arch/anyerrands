@@ -1,8 +1,9 @@
 import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 import { Errand, ErrandStatus } from "@workspace/api-client-react";
-import { MapPin, Clock, Euro } from "lucide-react";
+import { MapPin, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { requesterAvatarUrl } from "@/lib/avatars";
 
 const STATUS_STYLES: Record<string, string> = {
   [ErrandStatus.open]: "bg-primary text-primary-foreground",
@@ -66,8 +67,16 @@ export function ErrandCard({ errand }: { errand: Errand }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between text-[11px] text-muted-foreground/70 -mt-1">
-          <span className="font-medium">{errand.requesterName}</span>
+        <div className="flex items-center justify-between text-[11px] text-muted-foreground/80 -mt-1">
+          <span className="flex items-center gap-1.5 font-medium">
+            <img
+              src={requesterAvatarUrl(errand.requesterName, 40)}
+              alt=""
+              aria-hidden
+              className="w-5 h-5 rounded-full ring-1 ring-border"
+            />
+            {errand.requesterName}
+          </span>
           <span>{formatDistanceToNow(new Date(errand.createdAt), { addSuffix: true })}</span>
         </div>
       </div>
