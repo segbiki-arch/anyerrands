@@ -1,8 +1,10 @@
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCreateErrand, useListCategories, getListErrandsQueryKey, getGetErrandStatsQueryKey, getGetRecentErrandsQueryKey } from "@workspace/api-client-react";
+import { useAuth } from "@workspace/replit-auth-web";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -30,7 +32,10 @@ export default function NewErrandPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: categories } = useListCategories();
-  
+  const { user } = useAuth();
+
+  const accountName = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
+
   const createErrand = useCreateErrand();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -46,6 +51,12 @@ export default function NewErrandPage() {
       estimatedDuration: "",
     },
   });
+
+  useEffect(() => {
+    if (accountName && !form.getValues("requesterName")) {
+      form.setValue("requesterName", accountName);
+    }
+  }, [accountName, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     createErrand.mutate(
