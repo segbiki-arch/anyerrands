@@ -43,7 +43,7 @@ export default function Home() {
               Ask your neighbours to pick up the shopping, help with a small job, or give you a lift into town.
             </p>
             <p className="text-base sm:text-lg font-serif italic text-foreground/70 max-w-2xl mx-auto pt-2">
-              Creating trusted community through micro-help.
+              Small acts of help. Stronger communities.
             </p>
           </div>
 
