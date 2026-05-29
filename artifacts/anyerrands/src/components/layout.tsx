@@ -102,7 +102,7 @@ export function Layout({ children }: { children: ReactNode }) {
                   <span className="w-2 h-2 rounded-full bg-primary inline-block" />
                   <p>© {new Date().getFullYear()} <span className="font-bold text-background">AnyErrands</span> · Made with <span className="text-primary">♥</span> in Nenagh, Co. Tipperary</p>
                 </div>
-                <p className="font-serif italic text-background/70 pl-4">Creating trusted community micro-helping.</p>
+                <p className="font-serif italic text-background/70 pl-4">Creating trusted community through micro-help.</p>
               </div>
               <div className="flex items-center gap-5 text-xs">
                 <Link href="/errands" className="hover:text-primary transition-colors">Browse errands</Link>
