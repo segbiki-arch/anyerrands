@@ -38,4 +38,9 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
+
+[userenv.production]
+ADMIN_EMAILS = "anyerrandslive@hotmail.com,chudyspassion@hotmail.com"
+
+[userenv.development]
 ADMIN_EMAILS = "anyerrandslive@hotmail.com,chudyspassion@hotmail.com"
