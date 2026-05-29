@@ -4,6 +4,7 @@ import {
   useGetHelper,
   useGetHelperErrands,
   useStripeConnectOnboard,
+  useStripeConnectManage,
   useStripeConnectStatus,
   getGetHelperQueryKey,
   getGetHelperErrandsQueryKey,
@@ -43,6 +44,7 @@ export default function HelperProfilePage() {
   });
 
   const onboard = useStripeConnectOnboard();
+  const manage = useStripeConnectManage();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -61,6 +63,13 @@ export default function HelperProfilePage() {
     onboard.mutate({ helperId }, {
       onSuccess: ({ url }) => { window.location.href = url; },
       onError: () => toast({ title: "Failed to start setup", description: "Please try again.", variant: "destructive" }),
+    });
+  };
+
+  const handleManageStripe = () => {
+    manage.mutate({ helperId }, {
+      onSuccess: ({ url }) => { window.location.href = url; },
+      onError: () => toast({ title: "Couldn't open bank settings", description: "Please try again.", variant: "destructive" }),
     });
   };
 
@@ -166,14 +175,26 @@ export default function HelperProfilePage() {
           {statusLoading ? (
             <div className="flex items-center gap-2 text-muted-foreground text-sm"><Loader2 className="w-4 h-4 animate-spin" /> Checking account status…</div>
           ) : isConnected ? (
-            <div className="flex items-start gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
-              <ShieldCheck className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="font-semibold text-green-800">Bank account connected</p>
-                <p className="text-sm text-green-700 mt-0.5">
-                  You'll automatically receive <span className="font-bold">90%</span> of each errand payment directly to your bank. AnyErrands keeps 10%.
-                </p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl bg-green-50 border border-green-200">
+              <div className="flex items-start gap-3">
+                <ShieldCheck className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-green-800">Bank account connected</p>
+                  <p className="text-sm text-green-700 mt-0.5">
+                    You'll automatically receive <span className="font-bold">90%</span> of each errand payment directly to your bank. AnyErrands keeps 10%.
+                  </p>
+                </div>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleManageStripe}
+                disabled={manage.isPending}
+                className="rounded-full shrink-0 gap-2 border-green-300 bg-white/60 text-green-800 hover:bg-white hover:text-green-900"
+                data-testid="btn-manage-bank"
+              >
+                {manage.isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Opening…</> : <><ExternalLink className="w-3.5 h-3.5" />Update bank details</>}
+              </Button>
             </div>
           ) : isPending ? (
             <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">

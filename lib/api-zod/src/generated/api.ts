@@ -472,6 +472,18 @@ export const StripeConnectOnboardResponse = zod.object({
 
 
 /**
+ * @summary Get a Stripe Express dashboard link for a connected helper to update bank details
+ */
+export const StripeConnectManageParams = zod.object({
+  "helperId": zod.coerce.number()
+})
+
+export const StripeConnectManageResponse = zod.object({
+  "url": zod.string()
+})
+
+
+/**
  * @summary Get Stripe Connect account status for a helper
  */
 export const StripeConnectStatusParams = zod.object({

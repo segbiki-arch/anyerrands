@@ -466,6 +466,29 @@ paths:
         "404":
           description: Helper not found
 
+  /stripe/connect/manage/{helperId}:
+    post:
+      operationId: stripeConnectManage
+      tags: [helpers]
+      summary: Get a Stripe Express dashboard link for a connected helper to update bank details
+      parameters:
+        - name: helperId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Dashboard URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StripeConnectOnboardResponse"
+        "400":
+          description: Helper has no connected account yet
+        "404":
+          description: Helper not found
+
   /stripe/connect/status/{helperId}:
     get:
       operationId: stripeConnectStatus

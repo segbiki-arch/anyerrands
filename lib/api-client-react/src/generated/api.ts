@@ -1726,6 +1726,76 @@ export const useStripeConnectOnboard = <TError = ErrorType<void>,
       return useMutation(getStripeConnectOnboardMutationOptions(options));
     }
 
+export const getStripeConnectManageUrl = (helperId: number,) => {
+
+
+
+
+  return `/api/stripe/connect/manage/${helperId}`
+}
+
+/**
+ * @summary Get a Stripe Express dashboard link for a connected helper to update bank details
+ */
+export const stripeConnectManage = async (helperId: number, options?: RequestInit): Promise<StripeConnectOnboardResponse> => {
+
+  return customFetch<StripeConnectOnboardResponse>(getStripeConnectManageUrl(helperId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getStripeConnectManageMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stripeConnectManage>>, TError,{helperId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof stripeConnectManage>>, TError,{helperId: number}, TContext> => {
+
+const mutationKey = ['stripeConnectManage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof stripeConnectManage>>, {helperId: number}> = (props) => {
+          const {helperId} = props ?? {};
+
+          return  stripeConnectManage(helperId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type StripeConnectManageMutationResult = NonNullable<Awaited<ReturnType<typeof stripeConnectManage>>>
+
+    export type StripeConnectManageMutationError = ErrorType<void>
+
+    /**
+ * @summary Get a Stripe Express dashboard link for a connected helper to update bank details
+ */
+export const useStripeConnectManage = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof stripeConnectManage>>, TError,{helperId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof stripeConnectManage>>,
+        TError,
+        {helperId: number},
+        TContext
+      > => {
+      return useMutation(getStripeConnectManageMutationOptions(options));
+    }
+
 export const getStripeConnectStatusUrl = (helperId: number,) => {
 
 

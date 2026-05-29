@@ -47,6 +47,36 @@ router.post('/stripe/connect/onboard/:helperId', async (req, res) => {
   return res.json({ url: accountLink.url });
 });
 
+router.post('/stripe/connect/manage/:helperId', async (req, res) => {
+  const helperId = parseInt(req.params.helperId, 10);
+  if (isNaN(helperId)) return res.status(400).json({ error: 'Invalid helperId' });
+
+  const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, helperId));
+  if (!helper) return res.status(404).json({ error: 'Helper not found' });
+  if (!helper.stripeAccountId) return res.status(400).json({ error: 'No connected account yet' });
+
+  const stripe = await getUncachableStripeClient();
+  const account = await stripe.accounts.retrieve(helper.stripeAccountId);
+
+  const domain = `https://${process.env.REPLIT_DOMAINS?.split(',')[0] ?? 'localhost'}`;
+
+  // Express accounts that have finished onboarding get a dashboard login link
+  // (lets them change bank account, view payouts, etc.). If onboarding isn't
+  // complete yet, fall back to an account link so they can finish setup.
+  if (account.details_submitted) {
+    const loginLink = await stripe.accounts.createLoginLink(helper.stripeAccountId);
+    return res.json({ url: loginLink.url });
+  }
+
+  const accountLink = await stripe.accountLinks.create({
+    account: helper.stripeAccountId,
+    refresh_url: `${domain}/helpers/${helperId}?connect=refresh`,
+    return_url: `${domain}/helpers/${helperId}?connect=success`,
+    type: 'account_onboarding',
+  });
+  return res.json({ url: accountLink.url });
+});
+
 router.get('/stripe/connect/status/:helperId', async (req, res) => {
   const helperId = parseInt(req.params.helperId, 10);
   if (isNaN(helperId)) return res.status(400).json({ error: 'Invalid helperId' });
