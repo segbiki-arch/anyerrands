@@ -12,6 +12,7 @@ import {
   Car,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { AnyErrandsLogo } from "./anyerrands-logo";
 import {
   Sidebar,
