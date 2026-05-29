@@ -15,6 +15,12 @@ const DEFAULT_CATEGORIES = [
     description:
       "Help for older neighbours — companionship, collecting prescriptions, light tasks, getting to appointments and a friendly check-in.",
   },
+  {
+    name: "Kitchen Help",
+    icon: "chef-hat",
+    description:
+      "A hand in the kitchen — meal prep, batch cooking, baking, washing up and tidying after.",
+  },
 ];
 
 /**
