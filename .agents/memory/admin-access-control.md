@@ -14,3 +14,5 @@ Admin access is an **email allowlist** in the `ADMIN_EMAILS` env var (comma-sepa
 **Why:** admin endpoints previously had zero auth. Allowlist lets the non-technical owner add/remove admins via env var without code changes.
 
 **How to apply:** when adding new admin endpoints, attach `requireAdmin`. To change who is admin, edit `ADMIN_EMAILS` (shared env) — must redeploy for prod to pick it up.
+
+**Account-confusion gotcha:** login is via Replit Auth, so `isAdmin` matches the email of whatever Replit account the owner is *actually* signed into — not an email they think they typed. The owner (Chus) has two accounts: anyerrandslive@hotmail.com and the everyday chudyspassion@hotmail.com. Symptom "logged in as admin but no Admin menu" was really them using the everyday account. Fix: put the everyday account email in `ADMIN_EMAILS` too. Both are now allowlisted.
