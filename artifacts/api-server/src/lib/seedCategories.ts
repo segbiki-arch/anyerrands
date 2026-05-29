@@ -9,6 +9,12 @@ const DEFAULT_CATEGORIES = [
     description:
       "Offer or request a lift — airport drop-off/pick-up, trips to Limerick, Thurles, Borrisokane and other neighbouring towns.",
   },
+  {
+    name: "Elderly Assistance",
+    icon: "heart-handshake",
+    description:
+      "Help for older neighbours — companionship, collecting prescriptions, light tasks, getting to appointments and a friendly check-in.",
+  },
 ];
 
 /**
