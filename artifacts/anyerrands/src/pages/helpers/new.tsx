@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useCreateHelper, getListHelpersQueryKey } from "@workspace/api-client-react";
+import { useAuth } from "@workspace/replit-auth-web";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Send, MapPin, X } from "lucide-react";
+import { Send, MapPin, X, LogIn, UserPlus } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -27,7 +28,10 @@ export default function NewHelperPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+  const { user, isLoading: authLoading, isAuthenticated, login } = useAuth();
+
+  const accountName = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
+
   const [skillInput, setSkillInput] = useState("");
   const createHelper = useCreateHelper();
 
@@ -41,6 +45,10 @@ export default function NewHelperPage() {
       available: true,
     },
   });
+
+  useEffect(() => {
+    if (accountName) form.setValue("name", accountName);
+  }, [accountName, form]);
 
   const addSkill = () => {
     if (!skillInput.trim()) return;
@@ -80,6 +88,32 @@ export default function NewHelperPage() {
     );
   }
 
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto px-6 py-20 text-center">
+        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+          <UserPlus className="w-8 h-8 text-primary" />
+        </div>
+        <h2 className="text-2xl font-serif font-bold mb-2">Log in to become a helper</h2>
+        <p className="text-muted-foreground mb-8">
+          Your helper profile is linked to your account, so only you can manage it and your bank payout details. Please log in to continue.
+        </p>
+        <Button size="lg" className="rounded-full" onClick={login} data-testid="btn-login-helper">
+          <LogIn className="w-4 h-4 mr-2" />
+          Log in to continue
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-6 md:p-8 py-12">
       <div className="mb-8">
@@ -101,8 +135,9 @@ export default function NewHelperPage() {
                     <FormItem>
                       <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} data-testid="input-helper-name" />
+                        <Input placeholder="John Doe" {...field} disabled readOnly data-testid="input-helper-name" />
                       </FormControl>
+                      <FormDescription>From your account — keeps your profile tied to you.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

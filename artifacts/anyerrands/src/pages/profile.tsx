@@ -50,6 +50,8 @@ export default function ProfilePage() {
 
   const myHelperProfile = useMemo(() => {
     if (!allHelpers || !user) return undefined;
+    const owned = allHelpers.find(h => h.isOwner);
+    if (owned) return owned;
     const nameKey = displayName.toLowerCase().trim();
     return allHelpers.find(h => h.name.toLowerCase().trim() === nameKey);
   }, [allHelpers, user, displayName]);

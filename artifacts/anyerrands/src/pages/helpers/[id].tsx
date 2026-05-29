@@ -40,7 +40,7 @@ export default function HelperProfilePage() {
   });
 
   const { data: connectStatus, isLoading: statusLoading, refetch: refetchStatus } = useStripeConnectStatus(helperId, {
-    query: { enabled: !isNaN(helperId) }
+    query: { enabled: !isNaN(helperId) && helper?.isOwner === true }
   });
 
   const onboard = useStripeConnectOnboard();
@@ -100,8 +100,8 @@ export default function HelperProfilePage() {
     );
   }
 
-  const isConnected = connectStatus?.chargesEnabled === true;
-  const isPending = connectStatus?.connected && !connectStatus?.chargesEnabled;
+  const isConnected = connectStatus?.detailsSubmitted === true;
+  const isPending = connectStatus?.connected && !connectStatus?.detailsSubmitted;
 
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-8 space-y-8 pb-20">
@@ -164,7 +164,8 @@ export default function HelperProfilePage() {
         </CardContent>
       </Card>
 
-      {/* Stripe Connect payout section */}
+      {/* Stripe Connect payout section — only the profile owner can see/manage payouts */}
+      {helper.isOwner && (
       <Card className="border-border/60 shadow-sm">
         <CardContent className="p-6 space-y-4">
           <div className="flex items-center gap-2 mb-1">
@@ -222,6 +223,7 @@ export default function HelperProfilePage() {
           )}
         </CardContent>
       </Card>
+      )}
 
       {/* Errand history */}
       <div className="space-y-6">

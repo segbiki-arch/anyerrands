@@ -357,6 +357,7 @@ export const ListHelpersResponseItem = zod.object({
   "avatarInitials": zod.string().nullish(),
   "stripeAccountId": zod.string().nullish(),
   "stripeOnboardingComplete": zod.boolean().nullish(),
+  "isOwner": zod.boolean().optional().describe('True when the currently authenticated user owns this helper profile'),
   "createdAt": zod.string()
 })
 export const ListHelpersResponse = zod.array(ListHelpersResponseItem)
@@ -393,6 +394,7 @@ export const GetHelperResponse = zod.object({
   "avatarInitials": zod.string().nullish(),
   "stripeAccountId": zod.string().nullish(),
   "stripeOnboardingComplete": zod.boolean().nullish(),
+  "isOwner": zod.boolean().optional().describe('True when the currently authenticated user owns this helper profile'),
   "createdAt": zod.string()
 })
 
@@ -424,6 +426,7 @@ export const UpdateHelperResponse = zod.object({
   "avatarInitials": zod.string().nullish(),
   "stripeAccountId": zod.string().nullish(),
   "stripeOnboardingComplete": zod.boolean().nullish(),
+  "isOwner": zod.boolean().optional().describe('True when the currently authenticated user owns this helper profile'),
   "createdAt": zod.string()
 })
 

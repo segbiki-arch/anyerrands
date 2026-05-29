@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { getUncachableStripeClient, getStripePublishableKey } from '../stripeClient';
 import { db } from '@workspace/db';
 import { errandsTable, helpersTable } from '@workspace/db';
@@ -8,95 +8,138 @@ const router = Router();
 
 const PLATFORM_FEE_PERCENT = 10;
 
+type HelperRow = typeof helpersTable.$inferSelect;
+
+/**
+ * Loads the helper for :helperId and verifies the logged-in user is allowed to
+ * manage its payout/bank settings. Writes the appropriate error response and
+ * returns null when access is denied. Payout settings are sensitive (they let
+ * someone change where money is sent), so only the profile owner may touch them.
+ */
+async function requireOwnedHelper(req: Request, res: Response): Promise<HelperRow | null> {
+  const helperId = parseInt(String(req.params.helperId), 10);
+  if (isNaN(helperId)) {
+    res.status(400).json({ error: 'Invalid helperId' });
+    return null;
+  }
+  if (!req.user) {
+    res.status(401).json({ error: 'You must be logged in to manage payout details' });
+    return null;
+  }
+
+  const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, helperId));
+  if (!helper) {
+    res.status(404).json({ error: 'Helper not found' });
+    return null;
+  }
+
+  // Payout settings can only be managed by the account that owns the profile.
+  // Legacy profiles created before ownership existed (userId == null) cannot be
+  // managed at all — there is no trustworthy way to prove who owns them, so we
+  // never auto-claim based on a weak signal like a matching display name.
+  if (helper.userId !== req.user.id) {
+    res.status(403).json({ error: 'You do not have access to this helper account' });
+    return null;
+  }
+
+  return helper;
+}
+
 router.get('/stripe/config', async (_req, res) => {
   const publishableKey = await getStripePublishableKey();
   return res.json({ publishableKey });
 });
 
 router.post('/stripe/connect/onboard/:helperId', async (req, res) => {
-  const helperId = parseInt(req.params.helperId, 10);
-  if (isNaN(helperId)) return res.status(400).json({ error: 'Invalid helperId' });
+  const helper = await requireOwnedHelper(req, res);
+  if (!helper) return;
 
-  const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, helperId));
-  if (!helper) return res.status(404).json({ error: 'Helper not found' });
+  try {
+    const stripe = await getUncachableStripeClient();
 
-  const stripe = await getUncachableStripeClient();
+    let accountId = helper.stripeAccountId;
+    if (!accountId) {
+      const account = await stripe.accounts.create({
+        type: 'express',
+        country: 'IE',
+        capabilities: { transfers: { requested: true } },
+        business_profile: { name: helper.name },
+      });
+      accountId = account.id;
+      await db.update(helpersTable)
+        .set({ stripeAccountId: accountId })
+        .where(eq(helpersTable.id, helper.id));
+    }
 
-  let accountId = helper.stripeAccountId;
-  if (!accountId) {
-    const account = await stripe.accounts.create({
-      type: 'express',
-      country: 'IE',
-      capabilities: { transfers: { requested: true } },
-      business_profile: { name: helper.name },
+    const domain = `https://${process.env.REPLIT_DOMAINS?.split(',')[0] ?? 'localhost'}`;
+    const accountLink = await stripe.accountLinks.create({
+      account: accountId,
+      refresh_url: `${domain}/helpers/${helper.id}?connect=refresh`,
+      return_url: `${domain}/helpers/${helper.id}?connect=success`,
+      type: 'account_onboarding',
     });
-    accountId = account.id;
-    await db.update(helpersTable)
-      .set({ stripeAccountId: accountId })
-      .where(eq(helpersTable.id, helperId));
+
+    return res.json({ url: accountLink.url });
+  } catch (err) {
+    req.log.error({ err }, 'Stripe onboard error');
+    return res.status(502).json({ error: 'Could not start bank setup. Please try again.' });
   }
-
-  const domain = `https://${process.env.REPLIT_DOMAINS?.split(',')[0] ?? 'localhost'}`;
-  const accountLink = await stripe.accountLinks.create({
-    account: accountId,
-    refresh_url: `${domain}/helpers/${helperId}?connect=refresh`,
-    return_url: `${domain}/helpers/${helperId}?connect=success`,
-    type: 'account_onboarding',
-  });
-
-  return res.json({ url: accountLink.url });
 });
 
 router.post('/stripe/connect/manage/:helperId', async (req, res) => {
-  const helperId = parseInt(req.params.helperId, 10);
-  if (isNaN(helperId)) return res.status(400).json({ error: 'Invalid helperId' });
-
-  const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, helperId));
-  if (!helper) return res.status(404).json({ error: 'Helper not found' });
+  const helper = await requireOwnedHelper(req, res);
+  if (!helper) return;
   if (!helper.stripeAccountId) return res.status(400).json({ error: 'No connected account yet' });
 
-  const stripe = await getUncachableStripeClient();
-  const account = await stripe.accounts.retrieve(helper.stripeAccountId);
+  try {
+    const stripe = await getUncachableStripeClient();
+    const account = await stripe.accounts.retrieve(helper.stripeAccountId);
 
-  const domain = `https://${process.env.REPLIT_DOMAINS?.split(',')[0] ?? 'localhost'}`;
+    const domain = `https://${process.env.REPLIT_DOMAINS?.split(',')[0] ?? 'localhost'}`;
 
-  // Express accounts that have finished onboarding get a dashboard login link
-  // (lets them change bank account, view payouts, etc.). If onboarding isn't
-  // complete yet, fall back to an account link so they can finish setup.
-  if (account.details_submitted) {
-    const loginLink = await stripe.accounts.createLoginLink(helper.stripeAccountId);
-    return res.json({ url: loginLink.url });
+    // Express accounts that have finished onboarding get a dashboard login link
+    // (lets them change bank account, view payouts, etc.). If onboarding isn't
+    // complete yet, fall back to an account link so they can finish setup.
+    if (account.details_submitted) {
+      const loginLink = await stripe.accounts.createLoginLink(helper.stripeAccountId);
+      return res.json({ url: loginLink.url });
+    }
+
+    const accountLink = await stripe.accountLinks.create({
+      account: helper.stripeAccountId,
+      refresh_url: `${domain}/helpers/${helper.id}?connect=refresh`,
+      return_url: `${domain}/helpers/${helper.id}?connect=success`,
+      type: 'account_onboarding',
+    });
+    return res.json({ url: accountLink.url });
+  } catch (err) {
+    req.log.error({ err }, 'Stripe manage error');
+    return res.status(502).json({ error: 'Could not open bank settings. Please try again.' });
   }
-
-  const accountLink = await stripe.accountLinks.create({
-    account: helper.stripeAccountId,
-    refresh_url: `${domain}/helpers/${helperId}?connect=refresh`,
-    return_url: `${domain}/helpers/${helperId}?connect=success`,
-    type: 'account_onboarding',
-  });
-  return res.json({ url: accountLink.url });
 });
 
 router.get('/stripe/connect/status/:helperId', async (req, res) => {
-  const helperId = parseInt(req.params.helperId, 10);
-  if (isNaN(helperId)) return res.status(400).json({ error: 'Invalid helperId' });
-
-  const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, helperId));
-  if (!helper) return res.status(404).json({ error: 'Helper not found' });
+  const helper = await requireOwnedHelper(req, res);
+  if (!helper) return;
 
   if (!helper.stripeAccountId) {
     return res.json({ connected: false, detailsSubmitted: false, chargesEnabled: false, accountId: null });
   }
 
-  const stripe = await getUncachableStripeClient();
-  const account = await stripe.accounts.retrieve(helper.stripeAccountId);
+  try {
+    const stripe = await getUncachableStripeClient();
+    const account = await stripe.accounts.retrieve(helper.stripeAccountId);
 
-  return res.json({
-    connected: true,
-    detailsSubmitted: account.details_submitted,
-    chargesEnabled: account.charges_enabled,
-    accountId: helper.stripeAccountId,
-  });
+    return res.json({
+      connected: true,
+      detailsSubmitted: account.details_submitted,
+      chargesEnabled: account.charges_enabled,
+      accountId: helper.stripeAccountId,
+    });
+  } catch (err) {
+    req.log.error({ err }, 'Stripe status error');
+    return res.status(502).json({ error: 'Could not check account status. Please try again.' });
+  }
 });
 
 router.post('/stripe/checkout', async (req, res) => {

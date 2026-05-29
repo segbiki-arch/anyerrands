@@ -3,11 +3,13 @@ export const reportReasonEnum = pgEnum("report_reason", ["work_not_done", "work_
 export const reportStatusEnum = pgEnum("report_status", ["pending", "reviewed", "resolved"]);
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { usersTable } from "./auth";
 
 export const errandStatusEnum = pgEnum("errand_status", ["open", "accepted", "completed"]);
 
 export const helpersTable = pgTable("helpers", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").references(() => usersTable.id),
   name: text("name").notNull(),
   location: text("location").notNull(),
   bio: text("bio").notNull(),

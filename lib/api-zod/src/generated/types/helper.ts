@@ -22,5 +22,7 @@ export interface Helper {
   stripeAccountId?: string | null;
   /** @nullable */
   stripeOnboardingComplete?: boolean | null;
+  /** True when the currently authenticated user owns this helper profile */
+  isOwner?: boolean;
   createdAt: string;
 }

@@ -905,6 +905,9 @@ components:
           type: ["string", "null"]
         stripeOnboardingComplete:
           type: ["boolean", "null"]
+        isOwner:
+          type: boolean
+          description: True when the currently authenticated user owns this helper profile
         createdAt:
           type: string
 
