@@ -7,6 +7,7 @@ import {
   LogoutMobileSessionResponse,
 } from "@workspace/api-zod";
 import { db, usersTable } from "@workspace/db";
+import { isAdminEmail } from "../lib/admin";
 import {
   clearSession,
   getOidcConfig,
@@ -83,9 +84,11 @@ async function upsertUser(claims: Record<string, unknown>) {
 }
 
 router.get("/auth/user", (req: Request, res: Response) => {
+  const user = req.isAuthenticated() ? req.user : null;
   res.json(
     GetCurrentAuthUserResponse.parse({
-      user: req.isAuthenticated() ? req.user : null,
+      user,
+      isAdmin: isAdminEmail(user?.email),
     }),
   );
 });

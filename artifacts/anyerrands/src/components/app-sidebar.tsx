@@ -47,6 +47,7 @@ const NAV_BTN = "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:
 export function AppSidebar() {
   const [location] = useLocation();
   const { user, isAuthenticated, login, logout } = useAuth();
+  const { isAdmin } = useIsAdmin();
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? location === href : location === href || location.startsWith(href + "/");
@@ -107,24 +108,28 @@ export function AppSidebar() {
         </SidebarMenu>
 
         {/* Admin */}
-        <div className="mx-2 my-4 h-px bg-sidebar-border" />
-        <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/30 mb-1">Admin</p>
-        <SidebarMenu className="space-y-0.5">
-          {adminItems.map(item => (
-            <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
-                asChild
-                isActive={isActive(item.href)}
-                className={NAV_BTN}
-              >
-                <Link href={item.href} data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}>
-                  <item.icon className="w-4 h-4 shrink-0" />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+        {isAdmin && (
+          <>
+            <div className="mx-2 my-4 h-px bg-sidebar-border" />
+            <p className="px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/30 mb-1">Admin</p>
+            <SidebarMenu className="space-y-0.5">
+              {adminItems.map(item => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    className={NAV_BTN}
+                  >
+                    <Link href={item.href} data-testid={`link-nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                      <item.icon className="w-4 h-4 shrink-0" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </>
+        )}
       </SidebarContent>
 
       {/* Footer — user */}

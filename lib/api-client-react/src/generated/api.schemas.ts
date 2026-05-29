@@ -23,6 +23,7 @@ export interface AuthUser {
 
 export interface AuthUserEnvelope {
   user: AuthUser | null;
+  isAdmin: boolean;
 }
 
 export interface MobileTokenExchangeRequest {

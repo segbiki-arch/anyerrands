@@ -720,12 +720,14 @@ components:
           type: [string, 'null']
     AuthUserEnvelope:
       type: object
-      required: [user]
+      required: [user, isAdmin]
       properties:
         user:
           oneOf:
             - $ref: '#/components/schemas/AuthUser'
             - type: 'null'
+        isAdmin:
+          type: boolean
     MobileTokenExchangeRequest:
       type: object
       required: [code, code_verifier, redirect_uri, state]

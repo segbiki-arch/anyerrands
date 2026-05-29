@@ -2,12 +2,13 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { reportsTable, errandsTable, helpersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { requireAdmin } from "../middlewares/requireAdmin";
 const VALID_STATUSES = ["pending", "reviewed", "resolved"] as const;
 type ReportStatus = (typeof VALID_STATUSES)[number];
 
 const router = Router();
 
-router.get("/admin/reports", async (req, res) => {
+router.get("/admin/reports", requireAdmin, async (req, res) => {
   const { status } = req.query as { status?: string };
 
   const rows = await db
@@ -37,8 +38,8 @@ router.get("/admin/reports", async (req, res) => {
   );
 });
 
-router.patch("/admin/reports/:id", async (req, res) => {
-  const reportId = parseInt(req.params.id, 10);
+router.patch("/admin/reports/:id", requireAdmin, async (req, res) => {
+  const reportId = parseInt(String(req.params.id), 10);
   if (isNaN(reportId)) return res.status(400).json({ error: "Invalid report id" });
 
   const { status } = req.body as { status?: string };

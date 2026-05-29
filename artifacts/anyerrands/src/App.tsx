@@ -17,6 +17,14 @@ import ProfilePage from "@/pages/profile";
 import AdminReportsPage from "@/pages/admin/reports";
 import TermsPage from "@/pages/terms";
 import NotFound from "@/pages/not-found";
+import { useIsAdmin } from "@/hooks/use-is-admin";
+
+function AdminRoute() {
+  const { isAdmin, isLoading } = useIsAdmin();
+  if (isLoading) return null;
+  if (!isAdmin) return <NotFound />;
+  return <AdminReportsPage />;
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,7 +49,7 @@ function Router() {
         <Route path="/helpers/:id" component={HelperProfilePage} />
         <Route path="/map" component={MapPage} />
         <Route path="/profile" component={ProfilePage} />
-        <Route path="/admin/reports" component={AdminReportsPage} />
+        <Route path="/admin/reports" component={AdminRoute} />
         <Route path="/terms" component={TermsPage} />
         <Route component={NotFound} />
       </Switch>
