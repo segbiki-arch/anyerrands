@@ -12,12 +12,14 @@ import {
   AcceptErrandParams,
   AcceptErrandBody,
   CompleteErrandParams,
+  AbortErrandParams,
   GetRecentErrandsQueryParams,
   CreateReviewParams,
   CreateReviewBody,
 } from "@workspace/api-zod";
 import { isHelperChargesEnabled } from "../lib/stripeStatus";
 import { getUncachableStripeClient } from "../stripeClient";
+import { refundAndReopenErrand } from "../lib/refunds";
 
 const router = Router();
 
@@ -251,62 +253,158 @@ router.post("/errands/:id/complete", async (req, res) => {
     return res.status(400).json({ error: "This paid errand has no helper assigned to pay." });
   }
 
-  // Release the held payment (90%) to the helper. This happens BEFORE we flip
-  // the status, so if the transfer fails the errand stays accepted and can be
-  // retried — completion always implies the helper has been paid.
-  let transferId = errand.transferId;
-  let helperPaidAt = errand.helperPaidAt;
-  if (isPaid && errand.helperId && !errand.transferId) {
-    const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, errand.helperId));
-    if (!helper?.stripeAccountId) {
-      return res.status(400).json({
-        error: "The helper hasn't connected a payout account, so their payment can't be released yet.",
-      });
-    }
-    if (!errand.paymentIntentId) {
-      return res.status(400).json({ error: "Missing payment reference; cannot release payment." });
-    }
+  // Release the held payment (90%) to the helper and flip the status, all under
+  // a row lock so this is mutually exclusive with a concurrent abort / auto-
+  // refund. Whichever transaction grabs the lock first wins; the other re-reads
+  // the new state and bails. This guarantees a payment is EITHER paid out to the
+  // helper OR refunded to the requester, never both. The transfer happens before
+  // the status flip, so if it fails the errand stays accepted and can be retried.
+  let outcome:
+    | { ok: true; row: typeof errand }
+    | { ok: false; status: number; error: string };
 
-    const paidCents = Math.round(Number(errand.paidAmount ?? errand.budgetAmount) * 100);
-    const feeCents = Math.round(Number(errand.platformFee ?? 0) * 100);
-    const payoutCents = paidCents - feeCents;
+  try {
+    outcome = await db.transaction(async (tx) => {
+      const [locked] = await tx
+        .select()
+        .from(errandsTable)
+        .where(eq(errandsTable.id, parsed.data.id))
+        .for("update");
 
-    try {
-      const stripe = await getUncachableStripeClient();
-      const pi = await stripe.paymentIntents.retrieve(errand.paymentIntentId);
-      const chargeId = typeof pi.latest_charge === "string" ? pi.latest_charge : pi.latest_charge?.id;
-      const transfer = await stripe.transfers.create(
-        {
-          amount: payoutCents,
-          currency: "eur",
-          destination: helper.stripeAccountId,
-          ...(chargeId ? { source_transaction: chargeId } : {}),
-          metadata: { errandId: String(errand.id) },
-        },
-        { idempotencyKey: `errand-${errand.id}-payout` },
-      );
-      transferId = transfer.id;
-      helperPaidAt = new Date();
-    } catch (err) {
-      req.log.error({ err, errandId: errand.id }, "Failed to release helper payment");
-      return res.status(502).json({ error: "Couldn't release the payment to the helper. Please try again." });
-    }
+      // Re-validate against the freshly-locked row, never the stale snapshot.
+      // A concurrent abort/auto-refund may have reopened (or someone completed)
+      // this errand between our first read and acquiring the lock.
+      if (!locked) return { ok: false as const, status: 404, error: "Not found" };
+      if (locked.status !== "accepted") {
+        return {
+          ok: false as const,
+          status: 409,
+          error: "This errand can no longer be completed — it may have been reopened or already finished.",
+        };
+      }
+
+      const lockedIsPaid = !!locked.budgetAmount && Number(locked.budgetAmount) > 0 && locked.paymentStatus === "paid";
+
+      let transferId = locked.transferId;
+      let helperPaidAt = locked.helperPaidAt;
+      if (lockedIsPaid && locked.helperId && !locked.transferId) {
+        const [helper] = await tx.select().from(helpersTable).where(eq(helpersTable.id, locked.helperId));
+        if (!helper?.stripeAccountId) {
+          return {
+            ok: false as const,
+            status: 400,
+            error: "The helper hasn't connected a payout account, so their payment can't be released yet.",
+          };
+        }
+        if (!locked.paymentIntentId) {
+          return { ok: false as const, status: 400, error: "Missing payment reference; cannot release payment." };
+        }
+
+        const paidCents = Math.round(Number(locked.paidAmount ?? locked.budgetAmount) * 100);
+        const feeCents = Math.round(Number(locked.platformFee ?? 0) * 100);
+        const payoutCents = paidCents - feeCents;
+
+        const stripe = await getUncachableStripeClient();
+        const pi = await stripe.paymentIntents.retrieve(locked.paymentIntentId);
+        const chargeId = typeof pi.latest_charge === "string" ? pi.latest_charge : pi.latest_charge?.id;
+
+        // Split-brain safety net: our DB says still payable, but the held payment
+        // may already have been refunded to the requester (e.g. a refund that
+        // succeeded in Stripe while its DB write was lost). Never also pay the
+        // helper — confirm against Stripe before releasing funds.
+        if (chargeId) {
+          const charge = await stripe.charges.retrieve(chargeId);
+          if (charge.refunded || (charge.amount_refunded ?? 0) > 0) {
+            return {
+              ok: false as const,
+              status: 409,
+              error: "This payment has been refunded to the requester and can no longer be released to the helper.",
+            };
+          }
+        }
+
+        const transfer = await stripe.transfers.create(
+          {
+            amount: payoutCents,
+            currency: "eur",
+            destination: helper.stripeAccountId,
+            // Deterministic group so a refund can detect an existing payout in
+            // Stripe even if our DB write of transferId was lost.
+            transfer_group: `errand-${locked.id}`,
+            ...(chargeId ? { source_transaction: chargeId } : {}),
+            metadata: { errandId: String(locked.id) },
+          },
+          { idempotencyKey: `errand-${locked.id}-payout` },
+        );
+        transferId = transfer.id;
+        helperPaidAt = new Date();
+      }
+
+      const [updated] = await tx
+        .update(errandsTable)
+        .set({ status: "completed", transferId, helperPaidAt, updatedAt: new Date() })
+        .where(eq(errandsTable.id, locked.id))
+        .returning();
+
+      if (locked.helperId) {
+        await tx
+          .update(helpersTable)
+          .set({ errandsCompleted: sql`${helpersTable.errandsCompleted} + 1` })
+          .where(eq(helpersTable.id, locked.helperId));
+      }
+
+      return { ok: true as const, row: updated };
+    });
+  } catch (err) {
+    req.log.error({ err, errandId: parsed.data.id }, "Failed to release helper payment");
+    return res.status(502).json({ error: "Couldn't release the payment to the helper. Please try again." });
   }
 
-  const [row] = await db
-    .update(errandsTable)
-    .set({ status: "completed", transferId, helperPaidAt, updatedAt: new Date() })
-    .where(eq(errandsTable.id, parsed.data.id))
-    .returning();
-
-  if (errand.helperId) {
-    await db
-      .update(helpersTable)
-      .set({ errandsCompleted: sql`${helpersTable.errandsCompleted} + 1` })
-      .where(eq(helpersTable.id, errand.helperId));
+  if (!outcome.ok) {
+    return res.status(outcome.status).json({ error: outcome.error });
   }
 
-  return res.json(formatErrand(row, req.user?.id));
+  return res.json(formatErrand(outcome.row, req.user?.id));
+});
+
+// A helper backs out of a job they accepted. This refunds the requester's held
+// payment (if paid) and reopens the errand so it can be given to someone else.
+// Requesters cannot cancel a payment themselves — only the assigned helper can
+// abort, or the automatic 7-working-day timeout (see lib/refunds) refunds.
+router.post("/errands/:id/abort", async (req, res) => {
+  const parsed = AbortErrandParams.safeParse({ id: Number(req.params.id) });
+  if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+
+  if (!req.user) {
+    return res.status(401).json({ error: "You must be logged in to back out of a job." });
+  }
+
+  const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, parsed.data.id));
+  if (!errand) return res.status(404).json({ error: "Not found" });
+
+  if (errand.status !== "accepted") {
+    return res.status(400).json({ error: "Only an accepted job can be backed out of." });
+  }
+
+  // Only the assigned helper may abort. Confirm the logged-in user owns the
+  // helper profile that accepted this errand.
+  if (!errand.helperId) {
+    return res.status(400).json({ error: "This errand has no assigned helper." });
+  }
+  const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, errand.helperId));
+  if (!helper || helper.userId !== req.user.id) {
+    return res.status(403).json({ error: "Only the helper assigned to this job can back out of it." });
+  }
+
+  try {
+    await refundAndReopenErrand(errand, "helper_aborted");
+  } catch (err) {
+    req.log.error({ err, errandId: errand.id }, "Failed to refund/reopen on abort");
+    return res.status(502).json({ error: "Couldn't back out of the job right now. Please try again." });
+  }
+
+  const [row] = await db.select().from(errandsTable).where(eq(errandsTable.id, errand.id));
+  return res.json(formatErrand(row!, req.user?.id));
 });
 
 router.post("/errands/:id/review", async (req, res) => {

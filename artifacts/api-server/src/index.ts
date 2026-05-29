@@ -3,6 +3,7 @@ import { getStripeSync, getUncachableStripeClient, getStripePublishableKey } fro
 import app from "./app";
 import { logger } from "./lib/logger";
 import { ensureDefaultCategories } from "./lib/seedCategories";
+import { runAutoRefundSweep } from "./lib/refunds";
 
 async function checkStripeMode() {
   const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
@@ -66,3 +67,11 @@ app.listen(port, (err) => {
   }
   logger.info({ port }, "Server listening");
 });
+
+// Auto-refund sweep: refund requesters whose paid errand wasn't completed within
+// 7 working days. Run shortly after boot, then hourly.
+const AUTO_REFUND_INTERVAL_MS = 60 * 60 * 1000;
+const runSweep = () =>
+  runAutoRefundSweep().catch((err) => logger.error({ err }, "Auto-refund sweep crashed"));
+setTimeout(runSweep, 30_000);
+setInterval(runSweep, AUTO_REFUND_INTERVAL_MS);

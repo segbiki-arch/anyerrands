@@ -143,13 +143,13 @@ export default function TermsPage() {
           </Section>
 
           <Section title="5. Cancellations & Refunds">
-            <P>Cancellation and refund requests should be raised directly between Clients and Helpers in the first instance. Where agreement cannot be reached:</P>
+            <P>When a Client pays for an errand, the payment is held securely and is only released to the Helper once the Client confirms the job is done. A Client cannot cancel a payment on demand. Instead, the payment is automatically refunded in full to the Client's original payment method in the following situations:</P>
             <UL items={[
-              "Contact us at " + CONTACT_EMAIL + " with the errand ID and a description of the issue.",
-              "We will review the matter and, at our discretion, may facilitate a refund.",
-              "Refunds are processed back to the original payment method and may take 5–10 business days.",
-              "AnyErrands reserves the right to decline refund requests where the errand was completed as described.",
+              "The assigned Helper backs out of the job. The errand then reopens for another Helper to pick up.",
+              "The errand is not completed within 7 working days (Monday to Friday) of payment. The payment is automatically returned to the Client and the errand reopens.",
             ]} />
+            <P>Automatic refunds are processed back to the original payment method and may take 5–10 business days to appear, depending on your bank or card provider.</P>
+            <P>For any other dispute, cancellation, or refund request, contact us at {CONTACT_EMAIL} with the errand ID and a description of the issue. We will review the matter and, at our discretion, may facilitate a refund. AnyErrands reserves the right to decline refund requests where the errand was completed as described.</P>
           </Section>
 
           <Section title="6. Helper Conduct & Reporting">

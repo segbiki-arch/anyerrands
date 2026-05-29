@@ -341,6 +341,43 @@ export const CompleteErrandResponse = zod.object({
 
 
 /**
+ * @summary Helper backs out of an accepted errand; refunds the requester and reopens it
+ */
+export const AbortErrandParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AbortErrandResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "category": zod.string(),
+  "status": zod.enum(['open', 'accepted', 'completed']),
+  "requesterName": zod.string(),
+  "requesterLocation": zod.string(),
+  "requesterAddress": zod.string().nullish(),
+  "requesterPhone": zod.string().nullish(),
+  "estimatedDuration": zod.string().nullish(),
+  "budgetAmount": zod.number().nullish(),
+  "tripFrom": zod.string().nullish(),
+  "tripTo": zod.string().nullish(),
+  "tripWhen": zod.string().nullish(),
+  "passengers": zod.number().nullish(),
+  "returnTrip": zod.boolean().optional(),
+  "helperId": zod.number().nullish(),
+  "helperName": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
+  "paidAmount": zod.number().nullish(),
+  "platformFee": zod.number().nullish(),
+  "paidAt": zod.string().nullish(),
+  "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().nullish(),
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+})
+
+
+/**
  * @summary Get aggregate errand statistics
  */
 export const GetErrandStatsResponse = zod.object({

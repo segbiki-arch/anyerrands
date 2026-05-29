@@ -314,6 +314,29 @@ paths:
         "404":
           description: Not found
 
+  /errands/{id}/abort:
+    post:
+      operationId: abortErrand
+      tags: [errands]
+      summary: Helper backs out of an accepted errand; refunds the requester and reopens it
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Errand reopened (and requester refunded if it was paid)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errand"
+        "403":
+          description: Not allowed
+        "404":
+          description: Not found
+
   /errands/stats/summary:
     get:
       operationId: getErrandStats

@@ -5,6 +5,7 @@ import {
   useGetErrand, 
   useAcceptErrand, 
   useCompleteErrand, 
+  useAbortErrand,
   useListHelpers,
   useCreateReview,
   ErrandStatus,
@@ -56,6 +57,7 @@ export default function ErrandDetailPage() {
   const { redirectToCheckout, isPending: isCheckoutPending } = useStripeCheckout();
   
   const [isAcceptOpen, setIsAcceptOpen] = useState(false);
+  const [isAbortOpen, setIsAbortOpen] = useState(false);
   const [selectedHelperId, setSelectedHelperId] = useState<string>("");
 
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -87,6 +89,7 @@ export default function ErrandDetailPage() {
   const { data: helpers } = useListHelpers();
   const acceptErrand = useAcceptErrand();
   const completeErrand = useCompleteErrand();
+  const abortErrand = useAbortErrand();
   const createReview = useCreateReview();
 
   if (isNaN(errandId) || error) {
@@ -145,6 +148,25 @@ export default function ErrandDetailPage() {
         toast({ title: "Errand completed!", description: "Thanks for helping out the community." });
       },
       onError: () => toast({ title: "Failed to complete", variant: "destructive" }),
+    });
+  };
+
+  const handleAbort = () => {
+    abortErrand.mutate({ id: errandId }, {
+      onSuccess: (updated) => {
+        setIsAbortOpen(false);
+        queryClient.setQueryData(getGetErrandQueryKey(errandId), updated);
+        queryClient.invalidateQueries({ queryKey: getListErrandsQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetErrandStatsQueryKey() });
+        toast({
+          title: "You've backed out of this job",
+          description: "It's open again for someone else, and any payment is refunded to the requester.",
+        });
+      },
+      onError: (e) => {
+        const message = (e as { data?: { error?: string } })?.data?.error ?? "Please try again.";
+        toast({ title: "Couldn't back out", description: message, variant: "destructive" });
+      },
     });
   };
 
@@ -218,6 +240,9 @@ export default function ErrandDetailPage() {
   };
 
   const canReport = (errand.status === ErrandStatus.accepted || errand.status === ErrandStatus.completed) && !!errand.helperId;
+
+  const myHelper = helpers?.find((h) => h.isOwner);
+  const isAssignedHelper = !!myHelper && errand.helperId === myHelper.id;
 
   const getStatusBadge = () => {
     switch (errand.status) {
@@ -472,9 +497,26 @@ export default function ErrandDetailPage() {
                       // able to mark their own work done.
                       if (!errand.isRequester) {
                         return (
-                          <p className="text-xs text-center text-muted-foreground bg-muted/50 rounded-md px-2 py-1.5">
-                            Waiting for the requester to confirm the job is done.
-                          </p>
+                          <div className="space-y-2">
+                            <p className="text-xs text-center text-muted-foreground bg-muted/50 rounded-md px-2 py-1.5">
+                              Waiting for the requester to confirm the job is done.
+                            </p>
+                            {isAssignedHelper && (
+                              <>
+                                <Button
+                                  className="w-full rounded-full" size="sm" variant="ghost"
+                                  onClick={() => setIsAbortOpen(true)}
+                                  disabled={abortErrand.isPending}
+                                  data-testid="btn-abort-errand"
+                                >
+                                  {abortErrand.isPending ? "Backing out…" : "Back out of this job"}
+                                </Button>
+                                <p className="text-[11px] text-center text-muted-foreground">
+                                  If you can't do it, back out so someone else can. Any payment is refunded to the requester.
+                                </p>
+                              </>
+                            )}
+                          </div>
                         );
                       }
                       return (
@@ -493,9 +535,14 @@ export default function ErrandDetailPage() {
                             <CheckCircle2 className="w-4 h-4 ml-2" />
                           </Button>
                           {requiresPayment && !paymentMissing && (
-                            <p className="text-xs text-center text-muted-foreground">
-                              Only confirm once the job is done — this releases the held payment to your helper.
-                            </p>
+                            <>
+                              <p className="text-xs text-center text-muted-foreground">
+                                Only confirm once the job is done — this releases the held payment to your helper.
+                              </p>
+                              <p className="text-[11px] text-center text-muted-foreground">
+                                Your payment can't be cancelled, but if the helper backs out — or the job isn't completed within 7 working days — it's automatically refunded to you.
+                              </p>
+                            </>
                           )}
                           {paymentMissing && (
                             <p className="text-xs text-center text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
@@ -543,7 +590,26 @@ export default function ErrandDetailPage() {
         </div>
       </div>
 
-      {/* Accept dialog */}
+      {/* Abort / back-out dialog */}
+      <Dialog open={isAbortOpen} onOpenChange={setIsAbortOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Back out of this job?</DialogTitle>
+            <DialogDescription>
+              This errand will reopen for someone else to pick up, and any payment the requester made is refunded in full. Only back out if you genuinely can't complete it.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" className="rounded-full" onClick={() => setIsAbortOpen(false)} disabled={abortErrand.isPending}>
+              Keep the job
+            </Button>
+            <Button variant="destructive" className="rounded-full" onClick={handleAbort} disabled={abortErrand.isPending} data-testid="btn-confirm-abort">
+              {abortErrand.isPending ? "Backing out…" : "Yes, back out"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={isAcceptOpen} onOpenChange={setIsAcceptOpen}>
         <DialogContent>
           <DialogHeader>

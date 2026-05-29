@@ -1125,6 +1125,76 @@ export const useCompleteErrand = <TError = ErrorType<void>,
       return useMutation(getCompleteErrandMutationOptions(options));
     }
 
+export const getAbortErrandUrl = (id: number,) => {
+
+
+
+
+  return `/api/errands/${id}/abort`
+}
+
+/**
+ * @summary Helper backs out of an accepted errand; refunds the requester and reopens it
+ */
+export const abortErrand = async (id: number, options?: RequestInit): Promise<Errand> => {
+
+  return customFetch<Errand>(getAbortErrandUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getAbortErrandMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof abortErrand>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof abortErrand>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['abortErrand'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof abortErrand>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  abortErrand(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AbortErrandMutationResult = NonNullable<Awaited<ReturnType<typeof abortErrand>>>
+
+    export type AbortErrandMutationError = ErrorType<void>
+
+    /**
+ * @summary Helper backs out of an accepted errand; refunds the requester and reopens it
+ */
+export const useAbortErrand = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof abortErrand>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof abortErrand>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getAbortErrandMutationOptions(options));
+    }
+
 export const getGetErrandStatsUrl = () => {
 
 
