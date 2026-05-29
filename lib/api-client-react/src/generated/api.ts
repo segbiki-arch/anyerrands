@@ -35,6 +35,7 @@ import type {
   Helper,
   HelperEarnings,
   HelperInput,
+  HelperReviews,
   HelperUpdate,
   ListErrandsParams,
   ListNotificationsParams,
@@ -48,6 +49,8 @@ import type {
   Report,
   ReportHelperInput,
   ReportWithContext,
+  Review,
+  ReviewInput,
   StripeConnectOnboardResponse,
   StripeConnectStatusResponse,
   UpdateReportStatusInput
@@ -1733,6 +1736,155 @@ export function useGetHelperEarnings<TData = Awaited<ReturnType<typeof getHelper
 
 
 
+
+export const getGetHelperReviewsUrl = (id: number,) => {
+
+
+
+
+  return `/api/helpers/${id}/reviews`
+}
+
+/**
+ * @summary Get reviews left for a helper
+ */
+export const getHelperReviews = async (id: number, options?: RequestInit): Promise<HelperReviews> => {
+
+  return customFetch<HelperReviews>(getGetHelperReviewsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetHelperReviewsQueryKey = (id: number,) => {
+    return [
+    `/api/helpers/${id}/reviews`
+    ] as const;
+    }
+
+
+export const getGetHelperReviewsQueryOptions = <TData = Awaited<ReturnType<typeof getHelperReviews>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getHelperReviews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetHelperReviewsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHelperReviews>>> = ({ signal }) => getHelperReviews(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHelperReviews>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetHelperReviewsQueryResult = NonNullable<Awaited<ReturnType<typeof getHelperReviews>>>
+export type GetHelperReviewsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get reviews left for a helper
+ */
+
+export function useGetHelperReviews<TData = Awaited<ReturnType<typeof getHelperReviews>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getHelperReviews>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetHelperReviewsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateReviewUrl = (id: number,) => {
+
+
+
+
+  return `/api/errands/${id}/review`
+}
+
+/**
+ * @summary Leave a review for the helper on a completed errand
+ */
+export const createReview = async (id: number,
+    reviewInput: ReviewInput, options?: RequestInit): Promise<Review> => {
+
+  return customFetch<Review>(getCreateReviewUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      reviewInput,)
+  }
+);}
+
+
+
+
+export const getCreateReviewMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReview>>, TError,{id: number;data: BodyType<ReviewInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createReview>>, TError,{id: number;data: BodyType<ReviewInput>}, TContext> => {
+
+const mutationKey = ['createReview'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createReview>>, {id: number;data: BodyType<ReviewInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createReview(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateReviewMutationResult = NonNullable<Awaited<ReturnType<typeof createReview>>>
+    export type CreateReviewMutationBody = BodyType<ReviewInput>
+    export type CreateReviewMutationError = ErrorType<void>
+
+    /**
+ * @summary Leave a review for the helper on a completed errand
+ */
+export const useCreateReview = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createReview>>, TError,{id: number;data: BodyType<ReviewInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createReview>>,
+        TError,
+        {id: number;data: BodyType<ReviewInput>},
+        TContext
+      > => {
+      return useMutation(getCreateReviewMutationOptions(options));
+    }
 
 export const getStripeConnectOnboardUrl = (helperId: number,) => {
 

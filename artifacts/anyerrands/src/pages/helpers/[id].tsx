@@ -4,11 +4,13 @@ import {
   useGetHelper,
   useGetHelperErrands,
   useGetHelperEarnings,
+  useGetHelperReviews,
   useStripeConnectOnboard,
   useStripeConnectManage,
   useStripeConnectStatus,
   getGetHelperQueryKey,
   getGetHelperErrandsQueryKey,
+  getGetHelperReviewsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,6 +44,10 @@ export default function HelperProfilePage() {
 
   const { data: errands, isLoading: errandsLoading } = useGetHelperErrands(helperId, {
     query: { enabled: !isNaN(helperId), queryKey: getGetHelperErrandsQueryKey(helperId) }
+  });
+
+  const { data: reviewsData, isLoading: reviewsLoading } = useGetHelperReviews(helperId, {
+    query: { enabled: !isNaN(helperId), queryKey: getGetHelperReviewsQueryKey(helperId) }
   });
 
   const { data: connectStatus, isLoading: statusLoading, refetch: refetchStatus } = useStripeConnectStatus(helperId, {
@@ -146,10 +152,13 @@ export default function HelperProfilePage() {
                   ) : (
                     <Badge variant="secondary" className="font-normal">Not available right now</Badge>
                   )}
-                  {helper.rating != null && (
+                  {reviewsData && reviewsData.reviewCount > 0 && reviewsData.averageRating != null && (
                     <div className="flex items-center gap-1.5 text-amber-600 font-medium text-sm">
                       <Star className="w-4 h-4 fill-amber-500" />
-                      {helper.rating.toFixed(1)} Rating
+                      {reviewsData.averageRating.toFixed(1)}
+                      <span className="text-muted-foreground font-normal">
+                        ({reviewsData.reviewCount} {reviewsData.reviewCount === 1 ? "review" : "reviews"})
+                      </span>
                     </div>
                   )}
                 </div>
@@ -327,6 +336,65 @@ export default function HelperProfilePage() {
             <div>
               <p className="text-lg font-medium text-foreground">No history yet</p>
               <p className="text-sm text-muted-foreground">This helper hasn't accepted any errands yet.</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Reviews from the community */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 border-b border-border/60 pb-2">
+          <Star className="w-5 h-5 text-primary" />
+          <h2 className="text-2xl font-bold">Reviews</h2>
+          {reviewsData && reviewsData.reviewCount > 0 && (
+            <Badge variant="secondary" className="ml-2 rounded-full">{reviewsData.reviewCount}</Badge>
+          )}
+        </div>
+
+        {reviewsLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+          </div>
+        ) : reviewsData && reviewsData.reviews.length > 0 ? (
+          <div className="space-y-4">
+            {reviewsData.reviews.map((review) => (
+              <Card key={review.id} className="border-border/60 shadow-sm">
+                <CardContent className="p-5 space-y-2.5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-9 h-9">
+                        <AvatarFallback className="bg-muted text-foreground text-sm font-semibold">
+                          {review.reviewerName.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-foreground leading-tight">{review.reviewerName}</p>
+                        <p className="text-xs text-muted-foreground">{format(new Date(review.createdAt), "d MMM yyyy")}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <Star
+                          key={n}
+                          className={`w-4 h-4 ${n <= review.rating ? "fill-amber-500 text-amber-500" : "text-muted-foreground/30"}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  {review.comment && (
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap pl-12">{review.comment}</p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 border border-dashed border-border rounded-2xl text-center gap-3">
+            <Star className="w-10 h-10 text-muted-foreground/30" />
+            <div>
+              <p className="text-lg font-medium text-foreground">No reviews yet</p>
+              <p className="text-sm text-muted-foreground">Once this helper completes an errand, neighbours can leave a review here.</p>
             </div>
           </div>
         )}

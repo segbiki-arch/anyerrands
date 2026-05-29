@@ -99,3 +99,21 @@ export const insertReportSchema = z.object({
 });
 export type InsertReport = z.infer<typeof insertReportSchema>;
 export type Report = typeof reportsTable.$inferSelect;
+
+export const reviewsTable = pgTable("reviews", {
+  id: serial("id").primaryKey(),
+  errandId: integer("errand_id").references(() => errandsTable.id).notNull().unique(),
+  helperId: integer("helper_id").references(() => helpersTable.id).notNull(),
+  reviewerName: text("reviewer_name").notNull(),
+  rating: integer("rating").notNull(),
+  comment: text("comment"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertReviewSchema = z.object({
+  reviewerName: z.string().min(2),
+  rating: z.number().int().min(1).max(5),
+  comment: z.string().max(500).optional(),
+});
+export type InsertReview = z.infer<typeof insertReviewSchema>;
+export type Review = typeof reviewsTable.$inferSelect;

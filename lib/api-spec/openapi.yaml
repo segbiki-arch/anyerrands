@@ -468,6 +468,54 @@ paths:
         "404":
           description: Not found
 
+  /helpers/{id}/reviews:
+    get:
+      operationId: getHelperReviews
+      tags: [helpers]
+      summary: Get reviews left for a helper
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Helper's reviews
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HelperReviews"
+
+  /errands/{id}/review:
+    post:
+      operationId: createReview
+      tags: [errands]
+      summary: Leave a review for the helper on a completed errand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewInput"
+      responses:
+        "201":
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          description: Errand not completed, no helper, or already reviewed
+        "404":
+          description: Errand not found
+
   /stripe/connect/onboard/{helperId}:
     post:
       operationId: stripeConnectOnboard
@@ -993,6 +1041,51 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/HelperEarningJob"
+
+    Review:
+      type: object
+      required: [id, errandId, helperId, reviewerName, rating, comment, createdAt]
+      properties:
+        id:
+          type: integer
+        errandId:
+          type: integer
+        helperId:
+          type: integer
+        reviewerName:
+          type: string
+        rating:
+          type: integer
+        comment:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+    HelperReviews:
+      type: object
+      required: [averageRating, reviewCount, reviews]
+      properties:
+        averageRating:
+          type: ["number", "null"]
+        reviewCount:
+          type: integer
+        reviews:
+          type: array
+          items:
+            $ref: "#/components/schemas/Review"
+    ReviewInput:
+      type: object
+      required: [reviewerName, rating]
+      properties:
+        reviewerName:
+          type: string
+          minLength: 2
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          maxLength: 500
 
     StripeConnectOnboardResponse:
       type: object

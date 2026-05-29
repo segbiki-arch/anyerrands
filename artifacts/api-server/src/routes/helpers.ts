@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { helpersTable, errandsTable } from "@workspace/db";
+import { helpersTable, errandsTable, reviewsTable } from "@workspace/db";
 import { eq, desc, and } from "drizzle-orm";
 import {
   CreateHelperBody,
@@ -9,6 +9,7 @@ import {
   UpdateHelperBody,
   GetHelperErrandsParams,
   GetHelperEarningsParams,
+  GetHelperReviewsParams,
 } from "@workspace/api-zod";
 
 const router = Router();
@@ -70,6 +71,26 @@ router.get("/helpers/:id", async (req, res) => {
   const [row] = await db.select().from(helpersTable).where(eq(helpersTable.id, parsed.data.id));
   if (!row) return res.status(404).json({ error: "Not found" });
   return res.json(formatHelper(row, req.user?.id));
+});
+
+router.get("/helpers/:id/reviews", async (req, res) => {
+  const parsed = GetHelperReviewsParams.safeParse({ id: Number(req.params.id) });
+  if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+
+  const rows = await db
+    .select()
+    .from(reviewsTable)
+    .where(eq(reviewsTable.helperId, parsed.data.id))
+    .orderBy(desc(reviewsTable.createdAt));
+
+  const reviews = rows.map((r) => ({ ...r, createdAt: r.createdAt.toISOString() }));
+  const reviewCount = reviews.length;
+  const averageRating =
+    reviewCount > 0
+      ? Number((reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount).toFixed(1))
+      : null;
+
+  return res.json({ averageRating, reviewCount, reviews });
 });
 
 router.patch("/helpers/:id", async (req, res) => {

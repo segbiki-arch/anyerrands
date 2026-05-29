@@ -529,6 +529,50 @@ export const GetHelperEarningsResponse = zod.object({
 
 
 /**
+ * @summary Get reviews left for a helper
+ */
+export const GetHelperReviewsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetHelperReviewsResponse = zod.object({
+  "averageRating": zod.number().nullable(),
+  "reviewCount": zod.number(),
+  "reviews": zod.array(zod.object({
+  "id": zod.number(),
+  "errandId": zod.number(),
+  "helperId": zod.number(),
+  "reviewerName": zod.string(),
+  "rating": zod.number(),
+  "comment": zod.string().nullable(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Leave a review for the helper on a completed errand
+ */
+export const CreateReviewParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const createReviewBodyReviewerNameMin = 2;
+
+export const createReviewBodyRatingMax = 5;
+
+export const createReviewBodyCommentMax = 500;
+
+
+
+export const CreateReviewBody = zod.object({
+  "reviewerName": zod.string().min(createReviewBodyReviewerNameMin),
+  "rating": zod.number().min(1).max(createReviewBodyRatingMax),
+  "comment": zod.string().max(createReviewBodyCommentMax).optional()
+})
+
+
+/**
  * @summary Start Stripe Connect onboarding for a helper
  */
 export const StripeConnectOnboardParams = zod.object({

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { errandsTable, helpersTable, notificationsTable } from "@workspace/db";
-import { eq, desc, and, sql, ilike } from "drizzle-orm";
+import { errandsTable, helpersTable, notificationsTable, reviewsTable } from "@workspace/db";
+import { eq, desc, and, sql, ilike, avg, count } from "drizzle-orm";
 import {
   ListErrandsQueryParams,
   CreateErrandBody,
@@ -13,6 +13,8 @@ import {
   AcceptErrandBody,
   CompleteErrandParams,
   GetRecentErrandsQueryParams,
+  CreateReviewParams,
+  CreateReviewBody,
 } from "@workspace/api-zod";
 import { isHelperChargesEnabled } from "../lib/stripeStatus";
 
@@ -229,6 +231,70 @@ router.post("/errands/:id/complete", async (req, res) => {
   }
 
   return res.json(formatErrand(row));
+});
+
+router.post("/errands/:id/review", async (req, res) => {
+  const paramParsed = CreateReviewParams.safeParse({ id: Number(req.params.id) });
+  if (!paramParsed.success) return res.status(400).json({ error: "Invalid id" });
+  const bodyParsed = CreateReviewBody.safeParse(req.body);
+  if (!bodyParsed.success) return res.status(400).json({ error: "Invalid body", details: bodyParsed.error });
+
+  const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, paramParsed.data.id));
+  if (!errand) return res.status(404).json({ error: "Errand not found" });
+
+  if (errand.status !== "completed") {
+    return res.status(400).json({ error: "You can only review an errand once it's completed." });
+  }
+  if (!errand.helperId) {
+    return res.status(400).json({ error: "This errand has no helper to review." });
+  }
+
+  const [existing] = await db.select().from(reviewsTable).where(eq(reviewsTable.errandId, errand.id));
+  if (existing) {
+    return res.status(400).json({ error: "This errand has already been reviewed." });
+  }
+
+  let review;
+  try {
+    [review] = await db
+      .insert(reviewsTable)
+      .values({
+        errandId: errand.id,
+        helperId: errand.helperId,
+        reviewerName: bodyParsed.data.reviewerName,
+        rating: bodyParsed.data.rating,
+        comment: bodyParsed.data.comment ?? null,
+      })
+      .returning();
+  } catch (err) {
+    // Unique constraint on errand_id — another review landed first (race).
+    if ((err as { code?: string }).code === "23505") {
+      return res.status(400).json({ error: "This errand has already been reviewed." });
+    }
+    throw err;
+  }
+
+  if (!review) {
+    return res.status(400).json({ error: "This errand has already been reviewed." });
+  }
+
+  // Recompute the helper's average rating from all their reviews.
+  const [agg] = await db
+    .select({ avgRating: avg(reviewsTable.rating) })
+    .from(reviewsTable)
+    .where(eq(reviewsTable.helperId, errand.helperId));
+
+  if (agg?.avgRating != null) {
+    await db
+      .update(helpersTable)
+      .set({ rating: String(Number(agg.avgRating).toFixed(1)) })
+      .where(eq(helpersTable.id, errand.helperId));
+  }
+
+  return res.status(201).json({
+    ...review,
+    createdAt: review.createdAt.toISOString(),
+  });
 });
 
 export default router;

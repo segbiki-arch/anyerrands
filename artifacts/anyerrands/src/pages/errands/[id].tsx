@@ -6,10 +6,13 @@ import {
   useAcceptErrand, 
   useCompleteErrand, 
   useListHelpers,
+  useCreateReview,
   ErrandStatus,
   getGetErrandQueryKey,
   getListErrandsQueryKey,
-  getGetErrandStatsQueryKey
+  getGetErrandStatsQueryKey,
+  getGetHelperReviewsQueryKey,
+  getGetHelperQueryKey
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -32,7 +35,7 @@ import {
 import { 
   MapPin, Clock, Euro, User, CalendarDays, CheckCircle2, ArrowLeft,
   Info, CreditCard, Loader2, Flag, AlertTriangle, Home, Phone, Lock,
-  Car, ArrowRight, Calendar, Users
+  Car, ArrowRight, Calendar, Users, Star
 } from "lucide-react";
 import { useStripeCheckout } from "@/hooks/use-stripe-checkout";
 
@@ -62,12 +65,20 @@ export default function ErrandDetailPage() {
   const [isReporting, setIsReporting] = useState(false);
   const [alreadyReported, setAlreadyReported] = useState(false);
 
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [reviewerName, setReviewerName] = useState("");
+  const [reviewRating, setReviewRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState("");
+  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+
   const { data: errand, isLoading, error } = useGetErrand(errandId, { 
     query: { enabled: !isNaN(errandId), queryKey: getGetErrandQueryKey(errandId) } 
   });
   const { data: helpers } = useListHelpers();
   const acceptErrand = useAcceptErrand();
   const completeErrand = useCompleteErrand();
+  const createReview = useCreateReview();
 
   if (isNaN(errandId) || error) {
     return (
@@ -126,6 +137,43 @@ export default function ErrandDetailPage() {
       },
       onError: () => toast({ title: "Failed to complete", variant: "destructive" }),
     });
+  };
+
+  const handleReview = () => {
+    if (!reviewerName.trim() || reviewerName.trim().length < 2) {
+      toast({ title: "Please enter your name", variant: "destructive" }); return;
+    }
+    if (reviewRating < 1) {
+      toast({ title: "Please choose a star rating", variant: "destructive" }); return;
+    }
+    createReview.mutate(
+      {
+        id: errandId,
+        data: {
+          reviewerName: reviewerName.trim(),
+          rating: reviewRating,
+          comment: reviewComment.trim() || undefined,
+        },
+      },
+      {
+        onSuccess: (review) => {
+          setIsReviewOpen(false);
+          setAlreadyReviewed(true);
+          setReviewerName(""); setReviewRating(0); setHoverRating(0); setReviewComment("");
+          if (errand.helperId) {
+            queryClient.invalidateQueries({ queryKey: getGetHelperReviewsQueryKey(errand.helperId) });
+            queryClient.invalidateQueries({ queryKey: getGetHelperQueryKey(errand.helperId) });
+          }
+          void review;
+          toast({ title: "Thanks for your review!", description: "Your feedback helps the whole community." });
+        },
+        onError: (e) => {
+          const message = (e as { data?: { error?: string } })?.data?.error ?? "Please try again.";
+          if (/already/i.test(message)) setAlreadyReviewed(true);
+          toast({ title: "Couldn't submit review", description: message, variant: "destructive" });
+        },
+      }
+    );
   };
 
   const handleReport = async () => {
@@ -433,7 +481,7 @@ export default function ErrandDetailPage() {
                 )}
 
                 {errand.status === ErrandStatus.completed && (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-center gap-2 text-green-600 font-medium py-2 bg-green-50 rounded-lg">
                       <CheckCircle2 className="w-5 h-5" /> This errand is done!
                     </div>
@@ -442,6 +490,22 @@ export default function ErrandDetailPage() {
                         Paid €{errand.paidAmount.toFixed(2)}
                         {errand.platformFee != null && ` · €${(errand.paidAmount - errand.platformFee).toFixed(2)} to helper`}
                       </p>
+                    )}
+                    {errand.helperId && (
+                      alreadyReviewed ? (
+                        <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+                          <CheckCircle2 className="w-4 h-4 text-green-500" /> Thanks for your review
+                        </div>
+                      ) : (
+                        <Button
+                          className="w-full rounded-full gap-2"
+                          size="lg"
+                          onClick={() => setIsReviewOpen(true)}
+                          data-testid="btn-leave-review"
+                        >
+                          <Star className="w-4 h-4" /> Leave a review
+                        </Button>
+                      )
                     )}
                   </div>
                 )}
@@ -545,6 +609,87 @@ export default function ErrandDetailPage() {
               data-testid="btn-submit-report"
             >
               {isReporting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting…</> : "Submit Report"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Review dialog */}
+      <Dialog open={isReviewOpen} onOpenChange={setIsReviewOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-primary" />
+              Leave a review
+            </DialogTitle>
+            <DialogDescription>
+              {errand.helperName
+                ? `How did ${errand.helperName} do? Your review helps the whole community.`
+                : "How did your helper do? Your review helps the whole community."}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2">
+            <div className="space-y-2">
+              <Label>Your rating</Label>
+              <div className="flex items-center gap-1.5" data-testid="review-stars">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setReviewRating(n)}
+                    onMouseEnter={() => setHoverRating(n)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    className="transition-transform hover:scale-110"
+                    aria-label={`${n} star${n > 1 ? "s" : ""}`}
+                    data-testid={`review-star-${n}`}
+                  >
+                    <Star
+                      className={`w-8 h-8 transition-colors ${
+                        n <= (hoverRating || reviewRating)
+                          ? "fill-amber-500 text-amber-500"
+                          : "text-muted-foreground/30"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="reviewer-name">Your name</Label>
+              <Input
+                id="reviewer-name"
+                placeholder="e.g. Siobhán O'Brien"
+                value={reviewerName}
+                onChange={e => setReviewerName(e.target.value)}
+                data-testid="input-reviewer-name"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="review-comment">A few words (optional)</Label>
+              <Textarea
+                id="review-comment"
+                placeholder="What was it like working with them?"
+                rows={4}
+                maxLength={500}
+                value={reviewComment}
+                onChange={e => setReviewComment(e.target.value)}
+                data-testid="textarea-review-comment"
+              />
+              <p className="text-xs text-muted-foreground">{reviewComment.length}/500</p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReviewOpen(false)}>Cancel</Button>
+            <Button
+              onClick={handleReview}
+              disabled={createReview.isPending}
+              data-testid="btn-submit-review"
+            >
+              {createReview.isPending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting…</> : "Submit Review"}
             </Button>
           </DialogFooter>
         </DialogContent>

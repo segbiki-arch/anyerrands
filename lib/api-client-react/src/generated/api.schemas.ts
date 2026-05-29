@@ -208,6 +208,36 @@ export interface HelperEarnings {
   jobs: HelperEarningJob[];
 }
 
+export interface Review {
+  id: number;
+  errandId: number;
+  helperId: number;
+  reviewerName: string;
+  rating: number;
+  /** @nullable */
+  comment: string | null;
+  createdAt: string;
+}
+
+export interface HelperReviews {
+  /** @nullable */
+  averageRating: number | null;
+  reviewCount: number;
+  reviews: Review[];
+}
+
+export interface ReviewInput {
+  /** @minLength 2 */
+  reviewerName: string;
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  rating: number;
+  /** @maxLength 500 */
+  comment?: string;
+}
+
 export interface StripeConnectOnboardResponse {
   url: string;
 }

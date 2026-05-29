@@ -7,13 +7,15 @@ import { useCreateErrand, useListCategories, getListErrandsQueryKey, getGetErran
 import { useAuth } from "@workspace/replit-auth-web";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Send, MapPin, Euro, Clock, Home, Phone, Lock } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Send, MapPin, Euro, ChevronDown, Clock, Home, Phone } from "lucide-react";
+import { useState } from "react";
 
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title is too long"),
@@ -33,6 +35,8 @@ export default function NewErrandPage() {
   const queryClient = useQueryClient();
   const { data: categories } = useListCategories();
   const { user } = useAuth();
+  
+  const [isOptionalOpen, setIsOptionalOpen] = useState(false);
 
   const accountName = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
 
@@ -85,229 +89,198 @@ export default function NewErrandPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 md:p-8 py-12">
-      <div className="mb-8">
-        <h1 className="text-4xl font-serif font-bold tracking-tight">Ask for help</h1>
-        <p className="text-lg text-muted-foreground mt-2">Create a new errand post so neighbors can lend a hand.</p>
+    <div className="max-w-2xl mx-auto p-6 py-12">
+      <div className="mb-8 text-center">
+        <h1 className="text-4xl font-serif font-bold tracking-tight">Need a hand?</h1>
+        <p className="text-lg text-muted-foreground mt-2">Post in seconds. A neighbour will pick it up.</p>
       </div>
 
-      <Card className="border-border/60 shadow-sm overflow-hidden">
-        <div className="h-2 bg-primary w-full"></div>
+      <Card className="border-border/60 shadow-lg rounded-3xl overflow-hidden">
         <CardContent className="p-6 md:p-8">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               
-              <div className="space-y-6">
-                <div className="flex items-center gap-2 pb-2 border-b border-border/40">
-                  <span className="font-semibold text-lg">The Basics</span>
-                </div>
-                
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">What type of help do you need?</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="h-12 text-lg rounded-xl bg-muted/20" data-testid="select-category">
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories?.map(c => (
+                          <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Short title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Pick up groceries from Dunnes" className="h-12 text-lg rounded-xl bg-muted/20" {...field} data-testid="input-title" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Description</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Details..." 
+                        className="min-h-[100px] resize-none rounded-xl bg-muted/20"
+                        {...field} 
+                        data-testid="input-description"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="title"
+                  name="budgetAmount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-base">What do you need help with?</FormLabel>
+                      <FormLabel className="text-base font-semibold">Budget (€)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Pick up groceries from Dunnes Stores" className="text-lg py-6" {...field} data-testid="input-title" />
+                        <div className="relative">
+                          <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input type="number" placeholder="Optional" className="h-12 pl-9 rounded-xl bg-muted/20" {...field} value={field.value ?? ""} data-testid="input-budget" />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="requesterLocation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-semibold">Town / Area</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input placeholder="e.g., Nenagh" className="h-12 pl-9 rounded-xl bg-muted/20" {...field} data-testid="input-location" />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <Collapsible
+                open={isOptionalOpen}
+                onOpenChange={setIsOptionalOpen}
+                className="w-full border rounded-xl p-4 bg-muted/5"
+              >
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" className="w-full flex justify-between p-0 hover:bg-transparent h-auto">
+                    <span className="font-semibold text-muted-foreground">Add more details (optional)</span>
+                    <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isOptionalOpen ? 'rotate-180' : ''}`} />
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-4">
                   <FormField
                     control={form.control}
-                    name="category"
+                    name="requesterAddress"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Category</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormLabel>Exact Address</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input placeholder="e.g., 12 Pearse Street" className="pl-9" {...field} data-testid="input-address" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="requesterPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
                           <FormControl>
-                            <SelectTrigger data-testid="select-category">
-                              <SelectValue placeholder="Select a category" />
-                            </SelectTrigger>
+                            <div className="relative">
+                              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                              <Input type="tel" placeholder="e.g., 087 123 4567" className="pl-9" {...field} data-testid="input-phone" />
+                            </div>
                           </FormControl>
-                          <SelectContent>
-                            {categories?.map(c => (
-                              <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="estimatedDuration"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Estimated Duration</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                              <Input placeholder="e.g., 1-2 hours" className="pl-9" {...field} data-testid="input-duration" />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
                   <FormField
                     control={form.control}
-                    name="requesterLocation"
+                    name="requesterName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Location</FormLabel>
+                        <FormLabel>Your Name</FormLabel>
                         <FormControl>
-                          <div className="relative">
-                            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="e.g., Nenagh, Roscrea, Thurles..." className="pl-9" {...field} data-testid="input-location" />
-                          </div>
+                          <Input placeholder="What should helpers call you?" {...field} data-testid="input-name" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Details</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Provide any details the helper might need to know..." 
-                          className="min-h-[120px] resize-none"
-                          {...field} 
-                          data-testid="input-description"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="space-y-6 pt-6">
-                <div className="flex items-center gap-2 pb-2 border-b border-border/40">
-                  <span className="font-semibold text-lg">Optional Details</span>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="budgetAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Budget (€)</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input type="number" placeholder="0.00" className="pl-9" {...field} value={field.value ?? ""} data-testid="input-budget" />
-                          </div>
-                        </FormControl>
-                        <FormDescription>Leave blank if volunteer/unpaid</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="estimatedDuration"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Estimated Duration</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="e.g., 1-2 hours" className="pl-9" {...field} data-testid="input-duration" />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-6 pt-6">
-                <div className="flex items-center gap-2 pb-2 border-b border-border/40">
-                  <span className="font-semibold text-lg">Where to meet</span>
-                </div>
-
-                <div className="flex items-start gap-2 rounded-lg bg-primary/5 border border-primary/20 p-3">
-                  <Lock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                  <p className="text-sm text-muted-foreground">
-                    Your exact address and phone number stay <span className="font-medium text-foreground">private</span>.
-                    They're only shared with your helper <span className="font-medium text-foreground">after</span> they accept the errand — never shown on the public listings.
-                  </p>
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="requesterAddress"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Exact Address</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input placeholder="e.g., 12 Pearse Street, Nenagh" className="pl-9" {...field} data-testid="input-address" />
-                        </div>
-                      </FormControl>
-                      <FormDescription>Optional — helps your helper find you once they accept</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="requesterPhone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone Number</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                          <Input type="tel" placeholder="e.g., 087 123 4567" className="pl-9" {...field} data-testid="input-phone" />
-                        </div>
-                      </FormControl>
-                      <FormDescription>Optional — so your helper can reach you to coordinate</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="space-y-6 pt-6">
-                <div className="flex items-center gap-2 pb-2 border-b border-border/40">
-                  <span className="font-semibold text-lg">About You</span>
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="requesterName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Your Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="What should helpers call you?" {...field} data-testid="input-name" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="pt-6">
-                <Button 
-                  type="submit" 
-                  size="lg" 
-                  className="w-full md:w-auto text-lg px-8 rounded-full" 
-                  disabled={createErrand.isPending}
-                  data-testid="btn-submit-errand"
-                >
-                  {createErrand.isPending ? (
-                    "Posting..."
-                  ) : (
-                    <>
-                      Post Errand <Send className="ml-2 w-4 h-4" />
-                    </>
-                  )}
-                </Button>
-              </div>
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="w-full h-14 text-lg rounded-full font-bold shadow-md hover:scale-[1.02] transition-transform" 
+                disabled={createErrand.isPending}
+                data-testid="btn-submit-errand"
+              >
+                {createErrand.isPending ? "Posting..." : <><Send className="mr-2 w-5 h-5" /> Post Request</>}
+              </Button>
             </form>
           </Form>
         </CardContent>
