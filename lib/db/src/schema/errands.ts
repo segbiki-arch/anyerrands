@@ -57,6 +57,8 @@ export const errandsTable = pgTable("errands", {
   paymentIntentId: text("payment_intent_id"),
   checkoutSessionId: text("checkout_session_id"),
   paidAt: timestamp("paid_at"),
+  transferId: text("transfer_id"),
+  helperPaidAt: timestamp("helper_paid_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at"),
 });

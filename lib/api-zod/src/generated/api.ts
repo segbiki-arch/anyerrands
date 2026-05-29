@@ -133,6 +133,7 @@ export const ListErrandsResponseItem = zod.object({
   "paidAmount": zod.number().nullish(),
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
+  "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -199,6 +200,7 @@ export const GetErrandResponse = zod.object({
   "paidAmount": zod.number().nullish(),
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
+  "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -245,6 +247,7 @@ export const UpdateErrandResponse = zod.object({
   "paidAmount": zod.number().nullish(),
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
+  "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -293,6 +296,7 @@ export const AcceptErrandResponse = zod.object({
   "paidAmount": zod.number().nullish(),
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
+  "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -329,6 +333,7 @@ export const CompleteErrandResponse = zod.object({
   "paidAmount": zod.number().nullish(),
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
+  "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -379,6 +384,7 @@ export const GetRecentErrandsResponseItem = zod.object({
   "paidAmount": zod.number().nullish(),
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
+  "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -505,6 +511,7 @@ export const GetHelperErrandsResponseItem = zod.object({
   "paidAmount": zod.number().nullish(),
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
+  "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')

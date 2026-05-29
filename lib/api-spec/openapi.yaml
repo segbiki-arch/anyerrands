@@ -889,6 +889,9 @@ components:
           type: ["number", "null"]
         paidAt:
           type: ["string", "null"]
+        helperPaidAt:
+          type: ["string", "null"]
+          description: When the held payment was released to the helper.
         createdAt:
           type: string
         updatedAt:

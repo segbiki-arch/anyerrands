@@ -44,6 +44,11 @@ export interface Errand {
   platformFee?: number | null;
   /** @nullable */
   paidAt?: string | null;
+  /**
+     * When the held payment was released to the helper.
+     * @nullable
+     */
+  helperPaidAt?: string | null;
   createdAt: string;
   /** @nullable */
   updatedAt?: string | null;

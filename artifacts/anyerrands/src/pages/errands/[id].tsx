@@ -458,6 +458,16 @@ export default function ErrandDetailPage() {
                     {(() => {
                       const requiresPayment = errand.budgetAmount != null && Number(errand.budgetAmount) > 0;
                       const paymentMissing = requiresPayment && errand.paymentStatus !== "paid";
+                      // Only the requester can confirm completion — this releases
+                      // the held payment to the helper, so the helper must not be
+                      // able to mark their own work done.
+                      if (!errand.isRequester) {
+                        return (
+                          <p className="text-xs text-center text-muted-foreground bg-muted/50 rounded-md px-2 py-1.5">
+                            Waiting for the requester to confirm the job is done.
+                          </p>
+                        );
+                      }
                       return (
                         <>
                           <Button
@@ -466,12 +476,21 @@ export default function ErrandDetailPage() {
                             disabled={completeErrand.isPending || paymentMissing}
                             data-testid="btn-complete-errand"
                           >
-                            {completeErrand.isPending ? "Marking..." : "Mark as Completed"}
+                            {completeErrand.isPending
+                              ? "Confirming..."
+                              : requiresPayment
+                                ? "Confirm done & pay the helper"
+                                : "Mark as Completed"}
                             <CheckCircle2 className="w-4 h-4 ml-2" />
                           </Button>
+                          {requiresPayment && !paymentMissing && (
+                            <p className="text-xs text-center text-muted-foreground">
+                              Only confirm once the job is done — this releases the held payment to your helper.
+                            </p>
+                          )}
                           {paymentMissing && (
                             <p className="text-xs text-center text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
-                              Waiting for payment — the requester needs to pay before this can be marked complete.
+                              Pay first — your payment is held safely and only released to the helper when you confirm the job is done.
                             </p>
                           )}
                         </>

@@ -84,7 +84,6 @@ export class WebhookHandlers {
 
     const stripe = await getUncachableStripeClient();
     let amountCents = session.amount_total ?? 0;
-    let feeCents = 0;
     let paymentIntentId: string | null = null;
 
     if (session.payment_intent) {
@@ -94,11 +93,15 @@ export class WebhookHandlers {
       try {
         const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
         amountCents = pi.amount_received || pi.amount || amountCents;
-        feeCents = pi.application_fee_amount ?? 0;
       } catch (err) {
         logger.warn({ err, paymentIntentId }, 'Failed to retrieve PaymentIntent; using session amounts');
       }
     }
+
+    // Funds are held in the platform account (escrow). The 10% platform fee is
+    // computed here; the remaining 90% is transferred to the helper only when
+    // the requester confirms completion.
+    const feeCents = Math.round((amountCents * 10) / 100);
 
     await db
       .update(errandsTable)

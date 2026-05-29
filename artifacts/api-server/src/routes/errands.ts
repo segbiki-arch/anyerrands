@@ -17,6 +17,7 @@ import {
   CreateReviewBody,
 } from "@workspace/api-zod";
 import { isHelperChargesEnabled } from "../lib/stripeStatus";
+import { getUncachableStripeClient } from "../stripeClient";
 
 const router = Router();
 
@@ -212,16 +213,89 @@ router.post("/errands/:id/complete", async (req, res) => {
   const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, parsed.data.id));
   if (!errand) return res.status(404).json({ error: "Not found" });
 
+  if (!req.user) {
+    return res.status(401).json({ error: "You must be logged in to confirm completion." });
+  }
+
+  // Only an accepted errand can be confirmed. This also prevents re-completing
+  // an already-completed errand (which would be a double-payout re-entry).
+  if (errand.status !== "accepted") {
+    return res.status(400).json({ error: "Only an accepted errand can be marked completed." });
+  }
+
+  const requiresPayment = !!errand.budgetAmount && Number(errand.budgetAmount) > 0;
+  const isPaid = requiresPayment && errand.paymentStatus === "paid";
+
+  // Only the requester may confirm completion — confirming releases the held
+  // payment to the helper, so the helper must not be able to mark their own work
+  // done. The "any logged-in user" fallback is ONLY for unpaid/volunteer errands
+  // with no bound requester (legacy seed data); a paid errand must always be
+  // confirmed by its real requester so money is never released by a stranger.
+  if (errand.requesterUserId) {
+    if (errand.requesterUserId !== req.user.id) {
+      return res.status(403).json({ error: "Only the person who requested this errand can mark it completed." });
+    }
+  } else if (requiresPayment) {
+    return res.status(403).json({ error: "This errand's requester can't be verified, so payment can't be released." });
+  }
+
   // Block completion of paid errands until payment is confirmed
-  if (errand.budgetAmount && Number(errand.budgetAmount) > 0 && errand.paymentStatus !== "paid") {
+  if (requiresPayment && errand.paymentStatus !== "paid") {
     return res.status(400).json({
       error: "Payment not yet received. The requester must pay before this errand can be marked completed.",
     });
   }
 
+  // A paid errand must have a helper to receive the held funds.
+  if (isPaid && !errand.helperId) {
+    return res.status(400).json({ error: "This paid errand has no helper assigned to pay." });
+  }
+
+  // Release the held payment (90%) to the helper. This happens BEFORE we flip
+  // the status, so if the transfer fails the errand stays accepted and can be
+  // retried — completion always implies the helper has been paid.
+  let transferId = errand.transferId;
+  let helperPaidAt = errand.helperPaidAt;
+  if (isPaid && errand.helperId && !errand.transferId) {
+    const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, errand.helperId));
+    if (!helper?.stripeAccountId) {
+      return res.status(400).json({
+        error: "The helper hasn't connected a payout account, so their payment can't be released yet.",
+      });
+    }
+    if (!errand.paymentIntentId) {
+      return res.status(400).json({ error: "Missing payment reference; cannot release payment." });
+    }
+
+    const paidCents = Math.round(Number(errand.paidAmount ?? errand.budgetAmount) * 100);
+    const feeCents = Math.round(Number(errand.platformFee ?? 0) * 100);
+    const payoutCents = paidCents - feeCents;
+
+    try {
+      const stripe = await getUncachableStripeClient();
+      const pi = await stripe.paymentIntents.retrieve(errand.paymentIntentId);
+      const chargeId = typeof pi.latest_charge === "string" ? pi.latest_charge : pi.latest_charge?.id;
+      const transfer = await stripe.transfers.create(
+        {
+          amount: payoutCents,
+          currency: "eur",
+          destination: helper.stripeAccountId,
+          ...(chargeId ? { source_transaction: chargeId } : {}),
+          metadata: { errandId: String(errand.id) },
+        },
+        { idempotencyKey: `errand-${errand.id}-payout` },
+      );
+      transferId = transfer.id;
+      helperPaidAt = new Date();
+    } catch (err) {
+      req.log.error({ err, errandId: errand.id }, "Failed to release helper payment");
+      return res.status(502).json({ error: "Couldn't release the payment to the helper. Please try again." });
+    }
+  }
+
   const [row] = await db
     .update(errandsTable)
-    .set({ status: "completed", updatedAt: new Date() })
+    .set({ status: "completed", transferId, helperPaidAt, updatedAt: new Date() })
     .where(eq(errandsTable.id, parsed.data.id))
     .returning();
 

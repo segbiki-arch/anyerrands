@@ -1,16 +1,22 @@
 ---
-name: stripe fee split requires connected helper account
-description: Why the 10% platform fee is sometimes 0 and where errand money lands
+name: Stripe payment & escrow model
+description: How errand payments are held and released (escrow), and the 10% fee
 ---
 
-# Stripe fee split depends on helper's connected Stripe account
+# Payment / escrow model
 
-The 10% platform fee (`PLATFORM_FEE_PERCENT` in `artifacts/api-server/src/routes/stripe.ts`) is only split out via Stripe `application_fee_amount` + `transfer_data.destination` when the assigned helper has a connected Stripe Express account (`helpers.stripe_account_id` is set and charges enabled).
+AnyErrands uses **escrow via separate charges + transfers** (NOT destination charges):
 
-If the helper used has **no** connected Stripe account, the whole payment lands in the **platform** Stripe account with `platform_fee = 0` — there is no transfer to the helper and no visible 10% split. (Confirmed in prod: errand paid €1, helper profile had null `stripe_account_id`, recorded `platform_fee = 0.00`.)
+1. **Pay (checkout):** requires login. The payer is stamped as `errands.requesterUserId`. Funds are charged into the PLATFORM account only — no `transfer_data`/`application_fee`. Duplicate checkout is blocked when `paymentStatus==='paid'`.
+2. **Webhook** marks paid and computes the **10% platform fee itself** (`Math.round(amountCents*10/100)`) since there's no `application_fee_amount` anymore. Stores `paidAmount`, `platformFee`, `paymentIntentId`.
+3. **Confirm completion (`POST /errands/:id/complete`)** releases the held money. Only the requester can do this; it transfers `paidAmount - platformFee` (90%) to the helper's connected account via `stripe.transfers.create({ source_transaction: latest_charge, idempotencyKey: 'errand-<id>-payout' })`. Stored in `errands.transferId` + `helperPaidAt`.
 
-Other gotchas observed:
-- A user can end up with **multiple duplicate helper profiles**; only the one tied to the accepted errand matters, and it may not be the one where they later connected Stripe.
-- The app records completions via `helpers.errands_completed` counter only — there is no per-helper list/history of completed errands in the UI, and the profile shows no earnings figure (money lives in Stripe, not the app).
+**Why:** old flow paid the helper instantly at payment time (destination charge), so a helper could be paid before doing the work — a fraud loophole the user asked to close.
 
-**Why:** owner expected to "see the money" and a 10% deduction; neither appears when the helper isn't Stripe-connected and because no earnings UI exists.
+## Invariants that prevent money loss (don't weaken these)
+- Completion requires `status==='accepted'` → prevents re-completion/double-payout re-entry.
+- Transfer runs BEFORE flipping status to completed; on transfer failure return 502 and stay accepted (retryable; idempotency key reuses the same transfer).
+- Paid errands: NO null-requester fallback — must be `requesterUserId===req.user.id`; must have `helperId`. (Unpaid/volunteer errands allow any logged-in user since no money is at stake.)
+- `transferId` guard + stable idempotency key prevent double-pay.
+
+**Residual known risk:** transfer succeeds but DB write fails → `transferId` stays null; within Stripe's idempotency-key retention a retry reuses the same transfer (safe), beyond it could double-pay. Acceptable given retries happen in the same request flow.

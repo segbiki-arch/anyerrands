@@ -151,9 +151,26 @@ router.post('/stripe/checkout', async (req, res) => {
 
   if (!errandId) return res.status(400).json({ error: 'errandId required' });
 
+  // Paying requires login: the payer becomes the errand's requester of record,
+  // and is then the ONLY person who can later confirm completion and release
+  // the held payment to the helper.
+  if (!req.user) {
+    return res.status(401).json({ error: 'You must be logged in to pay for an errand.' });
+  }
+
   const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, errandId));
   if (!errand) return res.status(404).json({ error: 'Errand not found' });
   if (!errand.budgetAmount) return res.status(400).json({ error: 'Errand has no budget set' });
+
+  // Never charge twice for the same errand.
+  if (errand.paymentStatus === 'paid') {
+    return res.status(400).json({ error: 'This errand has already been paid for.' });
+  }
+
+  // Bind the errand to the paying user if it isn't already owned by someone else.
+  if (errand.requesterUserId && errand.requesterUserId !== req.user.id) {
+    return res.status(403).json({ error: 'This errand belongs to another account.' });
+  }
 
   const amountCents = Math.round(Number(errand.budgetAmount) * 100);
   if (amountCents < 50) return res.status(400).json({ error: 'Minimum payment is €0.50' });
@@ -166,14 +183,15 @@ router.post('/stripe/checkout', async (req, res) => {
 
   const stripe = await getUncachableStripeClient();
 
-  let helperStripeAccountId: string | null = null;
+  // Verify the helper can receive a payout later, but do NOT transfer now.
+  // Funds are held in the platform account (escrow) and only released to the
+  // helper when the requester confirms completion via /errands/:id/complete.
+  let helperCanReceive = false;
   if (errand.helperId) {
     const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, errand.helperId));
     if (helper?.stripeAccountId) {
       const account = await stripe.accounts.retrieve(helper.stripeAccountId);
-      if (account.charges_enabled) {
-        helperStripeAccountId = helper.stripeAccountId;
-      }
+      helperCanReceive = account.charges_enabled;
     }
   }
 
@@ -202,26 +220,23 @@ router.post('/stripe/checkout', async (req, res) => {
     cancel_url: cancelUrl,
   };
 
-  if (helperStripeAccountId) {
-    sessionParams.payment_intent_data = {
-      application_fee_amount: platformFeeCents,
-      transfer_data: { destination: helperStripeAccountId },
-    };
-  }
-
   const session = await stripe.checkout.sessions.create(sessionParams);
 
   // Record the session ID so we can correlate the upcoming webhook even if
-  // metadata is somehow stripped.
+  // metadata is somehow stripped, and bind the errand to the paying user.
   await db.update(errandsTable)
-    .set({ checkoutSessionId: session.id, updatedAt: new Date() })
+    .set({
+      checkoutSessionId: session.id,
+      requesterUserId: errand.requesterUserId ?? req.user.id,
+      updatedAt: new Date(),
+    })
     .where(eq(errandsTable.id, errandId));
 
   return res.json({
     url: session.url,
     sessionId: session.id,
     platformFeePercent: PLATFORM_FEE_PERCENT,
-    helperReceives: helperStripeAccountId ? amountCents - platformFeeCents : null,
+    helperReceives: helperCanReceive ? amountCents - platformFeeCents : null,
   });
 });
 
