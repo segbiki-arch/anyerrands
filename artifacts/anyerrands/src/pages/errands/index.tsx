@@ -9,14 +9,14 @@ import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 
 const STATUS_OPTIONS = [
-  { label: "All", value: "all" },
   { label: "Open", value: ErrandStatus.open },
+  { label: "All", value: "all" },
   { label: "In Progress", value: ErrandStatus.accepted },
   { label: "Completed", value: ErrandStatus.completed },
 ];
 
 export default function ErrandsPage() {
-  const [status, setStatus] = useState<ErrandStatus | "all">("all");
+  const [status, setStatus] = useState<ErrandStatus | "all">(ErrandStatus.open);
   const [category, setCategory] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [showBudget, setShowBudget] = useState(false);
@@ -39,12 +39,17 @@ export default function ErrandsPage() {
     const aboveMin = minBudget === "" || budget === null || budget >= Number(minBudget);
     const belowMax = maxBudget === "" || budget === null || budget <= Number(maxBudget);
     return matchesSearch && aboveMin && belowMax;
+  }).sort((a, b) => {
+    // Open errands first, then newest first within each group.
+    if (a.status === ErrandStatus.open && b.status !== ErrandStatus.open) return -1;
+    if (a.status !== ErrandStatus.open && b.status === ErrandStatus.open) return 1;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  const hasFilters = status !== "all" || category !== "all" || search !== "" || minBudget !== "" || maxBudget !== "";
+  const hasFilters = status !== ErrandStatus.open || category !== "all" || search !== "" || minBudget !== "" || maxBudget !== "";
 
   const reset = () => {
-    setStatus("all");
+    setStatus(ErrandStatus.open);
     setCategory("all");
     setSearch("");
     setMinBudget("");
@@ -196,12 +201,22 @@ export default function ErrandsPage() {
             <ClipboardList className="w-7 h-7 text-muted-foreground/50" />
           </div>
           <div>
-            <p className="text-lg font-bold">No errands found</p>
+            <p className="text-lg font-bold">
+              {status === ErrandStatus.open && !hasFilters ? "No open errands right now" : "No errands found"}
+            </p>
             <p className="text-sm text-muted-foreground mt-1 max-w-xs">
-              {hasFilters ? "Try adjusting your filters." : "No errands posted yet."}
+              {status === ErrandStatus.open && !hasFilters
+                ? "Check back soon — new errands appear here as neighbours post them."
+                : hasFilters
+                  ? "Try adjusting your filters."
+                  : "No errands posted yet."}
             </p>
           </div>
-          {hasFilters && (
+          {status === ErrandStatus.open && !hasFilters ? (
+            <Button variant="outline" size="sm" onClick={() => setStatus("all")} className="rounded-full">
+              View all errands
+            </Button>
+          ) : hasFilters && (
             <Button variant="outline" size="sm" onClick={reset} className="rounded-full">
               Clear filters
             </Button>
