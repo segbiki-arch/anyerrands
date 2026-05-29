@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { 
   MapPin, Clock, Euro, User, CalendarDays, CheckCircle2, ArrowLeft,
-  Info, CreditCard, Loader2, Flag, AlertTriangle
+  Info, CreditCard, Loader2, Flag, AlertTriangle, Home, Phone, Lock
 } from "lucide-react";
 import { useStripeCheckout } from "@/hooks/use-stripe-checkout";
 
@@ -264,6 +264,43 @@ export default function ErrandDetailPage() {
                   <p className="text-foreground">{errand.requesterLocation}</p>
                 </div>
               </div>
+
+              {errand.status !== ErrandStatus.open && (errand.requesterAddress || errand.requesterPhone) && (
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-4">
+                  <p className="text-sm font-semibold flex items-center gap-1.5 text-foreground">
+                    <Lock className="w-3.5 h-3.5 text-primary" /> Contact details
+                  </p>
+                  {errand.requesterAddress && (
+                    <div className="flex gap-3">
+                      <Home className="w-5 h-5 text-primary shrink-0" />
+                      <div>
+                        <p className="text-sm text-muted-foreground font-medium">Address</p>
+                        <p className="text-foreground">{errand.requesterAddress}</p>
+                      </div>
+                    </div>
+                  )}
+                  {errand.requesterPhone && (
+                    <div className="flex gap-3">
+                      <Phone className="w-5 h-5 text-primary shrink-0" />
+                      <div>
+                        <p className="text-sm text-muted-foreground font-medium">Phone</p>
+                        <a href={`tel:${errand.requesterPhone}`} className="text-foreground font-medium hover:text-primary underline-offset-2 hover:underline">
+                          {errand.requesterPhone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {errand.status === ErrandStatus.open && (
+                <div className="flex items-start gap-2 rounded-lg bg-muted/50 border border-border/60 p-3">
+                  <Lock className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <p className="text-xs text-muted-foreground">
+                    The requester's exact address and phone number are shared privately once you accept this errand.
+                  </p>
+                </div>
+              )}
 
               {errand.estimatedDuration && (
                 <div className="flex gap-4">

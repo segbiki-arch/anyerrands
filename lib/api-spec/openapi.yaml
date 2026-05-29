@@ -762,6 +762,10 @@ components:
           type: string
         requesterLocation:
           type: string
+        requesterAddress:
+          type: ["string", "null"]
+        requesterPhone:
+          type: ["string", "null"]
         estimatedDuration:
           type: ["string", "null"]
         budgetAmount:
@@ -799,6 +803,10 @@ components:
         requesterName:
           type: string
         requesterLocation:
+          type: string
+        requesterAddress:
+          type: string
+        requesterPhone:
           type: string
         estimatedDuration:
           type: string

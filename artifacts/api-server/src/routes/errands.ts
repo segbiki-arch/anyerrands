@@ -18,8 +18,11 @@ import {
 const router = Router();
 
 function formatErrand(e: typeof errandsTable.$inferSelect) {
+  const isOpen = e.status === "open";
   return {
     ...e,
+    requesterAddress: isOpen ? null : e.requesterAddress,
+    requesterPhone: isOpen ? null : e.requesterPhone,
     budgetAmount: e.budgetAmount ? Number(e.budgetAmount) : null,
     paidAmount: e.paidAmount ? Number(e.paidAmount) : null,
     platformFee: e.platformFee ? Number(e.platformFee) : null,
@@ -56,10 +59,15 @@ router.post("/errands", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid body", details: parsed.error });
   }
-  const { budgetAmount, ...rest } = parsed.data;
+  const { budgetAmount, requesterAddress, requesterPhone, ...rest } = parsed.data;
   const [row] = await db
     .insert(errandsTable)
-    .values({ ...rest, budgetAmount: budgetAmount != null ? String(budgetAmount) : null })
+    .values({
+      ...rest,
+      requesterAddress: requesterAddress?.trim() ? requesterAddress.trim() : null,
+      requesterPhone: requesterPhone?.trim() ? requesterPhone.trim() : null,
+      budgetAmount: budgetAmount != null ? String(budgetAmount) : null,
+    })
     .returning();
 
   // Fire notifications to available helpers in the same area

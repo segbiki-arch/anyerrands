@@ -37,6 +37,8 @@ export const errandsTable = pgTable("errands", {
   status: errandStatusEnum("status").notNull().default("open"),
   requesterName: text("requester_name").notNull(),
   requesterLocation: text("requester_location").notNull(),
+  requesterAddress: text("requester_address"),
+  requesterPhone: text("requester_phone"),
   estimatedDuration: text("estimated_duration"),
   budgetAmount: numeric("budget_amount", { precision: 10, scale: 2 }),
   helperId: integer("helper_id").references(() => helpersTable.id),

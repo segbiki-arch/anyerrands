@@ -11,7 +11,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Send, MapPin, Euro, Clock } from "lucide-react";
+import { Send, MapPin, Euro, Clock, Home, Phone, Lock } from "lucide-react";
 
 const formSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(100, "Title is too long"),
@@ -19,6 +19,8 @@ const formSchema = z.object({
   category: z.string().min(1, "Please select a category"),
   requesterName: z.string().min(2, "Name must be at least 2 characters"),
   requesterLocation: z.string().min(3, "Location is required"),
+  requesterAddress: z.string().optional(),
+  requesterPhone: z.string().optional(),
   estimatedDuration: z.string().optional(),
   budgetAmount: z.coerce.number().min(0, "Budget cannot be negative").optional().or(z.literal("").transform(() => undefined)),
 });
@@ -39,6 +41,8 @@ export default function NewErrandPage() {
       category: "",
       requesterName: "",
       requesterLocation: "",
+      requesterAddress: "",
+      requesterPhone: "",
       estimatedDuration: "",
     },
   });
@@ -204,6 +208,56 @@ export default function NewErrandPage() {
                     )}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-6 pt-6">
+                <div className="flex items-center gap-2 pb-2 border-b border-border/40">
+                  <span className="font-semibold text-lg">Where to meet</span>
+                </div>
+
+                <div className="flex items-start gap-2 rounded-lg bg-primary/5 border border-primary/20 p-3">
+                  <Lock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <p className="text-sm text-muted-foreground">
+                    Your exact address and phone number stay <span className="font-medium text-foreground">private</span>.
+                    They're only shared with your helper <span className="font-medium text-foreground">after</span> they accept the errand — never shown on the public listings.
+                  </p>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="requesterAddress"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Exact Address</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input placeholder="e.g., 12 Pearse Street, Nenagh" className="pl-9" {...field} data-testid="input-address" />
+                        </div>
+                      </FormControl>
+                      <FormDescription>Optional — helps your helper find you once they accept</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="requesterPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input type="tel" placeholder="e.g., 087 123 4567" className="pl-9" {...field} data-testid="input-phone" />
+                        </div>
+                      </FormControl>
+                      <FormDescription>Optional — so your helper can reach you to coordinate</FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
               <div className="space-y-6 pt-6">
