@@ -73,7 +73,16 @@ export default function ErrandDetailPage() {
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
 
   const { data: errand, isLoading, error } = useGetErrand(errandId, { 
-    query: { enabled: !isNaN(errandId), queryKey: getGetErrandQueryKey(errandId) } 
+    query: {
+      enabled: !isNaN(errandId),
+      queryKey: getGetErrandQueryKey(errandId),
+      // While an errand is accepted (in progress), poll so the helper's view
+      // flips from "waiting for confirmation" to "Completed" automatically the
+      // moment the requester confirms — no manual refresh needed.
+      refetchInterval: (query) =>
+        query.state.data?.status === ErrandStatus.accepted ? 5000 : false,
+      refetchIntervalInBackground: false,
+    },
   });
   const { data: helpers } = useListHelpers();
   const acceptErrand = useAcceptErrand();
