@@ -445,6 +445,29 @@ paths:
                 items:
                   $ref: "#/components/schemas/Errand"
 
+  /helpers/{id}/earnings:
+    get:
+      operationId: getHelperEarnings
+      tags: [helpers]
+      summary: Get a helper's earnings and completed paid jobs (owner only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Helper earnings summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HelperEarnings"
+        "403":
+          description: Not the owner of this helper profile
+        "404":
+          description: Not found
+
   /stripe/connect/onboard/{helperId}:
     post:
       operationId: stripeConnectOnboard
@@ -934,6 +957,42 @@ components:
           description: True when the currently authenticated user owns this helper profile
         createdAt:
           type: string
+
+    HelperEarningJob:
+      type: object
+      required: [errandId, title, paidAmount, platformFee, earned, completedAt]
+      properties:
+        errandId:
+          type: integer
+        title:
+          type: string
+        paidAmount:
+          type: number
+        platformFee:
+          type: number
+        earned:
+          type: number
+        completedAt:
+          type: ["string", "null"]
+    HelperEarnings:
+      type: object
+      required: [totalEarned, totalPaidOut, platformFeesPaid, jobsCount, jobs]
+      properties:
+        totalEarned:
+          type: number
+          description: Sum of what the helper actually earned (paid minus platform fee)
+        totalPaidOut:
+          type: number
+          description: Total amount requesters paid across the helper's paid jobs
+        platformFeesPaid:
+          type: number
+          description: Total platform fees deducted across the helper's paid jobs
+        jobsCount:
+          type: integer
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/HelperEarningJob"
 
     StripeConnectOnboardResponse:
       type: object

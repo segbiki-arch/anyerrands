@@ -24,6 +24,8 @@ export * from './getRecentErrandsParams';
 export * from './handleBrowserLoginCallbackParams';
 export * from './healthStatus';
 export * from './helper';
+export * from './helperEarningJob';
+export * from './helperEarnings';
 export * from './helperInput';
 export * from './helperUpdate';
 export * from './listErrandsParams';

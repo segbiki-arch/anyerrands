@@ -3,6 +3,7 @@ import { useLocation, useParams } from "wouter";
 import {
   useGetHelper,
   useGetHelperErrands,
+  useGetHelperEarnings,
   useStripeConnectOnboard,
   useStripeConnectManage,
   useStripeConnectStatus,
@@ -21,8 +22,12 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import {
   MapPin, Star, CheckCircle2, ArrowLeft, CalendarDays,
-  Banknote, ExternalLink, AlertCircle, Loader2, ShieldCheck
+  Banknote, ExternalLink, AlertCircle, Loader2, ShieldCheck, Wallet, TrendingUp
 } from "lucide-react";
+
+function formatEuro(n: number) {
+  return new Intl.NumberFormat("en-IE", { style: "currency", currency: "EUR" }).format(n);
+}
 
 export default function HelperProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -40,6 +45,10 @@ export default function HelperProfilePage() {
   });
 
   const { data: connectStatus, isLoading: statusLoading, refetch: refetchStatus } = useStripeConnectStatus(helperId, {
+    query: { enabled: !isNaN(helperId) && helper?.isOwner === true }
+  });
+
+  const { data: earnings, isLoading: earningsLoading } = useGetHelperEarnings(helperId, {
     query: { enabled: !isNaN(helperId) && helper?.isOwner === true }
   });
 
@@ -163,6 +172,74 @@ export default function HelperProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Earnings summary — only the profile owner can see their earnings */}
+      {helper.isOwner && (
+      <Card className="border-border/60 shadow-sm">
+        <CardContent className="p-6 space-y-5">
+          <div className="flex items-center gap-2">
+            <Wallet className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-bold">Your Earnings</h2>
+          </div>
+
+          {earningsLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Skeleton className="h-24 w-full rounded-xl" />
+              <Skeleton className="h-24 w-full rounded-xl" />
+              <Skeleton className="h-24 w-full rounded-xl" />
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl bg-primary/10 border border-primary/20">
+                  <p className="text-sm text-muted-foreground">Total earned</p>
+                  <p className="text-2xl font-bold text-foreground mt-1">{formatEuro(earnings?.totalEarned ?? 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">After the 10% platform fee</p>
+                </div>
+                <div className="p-4 rounded-xl bg-muted/40 border border-border/60">
+                  <p className="text-sm text-muted-foreground">Paid jobs</p>
+                  <p className="text-2xl font-bold text-foreground mt-1">{earnings?.jobsCount ?? 0}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Completed & paid</p>
+                </div>
+                <div className="p-4 rounded-xl bg-muted/40 border border-border/60">
+                  <p className="text-sm text-muted-foreground">Total paid by requesters</p>
+                  <p className="text-2xl font-bold text-foreground mt-1">{formatEuro(earnings?.totalPaidOut ?? 0)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Platform fee {formatEuro(earnings?.platformFeesPaid ?? 0)}</p>
+                </div>
+              </div>
+
+              {earnings && earnings.jobs.length > 0 ? (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <TrendingUp className="w-4 h-4" /> Completed paid jobs
+                  </div>
+                  <div className="divide-y divide-border/50 rounded-xl border border-border/60 overflow-hidden">
+                    {earnings.jobs.map((job) => (
+                      <div key={job.errandId} className="flex items-center justify-between gap-4 p-3.5 bg-card">
+                        <div className="min-w-0">
+                          <p className="font-medium text-foreground truncate">{job.title}</p>
+                          {job.completedAt && (
+                            <p className="text-xs text-muted-foreground mt-0.5">{format(new Date(job.completedAt), "d MMM yyyy")}</p>
+                          )}
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="font-bold text-foreground">{formatEuro(job.earned)}</p>
+                          <p className="text-xs text-muted-foreground">of {formatEuro(job.paidAmount)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No paid jobs yet. When you complete a paid errand, your earnings will appear here.
+                </p>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+      )}
 
       {/* Stripe Connect payout section — only the profile owner can see/manage payouts */}
       {helper.isOwner && (

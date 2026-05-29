@@ -506,6 +506,29 @@ export const GetHelperErrandsResponse = zod.array(GetHelperErrandsResponseItem)
 
 
 /**
+ * @summary Get a helper's earnings and completed paid jobs (owner only)
+ */
+export const GetHelperEarningsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetHelperEarningsResponse = zod.object({
+  "totalEarned": zod.number().describe('Sum of what the helper actually earned (paid minus platform fee)'),
+  "totalPaidOut": zod.number().describe('Total amount requesters paid across the helper\'s paid jobs'),
+  "platformFeesPaid": zod.number().describe('Total platform fees deducted across the helper\'s paid jobs'),
+  "jobsCount": zod.number(),
+  "jobs": zod.array(zod.object({
+  "errandId": zod.number(),
+  "title": zod.string(),
+  "paidAmount": zod.number(),
+  "platformFee": zod.number(),
+  "earned": zod.number(),
+  "completedAt": zod.string().nullable()
+}))
+})
+
+
+/**
  * @summary Start Stripe Connect onboarding for a helper
  */
 export const StripeConnectOnboardParams = zod.object({

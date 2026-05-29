@@ -2,6 +2,6 @@
 - [Color theme](color-theme.md) — yellow (#F5C400-ish, hsl 47 100% 50%) and black (hsl 0 0% 5%); primary-foreground is BLACK not white (yellow needs dark text)
 - [Admin access control](admin-access-control.md) — admin = email allowlist in ADMIN_EMAILS env; requireAdmin middleware is the real boundary, frontend useIsAdmin is UX-only
 - [Stripe fee split](stripe-fee-split.md) — 10% fee only splits when helper has connected stripe_account_id; otherwise whole amount lands in platform account, platform_fee=0; no earnings UI exists
-- [Errand deletion FK constraints](errand-fk-cascade.md) — DELETE /api/errands/:id 500s when notifications reference it; clean child rows first
+- [Helper/errand deletion FK constraints](errand-fk-cascade.md) — no ON DELETE CASCADE; deleting errand OR helper 500s unless you clear notifications/reports (and NULL errands.helper_id) in a transaction first
 - [Helper ownership](helper-ownership.md) — helpers.userId ties profile to login; Stripe payout routes gated by requireOwnedHelper; NO name-match auto-claim of legacy rows
 - [Stripe key slot mix-up](stripe-key-slot-mixup.md) — when guiding non-tech users to paste pk/sk/whsec, paste one at a time and verify by revealing each slot's prefix

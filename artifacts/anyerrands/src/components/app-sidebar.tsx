@@ -41,6 +41,7 @@ const actionItems = [
 
 const adminItems = [
   { href: "/admin/reports", label: "Reports Admin", icon: ShieldAlert },
+  { href: "/admin/helpers", label: "Helper Profiles", icon: Users },
 ];
 
 const NAV_BTN = "text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-white/8 data-[active=true]:bg-primary/15 data-[active=true]:text-primary data-[active=true]:font-semibold";

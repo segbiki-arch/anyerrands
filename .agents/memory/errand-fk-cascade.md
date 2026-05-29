@@ -1,13 +1,17 @@
 ---
-name: Errand deletion FK constraints
-description: Why DELETE /api/errands/:id can 500, and how to clean test errands
+name: Helper/errand deletion FK constraints
+description: Why deleting an errand or helper row can 500, and how to delete safely
 ---
 
-Deleting an errand row fails if child rows reference it. `notifications.errand_id` has a FK to `errands.id` with no ON DELETE CASCADE, so deleting an errand that has notifications (or other children like payments) raises a foreign-key violation.
+No child FKs in this DB use ON DELETE CASCADE, so deleting any parent row fails with a foreign-key violation whenever children reference it. You must clean children first (inside a transaction in route code).
 
-**Why:** The DELETE route does a plain `delete from errands` with no cascade and no child cleanup, so it returns 500 instead of a clean delete whenever children exist.
+**errands.id** children: `notifications.errand_id`, `reports.errand_id` (both NOT NULL). Deleting an errand with notifications raises a FK violation.
+
+**helpers.id** children: `notifications.helper_id` (NOT NULL), `reports.helper_id` (NOT NULL), `errands.helper_id` (NULLABLE). To delete a helper: delete its notifications + reports, then NULL out `errands.helper_id` (preserve the errand), then delete the helper — all in one `db.transaction`.
+
+**Why:** plain `delete from <parent>` with no cascade and no child cleanup returns 500 whenever children exist; a non-transactional multi-step delete can also leave a half-deleted state.
 
 **How to apply:**
-- To remove a test errand from the dev DB, delete child rows first: `DELETE FROM notifications WHERE errand_id = <id>;` then `DELETE FROM errands WHERE id = <id>;`.
-- A freshly-created errand may already have notifications, so the API DELETE endpoint will 500 on it — don't rely on it for cleanup.
-- If errand deletion ever needs to work end-to-end, either add ON DELETE CASCADE to child FKs or delete children in the route within a transaction.
+- Admin helper delete (DELETE /admin/helpers/:id) already does the transactional cleanup above — use it as the pattern for any parent delete.
+- For ad-hoc dev cleanup, delete child rows first then the parent.
+- A freshly-created errand may already have notifications, so a naive errand DELETE will 500 on it.

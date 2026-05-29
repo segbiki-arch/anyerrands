@@ -14,6 +14,7 @@ import {
   CompleteErrandParams,
   GetRecentErrandsQueryParams,
 } from "@workspace/api-zod";
+import { isHelperChargesEnabled } from "../lib/stripeStatus";
 
 const router = Router();
 
@@ -173,6 +174,22 @@ router.post("/errands/:id/accept", async (req, res) => {
 
   const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, bodyParsed.data.helperId));
   if (!helper) return res.status(404).json({ error: "Helper not found" });
+
+  const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, paramParsed.data.id));
+  if (!errand) return res.status(404).json({ error: "Errand not found" });
+
+  // For paid errands, the helper must have a working Stripe payout account
+  // before accepting — otherwise the requester's payment cannot be routed to
+  // them and the 10% platform fee cannot be split correctly.
+  if (errand.budgetAmount && Number(errand.budgetAmount) > 0) {
+    const ready = await isHelperChargesEnabled(helper);
+    if (!ready) {
+      return res.status(400).json({
+        error:
+          "Please connect your payout account before accepting a paid errand. Go to your helper profile and set up payouts so you get paid and the platform fee is handled correctly.",
+      });
+    }
+  }
 
   const [row] = await db
     .update(errandsTable)

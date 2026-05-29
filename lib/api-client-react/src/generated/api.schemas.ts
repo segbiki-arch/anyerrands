@@ -187,6 +187,27 @@ export interface Helper {
   createdAt: string;
 }
 
+export interface HelperEarningJob {
+  errandId: number;
+  title: string;
+  paidAmount: number;
+  platformFee: number;
+  earned: number;
+  /** @nullable */
+  completedAt: string | null;
+}
+
+export interface HelperEarnings {
+  /** Sum of what the helper actually earned (paid minus platform fee) */
+  totalEarned: number;
+  /** Total amount requesters paid across the helper's paid jobs */
+  totalPaidOut: number;
+  /** Total platform fees deducted across the helper's paid jobs */
+  platformFeesPaid: number;
+  jobsCount: number;
+  jobs: HelperEarningJob[];
+}
+
 export interface StripeConnectOnboardResponse {
   url: string;
 }

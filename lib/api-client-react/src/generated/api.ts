@@ -33,6 +33,7 @@ import type {
   HandleBrowserLoginCallbackParams,
   HealthStatus,
   Helper,
+  HelperEarnings,
   HelperInput,
   HelperUpdate,
   ListErrandsParams,
@@ -1644,6 +1645,83 @@ export function useGetHelperErrands<TData = Awaited<ReturnType<typeof getHelperE
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetHelperErrandsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetHelperEarningsUrl = (id: number,) => {
+
+
+
+
+  return `/api/helpers/${id}/earnings`
+}
+
+/**
+ * @summary Get a helper's earnings and completed paid jobs (owner only)
+ */
+export const getHelperEarnings = async (id: number, options?: RequestInit): Promise<HelperEarnings> => {
+
+  return customFetch<HelperEarnings>(getGetHelperEarningsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetHelperEarningsQueryKey = (id: number,) => {
+    return [
+    `/api/helpers/${id}/earnings`
+    ] as const;
+    }
+
+
+export const getGetHelperEarningsQueryOptions = <TData = Awaited<ReturnType<typeof getHelperEarnings>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getHelperEarnings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetHelperEarningsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHelperEarnings>>> = ({ signal }) => getHelperEarnings(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHelperEarnings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetHelperEarningsQueryResult = NonNullable<Awaited<ReturnType<typeof getHelperEarnings>>>
+export type GetHelperEarningsQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get a helper's earnings and completed paid jobs (owner only)
+ */
+
+export function useGetHelperEarnings<TData = Awaited<ReturnType<typeof getHelperEarnings>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getHelperEarnings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetHelperEarningsQueryOptions(id,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
