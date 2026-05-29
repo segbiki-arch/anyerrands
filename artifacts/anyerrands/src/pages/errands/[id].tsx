@@ -491,7 +491,7 @@ export default function ErrandDetailPage() {
                         {errand.platformFee != null && ` · €${(errand.paidAmount - errand.platformFee).toFixed(2)} to helper`}
                       </p>
                     )}
-                    {errand.helperId && (
+                    {errand.helperId && errand.isRequester && (
                       alreadyReviewed ? (
                         <div className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
                           <CheckCircle2 className="w-4 h-4 text-green-500" /> Thanks for your review

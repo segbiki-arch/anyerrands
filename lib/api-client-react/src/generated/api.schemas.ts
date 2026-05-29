@@ -109,6 +109,8 @@ export interface Errand {
   createdAt: string;
   /** @nullable */
   updatedAt?: string | null;
+  /** True when the authenticated user is the person who posted this errand. */
+  isRequester?: boolean;
 }
 
 export interface ErrandInput {

@@ -20,7 +20,7 @@ import { isHelperChargesEnabled } from "../lib/stripeStatus";
 
 const router = Router();
 
-function formatErrand(e: typeof errandsTable.$inferSelect) {
+function formatErrand(e: typeof errandsTable.$inferSelect, currentUserId?: string) {
   const isOpen = e.status === "open";
   return {
     ...e,
@@ -32,6 +32,7 @@ function formatErrand(e: typeof errandsTable.$inferSelect) {
     paidAt: e.paidAt ? e.paidAt.toISOString() : null,
     createdAt: e.createdAt.toISOString(),
     updatedAt: e.updatedAt ? e.updatedAt.toISOString() : null,
+    isRequester: !!currentUserId && e.requesterUserId === currentUserId,
   };
 }
 
@@ -54,7 +55,7 @@ router.get("/errands", async (req, res) => {
     .limit(limit)
     .offset(offset);
 
-  return res.json(rows.map(formatErrand));
+  return res.json(rows.map((r) => formatErrand(r, req.user?.id)));
 });
 
 router.post("/errands", async (req, res) => {
@@ -68,6 +69,7 @@ router.post("/errands", async (req, res) => {
     .insert(errandsTable)
     .values({
       ...rest,
+      requesterUserId: req.user?.id ?? null,
       requesterAddress: cleanText(requesterAddress),
       requesterPhone: cleanText(requesterPhone),
       budgetAmount: budgetAmount != null ? String(budgetAmount) : null,
@@ -94,7 +96,7 @@ router.post("/errands", async (req, res) => {
     );
   }
 
-  return res.status(201).json(formatErrand(row));
+  return res.status(201).json(formatErrand(row, req.user?.id));
 });
 
 router.get("/errands/stats/summary", async (req, res) => {
@@ -130,7 +132,7 @@ router.get("/errands/recent", async (req, res) => {
     .from(errandsTable)
     .orderBy(desc(errandsTable.createdAt))
     .limit(limit);
-  return res.json(rows.map(formatErrand));
+  return res.json(rows.map((r) => formatErrand(r, req.user?.id)));
 });
 
 router.get("/errands/:id", async (req, res) => {
@@ -138,7 +140,7 @@ router.get("/errands/:id", async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
   const [row] = await db.select().from(errandsTable).where(eq(errandsTable.id, parsed.data.id));
   if (!row) return res.status(404).json({ error: "Not found" });
-  return res.json(formatErrand(row));
+  return res.json(formatErrand(row, req.user?.id));
 });
 
 router.patch("/errands/:id", async (req, res) => {
@@ -158,7 +160,7 @@ router.patch("/errands/:id", async (req, res) => {
     .returning();
 
   if (!row) return res.status(404).json({ error: "Not found" });
-  return res.json(formatErrand(row));
+  return res.json(formatErrand(row, req.user?.id));
 });
 
 router.delete("/errands/:id", async (req, res) => {
@@ -200,7 +202,7 @@ router.post("/errands/:id/accept", async (req, res) => {
     .returning();
 
   if (!row) return res.status(404).json({ error: "Errand not found" });
-  return res.json(formatErrand(row));
+  return res.json(formatErrand(row, req.user?.id));
 });
 
 router.post("/errands/:id/complete", async (req, res) => {
@@ -230,7 +232,7 @@ router.post("/errands/:id/complete", async (req, res) => {
       .where(eq(helpersTable.id, errand.helperId));
   }
 
-  return res.json(formatErrand(row));
+  return res.json(formatErrand(row, req.user?.id));
 });
 
 router.post("/errands/:id/review", async (req, res) => {
@@ -239,9 +241,16 @@ router.post("/errands/:id/review", async (req, res) => {
   const bodyParsed = CreateReviewBody.safeParse(req.body);
   if (!bodyParsed.success) return res.status(400).json({ error: "Invalid body", details: bodyParsed.error });
 
+  if (!req.user) {
+    return res.status(401).json({ error: "You must be logged in to leave a review." });
+  }
+
   const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, paramParsed.data.id));
   if (!errand) return res.status(404).json({ error: "Errand not found" });
 
+  if (errand.requesterUserId !== req.user.id) {
+    return res.status(403).json({ error: "Only the person who posted this errand can review it." });
+  }
   if (errand.status !== "completed") {
     return res.status(400).json({ error: "You can only review an errand once it's completed." });
   }

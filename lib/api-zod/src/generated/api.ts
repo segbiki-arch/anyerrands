@@ -134,7 +134,8 @@ export const ListErrandsResponseItem = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
-  "updatedAt": zod.string().nullish()
+  "updatedAt": zod.string().nullish(),
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
 })
 export const ListErrandsResponse = zod.array(ListErrandsResponseItem)
 
@@ -199,7 +200,8 @@ export const GetErrandResponse = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
-  "updatedAt": zod.string().nullish()
+  "updatedAt": zod.string().nullish(),
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
 })
 
 
@@ -244,7 +246,8 @@ export const UpdateErrandResponse = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
-  "updatedAt": zod.string().nullish()
+  "updatedAt": zod.string().nullish(),
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
 })
 
 
@@ -291,7 +294,8 @@ export const AcceptErrandResponse = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
-  "updatedAt": zod.string().nullish()
+  "updatedAt": zod.string().nullish(),
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
 })
 
 
@@ -326,7 +330,8 @@ export const CompleteErrandResponse = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
-  "updatedAt": zod.string().nullish()
+  "updatedAt": zod.string().nullish(),
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
 })
 
 
@@ -375,7 +380,8 @@ export const GetRecentErrandsResponseItem = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
-  "updatedAt": zod.string().nullish()
+  "updatedAt": zod.string().nullish(),
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
 })
 export const GetRecentErrandsResponse = zod.array(GetRecentErrandsResponseItem)
 
@@ -500,7 +506,8 @@ export const GetHelperErrandsResponseItem = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "createdAt": zod.string(),
-  "updatedAt": zod.string().nullish()
+  "updatedAt": zod.string().nullish(),
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
 })
 export const GetHelperErrandsResponse = zod.array(GetHelperErrandsResponseItem)
 

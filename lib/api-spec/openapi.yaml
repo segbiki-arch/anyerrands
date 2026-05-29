@@ -893,6 +893,9 @@ components:
           type: string
         updatedAt:
           type: ["string", "null"]
+        isRequester:
+          type: boolean
+          description: True when the authenticated user is the person who posted this errand.
 
     ErrandInput:
       type: object
