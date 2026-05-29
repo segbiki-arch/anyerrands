@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { errandsTable, helpersTable, notificationsTable, reviewsTable } from "@workspace/db";
-import { eq, desc, and, sql, ilike, avg, count } from "drizzle-orm";
+import { eq, desc, and, sql, avg, count } from "drizzle-orm";
 import {
   ListErrandsQueryParams,
   CreateErrandBody,
@@ -82,16 +82,21 @@ router.post("/errands", async (req, res) => {
     })
     .returning();
 
-  // Fire notifications to available helpers in the same area
+  // Notify every available helper whenever a new errand is posted.
   const locationKeyword = rest.requesterLocation.split(",")[0].trim();
-  const nearbyHelpers = await db
-    .select({ id: helpersTable.id })
+  const availableHelpers = await db
+    .select({ id: helpersTable.id, userId: helpersTable.userId })
     .from(helpersTable)
-    .where(and(eq(helpersTable.available, true), ilike(helpersTable.location, `%${locationKeyword}%`)));
+    .where(eq(helpersTable.available, true));
 
-  if (nearbyHelpers.length > 0) {
+  // Don't notify the poster about their own errand.
+  const recipients = req.user?.id
+    ? availableHelpers.filter((h) => h.userId !== req.user!.id)
+    : availableHelpers;
+
+  if (recipients.length > 0) {
     await db.insert(notificationsTable).values(
-      nearbyHelpers.map((h) => ({
+      recipients.map((h) => ({
         helperId: h.id,
         errandId: row.id,
         message: `New errand in ${locationKeyword}: "${row.title}"`,
