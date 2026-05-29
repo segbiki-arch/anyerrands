@@ -25,6 +25,15 @@ export interface Errand {
   /** @nullable */
   budgetAmount?: number | null;
   /** @nullable */
+  tripFrom?: string | null;
+  /** @nullable */
+  tripTo?: string | null;
+  /** @nullable */
+  tripWhen?: string | null;
+  /** @nullable */
+  passengers?: number | null;
+  returnTrip?: boolean;
+  /** @nullable */
   helperId?: number | null;
   /** @nullable */
   helperName?: string | null;

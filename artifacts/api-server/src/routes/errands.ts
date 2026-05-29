@@ -59,14 +59,18 @@ router.post("/errands", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid body", details: parsed.error });
   }
-  const { budgetAmount, requesterAddress, requesterPhone, ...rest } = parsed.data;
+  const { budgetAmount, requesterAddress, requesterPhone, tripFrom, tripTo, tripWhen, ...rest } = parsed.data;
+  const cleanText = (v: string | undefined) => (v?.trim() ? v.trim() : null);
   const [row] = await db
     .insert(errandsTable)
     .values({
       ...rest,
-      requesterAddress: requesterAddress?.trim() ? requesterAddress.trim() : null,
-      requesterPhone: requesterPhone?.trim() ? requesterPhone.trim() : null,
+      requesterAddress: cleanText(requesterAddress),
+      requesterPhone: cleanText(requesterPhone),
       budgetAmount: budgetAmount != null ? String(budgetAmount) : null,
+      tripFrom: cleanText(tripFrom),
+      tripTo: cleanText(tripTo),
+      tripWhen: cleanText(tripWhen),
     })
     .returning();
 

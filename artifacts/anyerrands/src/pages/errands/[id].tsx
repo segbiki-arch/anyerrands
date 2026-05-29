@@ -31,7 +31,8 @@ import {
 } from "@/components/ui/dialog";
 import { 
   MapPin, Clock, Euro, User, CalendarDays, CheckCircle2, ArrowLeft,
-  Info, CreditCard, Loader2, Flag, AlertTriangle, Home, Phone, Lock
+  Info, CreditCard, Loader2, Flag, AlertTriangle, Home, Phone, Lock,
+  Car, ArrowRight, Calendar, Users
 } from "lucide-react";
 import { useStripeCheckout } from "@/hooks/use-stripe-checkout";
 
@@ -197,6 +198,41 @@ export default function ErrandDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: details */}
         <div className="lg:col-span-2 space-y-6">
+          {errand.tripFrom && errand.tripTo && (
+            <Card className="border-primary/30 shadow-sm overflow-hidden">
+              <div className="h-1.5 bg-primary w-full" />
+              <CardContent className="p-6 md:p-8 space-y-5">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Car className="w-5 h-5 text-primary" /> The Journey
+                </h3>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-xl font-bold text-foreground">{errand.tripFrom}</span>
+                  <ArrowRight className="w-5 h-5 text-primary" />
+                  <span className="text-xl font-bold text-foreground">{errand.tripTo}</span>
+                  {errand.returnTrip && (
+                    <span className="text-xs font-semibold bg-primary/15 text-foreground px-2.5 py-1 rounded-full">Return trip</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm">
+                  {errand.tripWhen && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      <span className="text-muted-foreground">When:</span>
+                      <span className="font-medium text-foreground">{errand.tripWhen}</span>
+                    </div>
+                  )}
+                  {errand.passengers != null && (
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-primary" />
+                      <span className="text-muted-foreground">Passengers:</span>
+                      <span className="font-medium text-foreground">{errand.passengers}</span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="border-border/60 shadow-sm">
             <CardContent className="p-6 md:p-8 space-y-4">
               <h3 className="text-lg font-semibold flex items-center gap-2">

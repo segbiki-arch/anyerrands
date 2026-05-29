@@ -18,4 +18,13 @@ export interface ErrandInput {
   requesterPhone?: string;
   estimatedDuration?: string;
   budgetAmount?: number;
+  tripFrom?: string;
+  tripTo?: string;
+  tripWhen?: string;
+  /**
+     * @minimum 1
+     * @maximum 8
+     */
+  passengers?: number;
+  returnTrip?: boolean;
 }

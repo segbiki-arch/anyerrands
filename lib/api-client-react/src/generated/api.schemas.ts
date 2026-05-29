@@ -86,6 +86,15 @@ export interface Errand {
   /** @nullable */
   budgetAmount?: number | null;
   /** @nullable */
+  tripFrom?: string | null;
+  /** @nullable */
+  tripTo?: string | null;
+  /** @nullable */
+  tripWhen?: string | null;
+  /** @nullable */
+  passengers?: number | null;
+  returnTrip?: boolean;
+  /** @nullable */
   helperId?: number | null;
   /** @nullable */
   helperName?: string | null;
@@ -113,6 +122,15 @@ export interface ErrandInput {
   requesterPhone?: string;
   estimatedDuration?: string;
   budgetAmount?: number;
+  tripFrom?: string;
+  tripTo?: string;
+  tripWhen?: string;
+  /**
+     * @minimum 1
+     * @maximum 8
+     */
+  passengers?: number;
+  returnTrip?: boolean;
 }
 
 export type ErrandUpdateStatus = typeof ErrandUpdateStatus[keyof typeof ErrandUpdateStatus];

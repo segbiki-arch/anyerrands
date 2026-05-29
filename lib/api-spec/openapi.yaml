@@ -793,6 +793,16 @@ components:
           type: ["string", "null"]
         budgetAmount:
           type: ["number", "null"]
+        tripFrom:
+          type: ["string", "null"]
+        tripTo:
+          type: ["string", "null"]
+        tripWhen:
+          type: ["string", "null"]
+        passengers:
+          type: ["integer", "null"]
+        returnTrip:
+          type: boolean
         helperId:
           type: ["integer", "null"]
         helperName:
@@ -835,6 +845,18 @@ components:
           type: string
         budgetAmount:
           type: number
+        tripFrom:
+          type: string
+        tripTo:
+          type: string
+        tripWhen:
+          type: string
+        passengers:
+          type: integer
+          minimum: 1
+          maximum: 8
+        returnTrip:
+          type: boolean
 
     ErrandUpdate:
       type: object

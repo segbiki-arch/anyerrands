@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 import { Errand, ErrandStatus } from "@workspace/api-client-react";
-import { MapPin, Clock } from "lucide-react";
+import { MapPin, Clock, Car, ArrowRight, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { requesterAvatarUrl } from "@/lib/avatars";
 
@@ -42,6 +42,14 @@ export function ErrandCard({ errand }: { errand: Errand }) {
           <h3 className="text-[15px] font-bold leading-snug line-clamp-2 text-foreground group-hover:text-primary transition-colors duration-150">
             {errand.title}
           </h3>
+          {errand.tripFrom && errand.tripTo && (
+            <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground bg-primary/10 rounded-lg px-2.5 py-1.5 w-fit max-w-full">
+              <Car className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="truncate">{errand.tripFrom}</span>
+              <ArrowRight className="w-3 h-3 text-muted-foreground shrink-0" />
+              <span className="truncate">{errand.tripTo}</span>
+            </div>
+          )}
           <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
             {errand.description}
           </p>
@@ -51,8 +59,14 @@ export function ErrandCard({ errand }: { errand: Errand }) {
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-muted-foreground pt-3 border-t border-border/60">
           <span className="flex items-center gap-1">
             <MapPin className="w-3 h-3 shrink-0" />
-            <span className="truncate max-w-[110px]">{errand.requesterLocation}</span>
+            <span className="truncate max-w-[110px]">{errand.tripWhen ?? errand.requesterLocation}</span>
           </span>
+          {errand.passengers != null && (
+            <span className="flex items-center gap-1">
+              <Users className="w-3 h-3 shrink-0" />
+              {errand.passengers}
+            </span>
+          )}
           {errand.estimatedDuration && (
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3 shrink-0" />

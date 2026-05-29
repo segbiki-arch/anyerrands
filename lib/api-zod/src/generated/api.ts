@@ -121,6 +121,11 @@ export const ListErrandsResponseItem = zod.object({
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
+  "tripFrom": zod.string().nullish(),
+  "tripTo": zod.string().nullish(),
+  "tripWhen": zod.string().nullish(),
+  "passengers": zod.number().nullish(),
+  "returnTrip": zod.boolean().optional(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
   "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
@@ -140,6 +145,8 @@ export const createErrandBodyTitleMin = 3;
 
 export const createErrandBodyDescriptionMin = 10;
 
+export const createErrandBodyPassengersMax = 8;
+
 
 
 export const CreateErrandBody = zod.object({
@@ -151,7 +158,12 @@ export const CreateErrandBody = zod.object({
   "requesterAddress": zod.string().optional(),
   "requesterPhone": zod.string().optional(),
   "estimatedDuration": zod.string().optional(),
-  "budgetAmount": zod.number().optional()
+  "budgetAmount": zod.number().optional(),
+  "tripFrom": zod.string().optional(),
+  "tripTo": zod.string().optional(),
+  "tripWhen": zod.string().optional(),
+  "passengers": zod.number().min(1).max(createErrandBodyPassengersMax).optional(),
+  "returnTrip": zod.boolean().optional()
 })
 
 
@@ -174,6 +186,11 @@ export const GetErrandResponse = zod.object({
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
+  "tripFrom": zod.string().nullish(),
+  "tripTo": zod.string().nullish(),
+  "tripWhen": zod.string().nullish(),
+  "passengers": zod.number().nullish(),
+  "returnTrip": zod.boolean().optional(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
   "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
@@ -214,6 +231,11 @@ export const UpdateErrandResponse = zod.object({
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
+  "tripFrom": zod.string().nullish(),
+  "tripTo": zod.string().nullish(),
+  "tripWhen": zod.string().nullish(),
+  "passengers": zod.number().nullish(),
+  "returnTrip": zod.boolean().optional(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
   "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
@@ -256,6 +278,11 @@ export const AcceptErrandResponse = zod.object({
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
+  "tripFrom": zod.string().nullish(),
+  "tripTo": zod.string().nullish(),
+  "tripWhen": zod.string().nullish(),
+  "passengers": zod.number().nullish(),
+  "returnTrip": zod.boolean().optional(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
   "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
@@ -286,6 +313,11 @@ export const CompleteErrandResponse = zod.object({
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
+  "tripFrom": zod.string().nullish(),
+  "tripTo": zod.string().nullish(),
+  "tripWhen": zod.string().nullish(),
+  "passengers": zod.number().nullish(),
+  "returnTrip": zod.boolean().optional(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
   "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
@@ -330,6 +362,11 @@ export const GetRecentErrandsResponseItem = zod.object({
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
+  "tripFrom": zod.string().nullish(),
+  "tripTo": zod.string().nullish(),
+  "tripWhen": zod.string().nullish(),
+  "passengers": zod.number().nullish(),
+  "returnTrip": zod.boolean().optional(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
   "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
@@ -450,6 +487,11 @@ export const GetHelperErrandsResponseItem = zod.object({
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
+  "tripFrom": zod.string().nullish(),
+  "tripTo": zod.string().nullish(),
+  "tripWhen": zod.string().nullish(),
+  "passengers": zod.number().nullish(),
+  "returnTrip": zod.boolean().optional(),
   "helperId": zod.number().nullish(),
   "helperName": zod.string().nullish(),
   "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),

@@ -2,6 +2,7 @@ import { runMigrations } from 'stripe-replit-sync';
 import { getStripeSync, getUncachableStripeClient, getStripePublishableKey } from './stripeClient';
 import app from "./app";
 import { logger } from "./lib/logger";
+import { ensureDefaultCategories } from "./lib/seedCategories";
 
 async function checkStripeMode() {
   const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
@@ -51,6 +52,12 @@ async function initStripe() {
 
 await initStripe();
 await checkStripeMode();
+
+try {
+  await ensureDefaultCategories();
+} catch (err) {
+  logger.error({ err }, "Category seed failed");
+}
 
 app.listen(port, (err) => {
   if (err) {

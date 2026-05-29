@@ -9,6 +9,7 @@ import {
   LogOut,
   ShieldAlert,
   ClipboardList,
+  Car,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnyErrandsLogo } from "./anyerrands-logo";
@@ -33,6 +34,7 @@ const navItems = [
 
 const actionItems = [
   { href: "/errands/new", label: "Post an Errand", icon: PlusCircle },
+  { href: "/lifts/new", label: "Request a Lift", icon: Car },
   { href: "/helpers/new", label: "Become a Helper", icon: UserPlus },
 ];
 
