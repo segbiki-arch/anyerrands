@@ -130,11 +130,12 @@ export default function TermsPage() {
           </Section>
 
           <Section title="4. Payments & Platform Fee">
-            <P>AnyErrands processes payments securely through <strong>Stripe</strong>. When a Client pays for a completed errand:</P>
+            <P>AnyErrands processes payments securely through <strong>Stripe</strong>. <strong>Clients do not need a Stripe account to pay</strong> — they simply pay by card at checkout. Only Helpers need a Stripe account, and only so they can receive their payouts.</P>
+            <P>When a Client pays for an errand, the payment is held securely by AnyErrands and only released to the Helper once the Client confirms the job is done. At that point:</P>
             <UL items={[
               "The Helper receives 90% of the errand budget directly to their connected bank account.",
               "AnyErrands retains a 10% platform fee to cover payment processing, platform maintenance, and community support.",
-              "Payments are released to Helpers via Stripe Connect once processed.",
+              "Payments are released to Helpers via Stripe Connect once the Client confirms completion.",
               "All amounts are in Euro (€).",
             ]} />
             <P>Helpers must complete Stripe Express onboarding (including identity verification) before receiving payouts. AnyErrands is not responsible for delays caused by Stripe's verification process.</P>
@@ -167,13 +168,15 @@ export default function TermsPage() {
             <UL items={[
               "Posting errands that involve illegal activities of any kind.",
               "Using the platform to harass, threaten, or harm other users.",
+              "Scamming, defrauding, or deceiving any other user.",
+              "Failing to pay for work that has been agreed and completed.",
               "Providing false information about yourself or an errand.",
               "Attempting to process payments outside the platform to avoid the fee.",
               "Creating fake reviews, reports, or accounts.",
               "Scraping, reverse-engineering, or attempting to interfere with the platform.",
               "Posting errands involving the purchase or handling of controlled substances.",
             ]} />
-            <P>Violations may result in immediate account suspension and, where appropriate, referral to relevant authorities.</P>
+            <P><strong>Zero-tolerance policy:</strong> anyone caught causing harm to another user, scamming or defrauding others, or failing to pay for completed work will be <strong>permanently banned for life</strong> from AnyErrands. Where appropriate, we will also refer the matter to An Garda Síochána or other relevant authorities.</P>
           </Section>
 
           <Section title="8. Limitation of Liability">

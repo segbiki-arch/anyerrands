@@ -459,7 +459,7 @@ export default function ErrandDetailPage() {
                                 ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Redirecting...</>
                                 : <><CreditCard className="w-4 h-4 mr-2" />Pay €{errand.budgetAmount}</>}
                             </Button>
-                            <p className="text-xs text-center text-muted-foreground">90% goes to the helper · 10% platform fee</p>
+                            <p className="text-xs text-center text-muted-foreground">Pay securely by card — no account needed · 90% goes to the helper · 10% platform fee</p>
                           </>
                         )}
                       </>
