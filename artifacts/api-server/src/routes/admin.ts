@@ -8,15 +8,6 @@ type ReportStatus = (typeof VALID_STATUSES)[number];
 
 const router = Router();
 
-// TEMP diagnostic (no auth): confirms whether the admin allowlist is loaded in
-// the running environment. Returns only counts, never the email values. Remove
-// once admin visibility is confirmed working in production.
-router.get("/admin-debug", (_req, res) => {
-  const raw = process.env.ADMIN_EMAILS ?? "";
-  const count = raw.split(",").map((e) => e.trim()).filter(Boolean).length;
-  return res.json({ adminEmailsConfigured: count, nodeEnv: process.env.NODE_ENV ?? null });
-});
-
 router.get("/admin/reports", requireAdmin, async (req, res) => {
   const { status } = req.query as { status?: string };
 
