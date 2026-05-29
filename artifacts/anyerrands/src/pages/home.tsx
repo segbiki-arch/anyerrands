@@ -1,4 +1,10 @@
 import { Link } from "wouter";
+import heroShopping from "@assets/stock_images/errand_shopping.jpg";
+import heroCouple from "@assets/stock_images/errand_garden5_2.jpg";
+import heroAirport from "@assets/stock_images/errand_airport_lift.jpg";
+import heroDog from "@assets/stock_images/errand_dog_walk2.jpg";
+import heroWalk from "@assets/stock_images/errand_garden5_1.jpg";
+import heroBoxes from "@assets/stock_images/errand_help4.jpg";
 import { useGetErrandStats, useGetRecentErrands } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +24,8 @@ import {
   Car,
 } from "lucide-react";
 
+const heroPhotos = [heroShopping, heroCouple, heroAirport, heroDog, heroWalk, heroBoxes];
+
 export default function Home() {
   const { data: stats, isLoading: statsLoading } = useGetErrandStats();
   const { data: recentErrands, isLoading: errandsLoading } = useGetRecentErrands({ limit: 4 });
@@ -26,7 +34,21 @@ export default function Home() {
     <div className="flex flex-col bg-background">
       {/* ──────────────── HERO ──────────────── */}
       <section className="relative w-full bg-white overflow-hidden border-b border-border/40">
-        <div className="max-w-6xl mx-auto px-6 py-24 md:py-32 flex flex-col items-center justify-center text-center space-y-8">
+        {/* Real neighbours, real errands — photo montage background */}
+        <div aria-hidden className="absolute inset-0 z-0 grid grid-cols-3 md:grid-cols-6">
+          {heroPhotos.map((src, i) => (
+            <img
+              key={i}
+              src={src}
+              alt=""
+              loading="lazy"
+              className="w-full h-full object-cover"
+            />
+          ))}
+        </div>
+        <div aria-hidden className="absolute inset-0 z-[1] bg-white/65" />
+        <div aria-hidden className="absolute inset-0 z-[1] bg-gradient-to-b from-white/55 via-white/65 to-white" />
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-24 md:py-32 flex flex-col items-center justify-center text-center space-y-8">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-foreground text-sm font-medium px-4 py-2 rounded-full shadow-sm animate-fade-down">
             <span className="relative flex w-2 h-2">
               <span className="absolute inline-flex w-full h-full rounded-full bg-primary opacity-75 animate-ping" />

@@ -1,8 +1,97 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "Hp-kYRotTDREkvNG_oLbn"
 uri = "file://artifacts/anyerrands/public/hero-bg.png"
 type = "image"
 title = "community errands hero background"
+
+[[outputs]]
+id = "dmVNkLgye3U0faXJ_QVE_"
+uri = "file://attached_assets/stock_images/errand_shopping.jpg"
+type = "image"
+title = "person carrying grocery shopping bags walking on a street, candid real photo"
+
+[[outputs]]
+id = "jIkYu-2jOpMt82d3cT6c4"
+uri = "file://attached_assets/stock_images/errand_chores.jpg"
+type = "image"
+title = "person helping an older neighbour with a small household chore, candid real photo"
+
+[[outputs]]
+id = "w8-idOn_hQJd1yyBf8K4w"
+uri = "file://attached_assets/stock_images/errand_airport_lift.jpg"
+type = "image"
+title = "person putting luggage into car boot for airport lift, candid real photo"
+
+[[outputs]]
+id = "DnMHfTlqd3yvE5s-mgt_e"
+uri = "file://attached_assets/stock_images/errand_dog_walk.jpg"
+type = "image"
+title = "person walking a dog outdoors in a town, candid real photo"
+
+[[outputs]]
+id = "y3mPvHReQWOsaFc8PsGeY"
+uri = "file://attached_assets/stock_images/errand_chores2.jpg"
+type = "image"
+title = "man mowing lawn helping with garden chores outdoors, real candid photograph"
+
+[[outputs]]
+id = "ciZ8KDU-Jr_QF8RN_ae2_"
+uri = "file://attached_assets/stock_images/errand_dog_walk2.jpg"
+type = "image"
+title = "person walking a dog on a leash on a park path, real candid photograph"
+
+[[outputs]]
+id = "U0dsVp4wu1B_lbb5zZY-C"
+uri = "file://attached_assets/stock_images/errand_shopping2.jpg"
+type = "image"
+title = "woman holding paper grocery bags full of food smiling, real candid photograph"
+
+[[outputs]]
+id = "C8bVmjKBpFThGTpmuwohH"
+uri = "file://attached_assets/stock_images/errand_lift2.jpg"
+type = "image"
+title = "smiling driver inside car looking back at passenger, real candid photograph"
+
+[[outputs]]
+id = "ZueQ0oTOsBhf4rfCWSKBK"
+uri = "file://attached_assets/stock_images/errand_help3.jpg"
+type = "image"
+title = "handyman helping repair a fence in a garden, real candid photograph of a person working"
+
+[[outputs]]
+id = "1V5THGx1JziCjfpcsNCYW"
+uri = "file://attached_assets/stock_images/errand_drive3.jpg"
+type = "image"
+title = "view from back seat of a person driving a car holding steering wheel, real candid photograph"
+
+[[outputs]]
+id = "f_wfqJrp-SfwYivfMVL3M"
+uri = "file://attached_assets/stock_images/errand_help4.jpg"
+type = "image"
+title = "two neighbours carrying a cardboard moving box together outdoors, real candid photograph"
+
+[[outputs]]
+id = "fp-0gKeGGbag2XNjQiqvv"
+uri = "file://attached_assets/stock_images/errand_garden5_1.jpg"
+type = "image"
+title = "older man and younger person gardening together helping in a backyard, real photograph"
+
+[[outputs]]
+id = "fX1s85S2-e-u2efVB_TaD"
+uri = "file://attached_assets/stock_images/errand_garden5_2.jpg"
+type = "image"
+title = "older man and younger person gardening together helping in a backyard, real photograph"
+
+[[outputs]]
+id = "Ef8B4qzGh8g_CBr6ErgRS"
+uri = "file://attached_assets/stock_images/errand_drive5_1.jpg"
+type = "image"
+title = "man driving car smiling, photo taken from passenger seat, real photograph"
+
+[[outputs]]
+id = "3Uot6NKAYcWH5fQFIcsun"
+uri = "file://attached_assets/stock_images/errand_drive5_2.jpg"
+type = "image"
+title = "man driving car smiling, photo taken from passenger seat, real photograph"
