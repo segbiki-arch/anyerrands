@@ -42,6 +42,9 @@ export default function Home() {
             <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Ask your neighbours to pick up the shopping, help with a small job, or give you a lift into town.
             </p>
+            <p className="text-base sm:text-lg font-serif italic text-foreground/70 max-w-2xl mx-auto pt-2">
+              Creating trusted community micro-helping.
+            </p>
           </div>
 
           <div className="flex flex-wrap gap-4 justify-center animate-fade-up [animation-delay:150ms] pt-4">

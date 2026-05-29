@@ -97,9 +97,12 @@ export function Layout({ children }: { children: ReactNode }) {
           </main>
           <footer className="border-t border-border bg-foreground text-background/80 px-6 py-6">
             <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-xs">
-                <span className="w-2 h-2 rounded-full bg-primary inline-block" />
-                <p>© {new Date().getFullYear()} <span className="font-bold text-background">AnyErrands</span> · Made with <span className="text-primary">♥</span> in Nenagh, Co. Tipperary</p>
+              <div className="flex flex-col gap-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+                  <p>© {new Date().getFullYear()} <span className="font-bold text-background">AnyErrands</span> · Made with <span className="text-primary">♥</span> in Nenagh, Co. Tipperary</p>
+                </div>
+                <p className="font-serif italic text-background/70 pl-4">Creating trusted community micro-helping.</p>
               </div>
               <div className="flex items-center gap-5 text-xs">
                 <Link href="/errands" className="hover:text-primary transition-colors">Browse errands</Link>
