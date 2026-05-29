@@ -19,6 +19,8 @@ import {
   Zap,
   Heart,
   MapPin,
+  Car,
+  Plane,
 } from "lucide-react";
 
 export default function Home() {
@@ -119,6 +121,43 @@ export default function Home() {
 
       {/* ──────────────── MAIN CONTENT ──────────────── */}
       <div className="max-w-6xl mx-auto w-full px-6 md:px-10 py-14 md:py-20 space-y-20">
+
+        {/* ── Lifts / rides banner ── */}
+        <section className="relative overflow-hidden rounded-3xl bg-primary text-primary-foreground p-8 md:p-12 shadow-2xl shadow-primary/30">
+          <div className="absolute -top-16 -right-10 w-[300px] h-[300px] rounded-full bg-black/10 blur-3xl" />
+          <div className="absolute -bottom-20 -left-12 w-[260px] h-[260px] rounded-full bg-black/5 blur-3xl" />
+          <Car className="absolute right-6 bottom-4 w-40 h-40 text-black/5 hidden md:block" aria-hidden />
+          <div className="relative grid md:grid-cols-[1.5fr_1fr] gap-8 items-center">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 bg-black/10 border border-black/15 text-primary-foreground text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+                <Plane className="w-3.5 h-3.5" /> Need a lift?
+              </div>
+              <h3 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+                Nenagh ↔ Shannon, Limerick<br className="hidden sm:block" /> &amp; surrounding areas
+              </h3>
+              <p className="text-primary-foreground/80 text-base md:text-lg max-w-lg">
+                Heading to the airport or into town? Request a lift from a local driver — or offer your own seats and earn on the journey you're already making.
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                {["Limerick", "Shannon Airport", "Thurles", "Roscrea", "Nenagh Town"].map((p) => (
+                  <span key={p} className="flex items-center gap-1.5 bg-black/10 text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full">
+                    <MapPin className="w-3 h-3" /> {p}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="flex md:justify-end">
+              <Button
+                asChild
+                size="lg"
+                className="rounded-full font-bold px-8 h-14 text-base shadow-xl shadow-black/20 bg-foreground text-background hover:bg-foreground/90 hover:scale-105 transition-transform"
+                data-testid="btn-request-lift"
+              >
+                <Link href="/lifts/new">Request a Lift <ArrowRight className="w-4 h-4 ml-1" /></Link>
+              </Button>
+            </div>
+          </div>
+        </section>
 
         {/* ── How it works ── */}
         <section className="space-y-8">
