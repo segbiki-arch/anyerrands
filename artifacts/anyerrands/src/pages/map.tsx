@@ -18,6 +18,15 @@ const STATUS_COLORS: Record<string, string> = {
   completed: "#16a34a",
 };
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function createPin(status: string) {
   const color = STATUS_COLORS[status] ?? "#6b7280";
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
@@ -98,17 +107,17 @@ export default function MapPage() {
         const popup = L.popup({ maxWidth: 280, className: "errand-popup" }).setContent(`
           <div style="font-family:sans-serif;min-width:220px">
             <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;margin-bottom:6px">
-              ${errand.category}
+              ${escapeHtml(errand.category)}
             </div>
             <div style="font-size:15px;font-weight:700;line-height:1.3;margin-bottom:10px;color:#1c1917">
-              ${errand.title}
+              ${escapeHtml(errand.title)}
             </div>
             <div style="display:flex;gap:12px;font-size:12px;color:#57534e;margin-bottom:12px;flex-wrap:wrap">
-              ${errand.estimatedDuration ? `<span>&#x23F1; ${errand.estimatedDuration}</span>` : ""}
-              <span>&#x20AC; ${errand.budgetAmount != null ? errand.budgetAmount : "Volunteer"}</span>
-              <span style="color:${STATUS_COLORS[errand.status]};font-weight:600;text-transform:capitalize">${errand.status}</span>
+              ${errand.estimatedDuration ? `<span>&#x23F1; ${escapeHtml(errand.estimatedDuration)}</span>` : ""}
+              <span>&#x20AC; ${errand.budgetAmount != null ? escapeHtml(errand.budgetAmount) : "Volunteer"}</span>
+              <span style="color:${STATUS_COLORS[errand.status] ?? "#6b7280"};font-weight:600;text-transform:capitalize">${escapeHtml(errand.status)}</span>
             </div>
-            <a href="/errands/${errand.id}" style="display:inline-block;background:#e05c2a;color:white;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none">
+            <a href="/errands/${encodeURIComponent(errand.id)}" style="display:inline-block;background:#e05c2a;color:white;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;text-decoration:none">
               View Details
             </a>
           </div>
