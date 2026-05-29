@@ -1,0 +1,24 @@
+{
+  "name": "AnyErrands — Your community, getting things done",
+  "short_name": "AnyErrands",
+  "description": "Post errands, find trusted helpers, and pay securely. A community marketplace for Nenagh and Co. Tipperary.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#0D0D0D",
+  "theme_color": "#F5C400",
+  "lang": "en-IE",
+  "categories": ["lifestyle", "social", "shopping"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Post an Errand", "short_name": "Post", "url": "/errands/new" },
+    { "name": "Browse Errands", "short_name": "Browse", "url": "/errands" }
+  ]
+}

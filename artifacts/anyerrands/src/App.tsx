@@ -2,6 +2,7 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/layout";
+import { InstallPrompt } from "@/components/install-prompt";
 
 // Pages
 import Home from "@/pages/home";
@@ -73,6 +74,7 @@ function App() {
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Router />
         </WouterRouter>
+        <InstallPrompt />
       </TooltipProvider>
     </QueryClientProvider>
   );
