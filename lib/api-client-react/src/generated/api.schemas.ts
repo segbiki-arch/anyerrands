@@ -137,15 +137,6 @@ export interface ErrandInput {
   returnTrip?: boolean;
 }
 
-export type ErrandUpdateStatus = typeof ErrandUpdateStatus[keyof typeof ErrandUpdateStatus];
-
-
-export const ErrandUpdateStatus = {
-  open: 'open',
-  accepted: 'accepted',
-  completed: 'completed',
-} as const;
-
 export interface ErrandUpdate {
   title?: string;
   description?: string;
@@ -153,7 +144,6 @@ export interface ErrandUpdate {
   requesterLocation?: string;
   estimatedDuration?: string;
   budgetAmount?: number;
-  status?: ErrandUpdateStatus;
 }
 
 export interface AcceptErrandInput {

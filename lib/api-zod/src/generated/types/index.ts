@@ -19,7 +19,6 @@ export * from './errandPaymentStatus';
 export * from './errandStats';
 export * from './errandStatus';
 export * from './errandUpdate';
-export * from './errandUpdateStatus';
 export * from './errorEnvelope';
 export * from './getRecentErrandsParams';
 export * from './handleBrowserLoginCallbackParams';

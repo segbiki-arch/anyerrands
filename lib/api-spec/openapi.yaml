@@ -1009,9 +1009,6 @@ components:
           type: string
         budgetAmount:
           type: number
-        status:
-          type: string
-          enum: [open, accepted, completed]
 
     AcceptErrandInput:
       type: object

@@ -9,7 +9,6 @@ export * from "./generated/types/errandInput";
 export * from "./generated/types/errandStats";
 export * from "./generated/types/errandStatus";
 export * from "./generated/types/errandUpdate";
-export * from "./generated/types/errandUpdateStatus";
 export * from "./generated/types/getRecentErrandsParams";
 export * from "./generated/types/healthStatus";
 export * from "./generated/types/helper";

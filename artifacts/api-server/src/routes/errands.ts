@@ -195,22 +195,52 @@ router.get("/errands/:id", async (req, res) => {
 });
 
 router.patch("/errands/:id", async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: "You must be logged in to edit an errand." });
   const paramParsed = UpdateErrandParams.safeParse({ id: Number(req.params.id) });
   if (!paramParsed.success) return res.status(400).json({ error: "Invalid id" });
   const bodyParsed = UpdateErrandBody.safeParse(req.body);
   if (!bodyParsed.success) return res.status(400).json({ error: "Invalid body" });
 
+  const [existing] = await db.select().from(errandsTable).where(eq(errandsTable.id, paramParsed.data.id));
+  if (!existing) return res.status(404).json({ error: "Not found" });
+
+  // Only the owner can edit their own errand.
+  if (existing.requesterUserId !== req.user.id) {
+    return res.status(403).json({ error: "You can only edit your own errands." });
+  }
+
+  // Once an errand has been accepted, its details (especially the budget) are
+  // locked so the agreed terms can't be changed under the helper.
+  if (existing.status !== "open") {
+    return res.status(400).json({
+      error: "This errand can no longer be edited because it has already been accepted.",
+    });
+  }
+
   const { budgetAmount, ...rest } = bodyParsed.data;
   const updates: Record<string, unknown> = { ...rest, updatedAt: new Date() };
   if (budgetAmount !== undefined) updates.budgetAmount = budgetAmount != null ? String(budgetAmount) : null;
 
+  // Atomic guard: only update if this is still the owner's OPEN errand. This
+  // closes the race window between the checks above and the write (e.g. a helper
+  // accepting in between), so an accepted errand's budget can't be changed.
   const [row] = await db
     .update(errandsTable)
     .set(updates)
-    .where(eq(errandsTable.id, paramParsed.data.id))
+    .where(
+      and(
+        eq(errandsTable.id, paramParsed.data.id),
+        eq(errandsTable.requesterUserId, req.user.id),
+        eq(errandsTable.status, "open"),
+      ),
+    )
     .returning();
 
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    return res.status(409).json({
+      error: "This errand can no longer be edited because it has already been accepted.",
+    });
+  }
   return res.json(formatErrand(row, req.user?.id));
 });
 

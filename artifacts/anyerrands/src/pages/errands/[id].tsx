@@ -40,6 +40,7 @@ import {
   Car, ArrowRight, Calendar, Users, Star
 } from "lucide-react";
 import { useStripeCheckout } from "@/hooks/use-stripe-checkout";
+import { useAuth } from "@workspace/replit-auth-web";
 
 const REPORT_REASONS = [
   { value: "work_not_done",     label: "Work was not done at all" },
@@ -63,6 +64,7 @@ export default function ErrandDetailPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { redirectToCheckout, isPending: isCheckoutPending } = useStripeCheckout();
+  const { isAuthenticated, login } = useAuth();
   
   const [isAcceptOpen, setIsAcceptOpen] = useState(false);
   const [isAbortOpen, setIsAbortOpen] = useState(false);
@@ -273,7 +275,7 @@ export default function ErrandDetailPage() {
     }
   };
 
-  const canReport = (errand.status === ErrandStatus.accepted || errand.status === ErrandStatus.completed) && !!errand.helperId;
+  const canReport = (errand.status === ErrandStatus.accepted || errand.status === ErrandStatus.completed) && !!errand.helperId && !!errand.isRequester;
 
   const myHelper = helpers?.find((h) => h.isOwner);
   const isAssignedHelper = !!myHelper && errand.helperId === myHelper.id;
@@ -530,7 +532,14 @@ export default function ErrandDetailPage() {
                   variant="outline"
                   size="sm"
                   className="shrink-0 gap-2 text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive rounded-full"
-                  onClick={() => setIsReportOpen(true)}
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast({ title: "Please log in to report a helper" });
+                      login();
+                      return;
+                    }
+                    setIsReportOpen(true);
+                  }}
                   data-testid="btn-report-helper"
                 >
                   <Flag className="w-3.5 h-3.5" /> Report Helper

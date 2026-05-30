@@ -5,7 +5,6 @@
  * AnyErrands API specification
  * OpenAPI spec version: 0.1.0
  */
-import type { ErrandUpdateStatus } from './errandUpdateStatus';
 
 export interface ErrandUpdate {
   title?: string;
@@ -14,5 +13,4 @@ export interface ErrandUpdate {
   requesterLocation?: string;
   estimatedDuration?: string;
   budgetAmount?: number;
-  status?: ErrandUpdateStatus;
 }

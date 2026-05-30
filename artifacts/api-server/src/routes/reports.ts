@@ -6,6 +6,9 @@ import { eq } from "drizzle-orm";
 const router = Router();
 
 router.post("/errands/:id/report", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "You must be logged in to report a helper." });
+  }
   const errandId = parseInt(req.params.id, 10);
   if (isNaN(errandId)) return res.status(400).json({ error: "Invalid errand id" });
 
@@ -14,6 +17,13 @@ router.post("/errands/:id/report", async (req, res) => {
 
   if (!errand.helperId) {
     return res.status(400).json({ error: "This errand has no assigned helper to report" });
+  }
+
+  // Only the person who posted the errand (and hired the helper) may report
+  // that helper. This prevents anyone from filing reports on errands they have
+  // nothing to do with.
+  if (errand.requesterUserId !== req.user.id) {
+    return res.status(403).json({ error: "You can only report a helper on your own errand." });
   }
 
   const parsed = insertReportSchema.safeParse(req.body);

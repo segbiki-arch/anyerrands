@@ -217,8 +217,7 @@ export const UpdateErrandBody = zod.object({
   "category": zod.string().optional(),
   "requesterLocation": zod.string().optional(),
   "estimatedDuration": zod.string().optional(),
-  "budgetAmount": zod.number().optional(),
-  "status": zod.enum(['open', 'accepted', 'completed']).optional()
+  "budgetAmount": zod.number().optional()
 })
 
 export const UpdateErrandResponse = zod.object({
