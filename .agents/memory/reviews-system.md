@@ -14,3 +14,6 @@ One review per completed errand that has a helper. Enforced by a UNIQUE constrai
 - `formatErrand(e, currentUserId?)` returns computed `isRequester` (in OpenAPI Errand schema). Frontend errand-detail only shows the "Leave a review" button when `errand.isRequester` (and completed + has helper).
 
 **Consequence / known tradeoff:** errands posted by anonymous (not-logged-in) users have `requesterUserId = null`, so they can NEVER be reviewed — nobody satisfies the ownership check. Same for legacy errands created before this column existed. This is intentional: locking down beats allowing fake/hijacked reviews. The rest of the app (accept/complete/report) is still open-write & name-based; reviews are the one flow deliberately made stricter at the user's request.
+
+## helpers.rating is review-derived only — never self-set
+`helpers.rating` is ALWAYS the computed avg of reviews. `PATCH /helpers/:id` (helper self-edit of bio/location/skills/available) is owner-only (`existing.userId === req.user.id`, else 401/403) and `rating` was deliberately REMOVED from the `HelperUpdate` OpenAPI schema so it can't be set via the contract. **Why:** a helper editing their own profile must not be able to inflate their own star rating. Do not re-add `rating` to `HelperUpdate`.

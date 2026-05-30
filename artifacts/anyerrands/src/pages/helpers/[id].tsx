@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { ErrandCard } from "@/components/errand-card";
+import { EditHelperDialog } from "@/components/edit-helper-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import {
@@ -147,6 +148,17 @@ export default function HelperProfilePage() {
                 </div>
 
                 <div className="flex flex-row md:flex-col gap-3 md:items-end">
+                  {helper.isOwner && (
+                    <EditHelperDialog
+                      helper={{
+                        id: helper.id,
+                        location: helper.location,
+                        bio: helper.bio,
+                        skills: helper.skills,
+                        available: helper.available,
+                      }}
+                    />
+                  )}
                   {helper.available ? (
                     <Badge className="bg-green-100 text-green-800 hover:bg-green-100 font-normal">Available to help</Badge>
                   ) : (

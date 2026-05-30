@@ -99,9 +99,19 @@ router.patch("/helpers/:id", async (req, res) => {
   const bodyParsed = UpdateHelperBody.safeParse(req.body);
   if (!bodyParsed.success) return res.status(400).json({ error: "Invalid body" });
 
-  const { rating, ...rest } = bodyParsed.data;
-  const updates: Record<string, unknown> = { ...rest };
-  if (rating !== undefined) updates.rating = String(rating);
+  if (!req.user) return res.status(401).json({ error: "You must be logged in to edit a profile." });
+
+  // Only the profile owner may edit it — a profile is tied to its creator's
+  // login, so neighbours can't change someone else's About Me, location, etc.
+  const [existing] = await db.select().from(helpersTable).where(eq(helpersTable.id, paramParsed.data.id));
+  if (!existing) return res.status(404).json({ error: "Not found" });
+  if (existing.userId !== req.user.id) {
+    return res.status(403).json({ error: "You can only edit your own profile." });
+  }
+
+  // Only bio/location/skills/available are editable. Rating is computed from
+  // community reviews and is intentionally not part of this contract.
+  const updates: Record<string, unknown> = { ...bodyParsed.data };
 
   const [row] = await db
     .update(helpersTable)
@@ -110,7 +120,7 @@ router.patch("/helpers/:id", async (req, res) => {
     .returning();
 
   if (!row) return res.status(404).json({ error: "Not found" });
-  return res.json(formatHelper(row));
+  return res.json(formatHelper(row, req.user.id));
 });
 
 router.get("/helpers/:id/errands", async (req, res) => {

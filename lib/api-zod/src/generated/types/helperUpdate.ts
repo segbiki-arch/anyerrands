@@ -11,5 +11,4 @@ export interface HelperUpdate {
   location?: string;
   skills?: string[];
   available?: boolean;
-  rating?: number;
 }

@@ -1166,8 +1166,6 @@ components:
             type: string
         available:
           type: boolean
-        rating:
-          type: number
 
     Category:
       type: object

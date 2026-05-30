@@ -497,8 +497,7 @@ export const UpdateHelperBody = zod.object({
   "bio": zod.string().optional(),
   "location": zod.string().optional(),
   "skills": zod.array(zod.string()).optional(),
-  "available": zod.boolean().optional(),
-  "rating": zod.number().optional()
+  "available": zod.boolean().optional()
 })
 
 export const UpdateHelperResponse = zod.object({
