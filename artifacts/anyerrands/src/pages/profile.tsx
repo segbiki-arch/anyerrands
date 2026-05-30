@@ -28,8 +28,8 @@ export default function ProfilePage() {
   const displayName =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "My Account";
 
-  const { data: allErrands, isLoading: errandsLoading } = useListErrands(
-    undefined,
+  const { data: myErrandsData, isLoading: errandsLoading } = useListErrands(
+    { mine: true },
     { query: { enabled: isAuthenticated } },
   );
   const { data: allHelpers, isLoading: helpersLoading } = useListHelpers(
@@ -37,24 +37,21 @@ export default function ProfilePage() {
     { query: { enabled: isAuthenticated } },
   );
 
+  // Show the errands this logged-in account actually owns (matched by user id on
+  // the server via ?mine=true), newest first — never a fragile name match.
   const myErrands = useMemo(() => {
-    if (!allErrands || !user) return [];
-    const nameKey = displayName.toLowerCase().trim();
-    const emailKey = user.email?.toLowerCase().trim();
-    return allErrands.filter(
-      e =>
-        e.requesterName.toLowerCase().trim() === nameKey ||
-        (emailKey && e.requesterName.toLowerCase().includes(emailKey)),
+    if (!myErrandsData) return [];
+    return [...myErrandsData].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-  }, [allErrands, user, displayName]);
+  }, [myErrandsData]);
 
+  // Only the helper profile genuinely owned by this account (isOwner is computed
+  // server-side from the logged-in user id) — no name-match fallback.
   const myHelperProfile = useMemo(() => {
-    if (!allHelpers || !user) return undefined;
-    const owned = allHelpers.find(h => h.isOwner);
-    if (owned) return owned;
-    const nameKey = displayName.toLowerCase().trim();
-    return allHelpers.find(h => h.name.toLowerCase().trim() === nameKey);
-  }, [allHelpers, user, displayName]);
+    if (!allHelpers) return undefined;
+    return allHelpers.find(h => h.isOwner);
+  }, [allHelpers]);
 
   if (isLoading) {
     return (
