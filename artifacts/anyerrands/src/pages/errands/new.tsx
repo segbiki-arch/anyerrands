@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Send, MapPin, Euro, ChevronDown, Clock, Home, Phone } from "lucide-react";
+import { Send, MapPin, Euro, ChevronDown, Clock } from "lucide-react";
 import { useState } from "react";
 
 const formSchema = z.object({
@@ -23,8 +23,6 @@ const formSchema = z.object({
   category: z.string().min(1, "Please select a category"),
   requesterName: z.string().min(2, "Name must be at least 2 characters"),
   requesterLocation: z.string().min(3, "Location is required"),
-  requesterAddress: z.string().optional(),
-  requesterPhone: z.string().optional(),
   estimatedDuration: z.string().optional(),
   budgetAmount: z.coerce.number().min(0, "Budget cannot be negative").optional().or(z.literal("").transform(() => undefined)),
 });
@@ -50,8 +48,6 @@ export default function NewErrandPage() {
       category: "",
       requesterName: "",
       requesterLocation: "",
-      requesterAddress: "",
-      requesterPhone: "",
       estimatedDuration: "",
     },
   });
@@ -206,55 +202,20 @@ export default function NewErrandPage() {
                 <CollapsibleContent className="space-y-4 pt-4">
                   <FormField
                     control={form.control}
-                    name="requesterAddress"
+                    name="estimatedDuration"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Exact Address</FormLabel>
+                        <FormLabel>Estimated Duration</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input placeholder="e.g., 12 Pearse Street" className="pl-9" {...field} data-testid="input-address" />
+                            <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input placeholder="e.g., 1-2 hours" className="pl-9" {...field} data-testid="input-duration" />
                           </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="requesterPhone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                              <Input type="tel" placeholder="e.g., 087 123 4567" className="pl-9" {...field} data-testid="input-phone" />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="estimatedDuration"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Estimated Duration</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                              <Input placeholder="e.g., 1-2 hours" className="pl-9" {...field} data-testid="input-duration" />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
                   
                   <FormField
                     control={form.control}

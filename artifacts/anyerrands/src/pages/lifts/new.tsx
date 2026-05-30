@@ -13,7 +13,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Car, MapPin, Calendar, Users, Euro, Phone, Send, Lock, ArrowRight, Plane } from "lucide-react";
+import { Car, MapPin, Calendar, Users, Euro, Send, Lock, ArrowRight, Plane } from "lucide-react";
 
 const LIFTS_CATEGORY = "Lifts & Transport";
 
@@ -25,7 +25,6 @@ const formSchema = z.object({
   returnTrip: z.boolean().default(false),
   description: z.string().min(10, "Add a few details (min 10 characters)"),
   requesterName: z.string().min(2, "Name must be at least 2 characters"),
-  requesterPhone: z.string().optional(),
   budgetAmount: z.coerce.number().min(0, "Cannot be negative").optional().or(z.literal("").transform(() => undefined)),
 });
 
@@ -50,7 +49,6 @@ export default function NewLiftPage() {
       returnTrip: false,
       description: "",
       requesterName: "",
-      requesterPhone: "",
     },
   });
 
@@ -70,7 +68,6 @@ export default function NewLiftPage() {
           category: LIFTS_CATEGORY,
           requesterName: values.requesterName,
           requesterLocation: values.tripFrom,
-          requesterPhone: values.requesterPhone,
           budgetAmount: values.budgetAmount,
           tripFrom: values.tripFrom,
           tripTo: values.tripTo,
@@ -276,20 +273,6 @@ export default function NewLiftPage() {
                         <FormControl>
                           <Input placeholder="What should the driver call you?" {...field} data-testid="input-lift-name" />
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="requesterPhone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="flex items-center gap-1.5"><Phone className="w-4 h-4 text-muted-foreground" /> Phone</FormLabel>
-                        <FormControl>
-                          <Input type="tel" placeholder="e.g., 087 123 4567" {...field} data-testid="input-lift-phone" />
-                        </FormControl>
-                        <FormDescription>Optional — so your driver can coordinate</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
