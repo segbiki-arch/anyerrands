@@ -19,6 +19,7 @@ import ProfilePage from "@/pages/profile";
 import AdminReportsPage from "@/pages/admin/reports";
 import AdminHelpersPage from "@/pages/admin/helpers";
 import TermsPage from "@/pages/terms";
+import HelpCenterPage from "@/pages/help-center";
 import NotFound from "@/pages/not-found";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 
@@ -63,6 +64,7 @@ function Router() {
         <Route path="/admin/reports" component={AdminRoute} />
         <Route path="/admin/helpers" component={AdminHelpersRoute} />
         <Route path="/terms" component={TermsPage} />
+        <Route path="/help" component={HelpCenterPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

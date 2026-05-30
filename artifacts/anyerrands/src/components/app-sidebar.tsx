@@ -11,6 +11,7 @@ import {
   ClipboardList,
   ListChecks,
   Car,
+  LifeBuoy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -122,6 +123,23 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
+        </SidebarMenu>
+
+        {/* Help */}
+        <div className="mx-2 my-4 h-px bg-sidebar-border" />
+        <SidebarMenu className="space-y-0.5">
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={isActive("/help")}
+              className={NAV_BTN}
+            >
+              <Link href="/help" data-testid="link-nav-help-centre">
+                <LifeBuoy className="w-4 h-4 shrink-0" />
+                <span>Help Centre</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
 
         {/* Admin */}
