@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { 
   MapPin, Clock, Euro, User, CalendarDays, CheckCircle2, ArrowLeft,
-  Info, CreditCard, Loader2, Flag, AlertTriangle, Home, Phone, Lock,
+  Info, CreditCard, Loader2, Flag, AlertTriangle, MessageCircle, Phone, Lock,
   Car, ArrowRight, Calendar, Users, Star
 } from "lucide-react";
 import { useStripeCheckout } from "@/hooks/use-stripe-checkout";
@@ -48,6 +48,13 @@ const REPORT_REASONS = [
   { value: "late",              label: "Helper was significantly late" },
   { value: "other",             label: "Other issue" },
 ];
+
+function toWhatsAppLink(phone: string): string {
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  else if (digits.startsWith("0")) digits = `353${digits.slice(1)}`;
+  return `https://wa.me/${digits}`;
+}
 
 export default function ErrandDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -68,7 +75,6 @@ export default function ErrandDetailPage() {
   const [isReporting, setIsReporting] = useState(false);
   const [alreadyReported, setAlreadyReported] = useState(false);
 
-  const [contactAddress, setContactAddress] = useState("");
   const [contactPhone, setContactPhone] = useState("");
 
   const [isReviewOpen, setIsReviewOpen] = useState(false);
@@ -176,19 +182,16 @@ export default function ErrandDetailPage() {
   };
 
   const handleSaveContact = () => {
-    if (contactAddress.trim().length < 3) {
-      toast({ title: "Please enter your address", variant: "destructive" }); return;
-    }
     if (contactPhone.trim().length < 5) {
       toast({ title: "Please enter a phone number", variant: "destructive" }); return;
     }
     setErrandContact.mutate(
-      { id: errandId, data: { requesterAddress: contactAddress.trim(), requesterPhone: contactPhone.trim() } },
+      { id: errandId, data: { requesterPhone: contactPhone.trim() } },
       {
         onSuccess: (updated) => {
           queryClient.setQueryData(getGetErrandQueryKey(errandId), updated);
-          setContactAddress(""); setContactPhone("");
-          toast({ title: "Contact details saved", description: "Your helper can now reach you." });
+          setContactPhone("");
+          toast({ title: "Number shared", description: "Your helper can now WhatsApp or call you." });
         },
         onError: (e) => {
           const message = (e as { data?: { error?: string } })?.data?.error ?? "Please try again.";
@@ -271,6 +274,10 @@ export default function ErrandDetailPage() {
 
   const myHelper = helpers?.find((h) => h.isOwner);
   const isAssignedHelper = !!myHelper && errand.helperId === myHelper.id;
+
+  const isLift = errand.category === "Lifts & Transport";
+  const requiresPayment = errand.budgetAmount != null && Number(errand.budgetAmount) > 0;
+  const contactUnlocked = errand.paymentStatus === "paid" || !requiresPayment;
 
   const getStatusBadge = () => {
     switch (errand.status) {
@@ -416,26 +423,17 @@ export default function ErrandDetailPage() {
             );
           })()}
 
-          {errand.status === ErrandStatus.accepted && errand.isRequester
-            && !(errand.requesterAddress && errand.requesterPhone) && (
-            <Card className="border-primary/30 shadow-sm bg-primary/5">
-              <CardContent className="p-6 space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-1">Share your contact details</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Add the address where the errand should happen and a phone number so {errand.helperName ?? "your helper"} can reach you. Only your assigned helper can see this.
-                  </p>
-                </div>
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <Label htmlFor="contact-address">Address</Label>
-                    <Input
-                      id="contact-address"
-                      placeholder="e.g. 12 Main Street, Nenagh"
-                      value={contactAddress}
-                      onChange={(e) => setContactAddress(e.target.value)}
-                      data-testid="input-contact-address"
-                    />
+          {errand.status === ErrandStatus.accepted && errand.isRequester && !errand.requesterPhone && (
+            contactUnlocked ? (
+              <Card className="border-primary/30 shadow-sm bg-primary/5">
+                <CardContent className="p-6 space-y-4">
+                  <div>
+                    <h3 className="font-semibold mb-1">Share your number with {errand.helperName ?? "your helper"}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {isLift
+                        ? `Add your phone number so ${errand.helperName ?? "your driver"} can WhatsApp or call you to sort out pickup and directions. Only your assigned driver can see this.`
+                        : `Add your phone number so ${errand.helperName ?? "your helper"} can WhatsApp or call you to arrange the address and details. Only your assigned helper can see this.`}
+                    </p>
                   </div>
                   <div className="space-y-1.5">
                     <Label htmlFor="contact-phone">Phone number</Label>
@@ -448,17 +446,28 @@ export default function ErrandDetailPage() {
                       data-testid="input-contact-phone"
                     />
                   </div>
-                </div>
-                <Button
-                  className="w-full rounded-full"
-                  onClick={handleSaveContact}
-                  disabled={setErrandContact.isPending}
-                  data-testid="btn-save-contact"
-                >
-                  {setErrandContact.isPending ? "Saving…" : "Save contact details"}
-                </Button>
-              </CardContent>
-            </Card>
+                  <Button
+                    className="w-full rounded-full"
+                    onClick={handleSaveContact}
+                    disabled={setErrandContact.isPending}
+                    data-testid="btn-save-contact"
+                  >
+                    {setErrandContact.isPending ? "Sharing…" : "Share my number"}
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-border/60 shadow-sm bg-muted/30">
+                <CardContent className="p-6 space-y-2">
+                  <h3 className="font-semibold flex items-center gap-1.5">
+                    <Lock className="w-4 h-4 text-primary" /> Pay first to share your number
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Once you pay (just below), you'll be able to share your number so {errand.helperName ?? "your helper"} can WhatsApp or call you. Your payment is held safely and only released when you confirm the job is done.
+                  </p>
+                </CardContent>
+              </Card>
+            )
           )}
 
           {/* Report section — shown on accepted or completed errands */}
@@ -507,31 +516,35 @@ export default function ErrandDetailPage() {
                 </div>
               </div>
 
-              {errand.status !== ErrandStatus.open && (errand.requesterAddress || errand.requesterPhone) && (
-                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-4">
+              {errand.status !== ErrandStatus.open && errand.requesterPhone && (
+                <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
                   <p className="text-sm font-semibold flex items-center gap-1.5 text-foreground">
-                    <Lock className="w-3.5 h-3.5 text-primary" /> Contact details
+                    <Lock className="w-3.5 h-3.5 text-primary" /> {isLift ? "Contact for directions" : "Contact the requester"}
                   </p>
-                  {errand.requesterAddress && (
-                    <div className="flex gap-3">
-                      <Home className="w-5 h-5 text-primary shrink-0" />
-                      <div>
-                        <p className="text-sm text-muted-foreground font-medium">Address</p>
-                        <p className="text-foreground">{errand.requesterAddress}</p>
-                      </div>
-                    </div>
-                  )}
-                  {errand.requesterPhone && (
-                    <div className="flex gap-3">
-                      <Phone className="w-5 h-5 text-primary shrink-0" />
-                      <div>
-                        <p className="text-sm text-muted-foreground font-medium">Phone</p>
-                        <a href={`tel:${errand.requesterPhone}`} className="text-foreground font-medium hover:text-primary underline-offset-2 hover:underline">
-                          {errand.requesterPhone}
-                        </a>
-                      </div>
-                    </div>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {isLift
+                      ? "Message or call to sort out pickup and directions."
+                      : "Message or call to arrange the address and details."}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <a
+                      href={toWhatsAppLink(errand.requesterPhone)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 rounded-full bg-[#25D366] text-white font-medium py-2.5 text-sm hover:opacity-90 transition-opacity"
+                      data-testid="link-whatsapp"
+                    >
+                      <MessageCircle className="w-4 h-4" /> WhatsApp
+                    </a>
+                    <a
+                      href={`tel:${errand.requesterPhone}`}
+                      className="flex items-center justify-center gap-2 rounded-full border border-border bg-background text-foreground font-medium py-2.5 text-sm hover:bg-muted transition-colors"
+                      data-testid="link-call"
+                    >
+                      <Phone className="w-4 h-4" /> Call
+                    </a>
+                  </div>
+                  <p className="text-xs text-muted-foreground text-center">{errand.requesterPhone}</p>
                 </div>
               )}
 
@@ -618,7 +631,6 @@ export default function ErrandDetailPage() {
                       </>
                     )}
                     {(() => {
-                      const requiresPayment = errand.budgetAmount != null && Number(errand.budgetAmount) > 0;
                       const paymentMissing = requiresPayment && errand.paymentStatus !== "paid";
                       // Only the requester can confirm completion — this releases
                       // the held payment to the helper, so the helper must not be

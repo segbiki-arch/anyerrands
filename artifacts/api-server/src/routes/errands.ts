@@ -44,13 +44,15 @@ function formatErrand(
   const isOpen = e.status === "open";
   const isRequester = !!currentUserId && e.requesterUserId === currentUserId;
   const isAssignedHelper = viewerHelperId != null && e.helperId === viewerHelperId;
-  // Address + phone are private contact details: only the requester who posted
-  // the errand and the helper assigned to it may see them. Everyone else (and
-  // anyone viewing an open errand) gets null.
+  // The phone number is a private contact detail: only the requester who posted
+  // the errand and the helper assigned to it may see it. Everyone else (and
+  // anyone viewing an open errand) gets null. The legacy requesterAddress column
+  // is never returned (phone-only contact model).
   const canSeeContact = !isOpen && (isRequester || isAssignedHelper);
+  const { requesterAddress: _legacyAddress, ...rest } = e;
+  void _legacyAddress;
   return {
-    ...e,
-    requesterAddress: canSeeContact ? e.requesterAddress : null,
+    ...rest,
     requesterPhone: canSeeContact ? e.requesterPhone : null,
     budgetAmount: e.budgetAmount ? Number(e.budgetAmount) : null,
     paidAmount: e.paidAmount ? Number(e.paidAmount) : null,
@@ -90,7 +92,7 @@ router.post("/errands", async (req, res) => {
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid body", details: parsed.error });
   }
-  const { budgetAmount, requesterAddress: _ignoredAddress, requesterPhone: _ignoredPhone, tripFrom, tripTo, tripWhen, ...rest } = parsed.data;
+  const { budgetAmount, tripFrom, tripTo, tripWhen, ...rest } = parsed.data;
   const cleanText = (v: string | undefined) => (v?.trim() ? v.trim() : null);
   const [row] = await db
     .insert(errandsTable)
@@ -278,10 +280,14 @@ router.post("/errands/:id/contact", async (req, res) => {
     return res.status(400).json({ error: "You can only share contact details once a helper has accepted your errand." });
   }
 
+  const requiresPayment = errand.budgetAmount != null && Number(errand.budgetAmount) > 0;
+  if (requiresPayment && errand.paymentStatus !== "paid") {
+    return res.status(400).json({ error: "Please pay first. Your payment is held safely and only released to the helper when you confirm the job is done — once it's paid you can share your number." });
+  }
+
   const [row] = await db
     .update(errandsTable)
     .set({
-      requesterAddress: bodyParsed.data.requesterAddress.trim(),
       requesterPhone: bodyParsed.data.requesterPhone.trim(),
       updatedAt: new Date(),
     })

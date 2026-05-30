@@ -118,7 +118,6 @@ export const ListErrandsResponseItem = zod.object({
   "status": zod.enum(['open', 'accepted', 'completed']),
   "requesterName": zod.string(),
   "requesterLocation": zod.string(),
-  "requesterAddress": zod.string().nullish(),
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
@@ -158,8 +157,6 @@ export const CreateErrandBody = zod.object({
   "category": zod.string(),
   "requesterName": zod.string(),
   "requesterLocation": zod.string(),
-  "requesterAddress": zod.string().optional(),
-  "requesterPhone": zod.string().optional(),
   "estimatedDuration": zod.string().optional(),
   "budgetAmount": zod.number().optional(),
   "tripFrom": zod.string().optional(),
@@ -185,7 +182,6 @@ export const GetErrandResponse = zod.object({
   "status": zod.enum(['open', 'accepted', 'completed']),
   "requesterName": zod.string(),
   "requesterLocation": zod.string(),
-  "requesterAddress": zod.string().nullish(),
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
@@ -232,7 +228,6 @@ export const UpdateErrandResponse = zod.object({
   "status": zod.enum(['open', 'accepted', 'completed']),
   "requesterName": zod.string(),
   "requesterLocation": zod.string(),
-  "requesterAddress": zod.string().nullish(),
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
@@ -281,7 +276,6 @@ export const AcceptErrandResponse = zod.object({
   "status": zod.enum(['open', 'accepted', 'completed']),
   "requesterName": zod.string(),
   "requesterLocation": zod.string(),
-  "requesterAddress": zod.string().nullish(),
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
@@ -304,20 +298,17 @@ export const AcceptErrandResponse = zod.object({
 
 
 /**
- * @summary Requester sets their contact details (address + phone) after acceptance
+ * @summary Requester shares their phone number after acceptance (and payment, if required)
  */
 export const SetErrandContactParams = zod.object({
   "id": zod.coerce.number()
 })
-
-export const setErrandContactBodyRequesterAddressMin = 3;
 
 export const setErrandContactBodyRequesterPhoneMin = 5;
 
 
 
 export const SetErrandContactBody = zod.object({
-  "requesterAddress": zod.string().min(setErrandContactBodyRequesterAddressMin),
   "requesterPhone": zod.string().min(setErrandContactBodyRequesterPhoneMin)
 })
 
@@ -329,7 +320,6 @@ export const SetErrandContactResponse = zod.object({
   "status": zod.enum(['open', 'accepted', 'completed']),
   "requesterName": zod.string(),
   "requesterLocation": zod.string(),
-  "requesterAddress": zod.string().nullish(),
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
@@ -366,7 +356,6 @@ export const CompleteErrandResponse = zod.object({
   "status": zod.enum(['open', 'accepted', 'completed']),
   "requesterName": zod.string(),
   "requesterLocation": zod.string(),
-  "requesterAddress": zod.string().nullish(),
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
@@ -403,7 +392,6 @@ export const AbortErrandResponse = zod.object({
   "status": zod.enum(['open', 'accepted', 'completed']),
   "requesterName": zod.string(),
   "requesterLocation": zod.string(),
-  "requesterAddress": zod.string().nullish(),
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
@@ -454,7 +442,6 @@ export const GetRecentErrandsResponseItem = zod.object({
   "status": zod.enum(['open', 'accepted', 'completed']),
   "requesterName": zod.string(),
   "requesterLocation": zod.string(),
-  "requesterAddress": zod.string().nullish(),
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),
@@ -580,7 +567,6 @@ export const GetHelperErrandsResponseItem = zod.object({
   "status": zod.enum(['open', 'accepted', 'completed']),
   "requesterName": zod.string(),
   "requesterLocation": zod.string(),
-  "requesterAddress": zod.string().nullish(),
   "requesterPhone": zod.string().nullish(),
   "estimatedDuration": zod.string().nullish(),
   "budgetAmount": zod.number().nullish(),

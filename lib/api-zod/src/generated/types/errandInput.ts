@@ -14,8 +14,6 @@ export interface ErrandInput {
   category: string;
   requesterName: string;
   requesterLocation: string;
-  requesterAddress?: string;
-  requesterPhone?: string;
   estimatedDuration?: string;
   budgetAmount?: number;
   tripFrom?: string;

@@ -1065,7 +1065,7 @@ export const getSetErrandContactUrl = (id: number,) => {
 }
 
 /**
- * @summary Requester sets their contact details (address + phone) after acceptance
+ * @summary Requester shares their phone number after acceptance (and payment, if required)
  */
 export const setErrandContact = async (id: number,
     errandContactInput: ErrandContactInput, options?: RequestInit): Promise<Errand> => {
@@ -1115,7 +1115,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type SetErrandContactMutationError = ErrorType<void>
 
     /**
- * @summary Requester sets their contact details (address + phone) after acceptance
+ * @summary Requester shares their phone number after acceptance (and payment, if required)
  */
 export const useSetErrandContact = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setErrandContact>>, TError,{id: number;data: BodyType<ErrandContactInput>}, TContext>, request?: SecondParameter<typeof customFetch>}

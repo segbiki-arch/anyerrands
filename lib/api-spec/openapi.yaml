@@ -297,7 +297,7 @@ paths:
     post:
       operationId: setErrandContact
       tags: [errands]
-      summary: Requester sets their contact details (address + phone) after acceptance
+      summary: Requester shares their phone number after acceptance (and payment, if required)
       parameters:
         - name: id
           in: path
@@ -916,8 +916,6 @@ components:
           type: string
         requesterLocation:
           type: string
-        requesterAddress:
-          type: ["string", "null"]
         requesterPhone:
           type: ["string", "null"]
         estimatedDuration:
@@ -974,10 +972,6 @@ components:
           type: string
         requesterLocation:
           type: string
-        requesterAddress:
-          type: string
-        requesterPhone:
-          type: string
         estimatedDuration:
           type: string
         budgetAmount:
@@ -1023,11 +1017,8 @@ components:
 
     ErrandContactInput:
       type: object
-      required: [requesterAddress, requesterPhone]
+      required: [requesterPhone]
       properties:
-        requesterAddress:
-          type: string
-          minLength: 3
         requesterPhone:
           type: string
           minLength: 5

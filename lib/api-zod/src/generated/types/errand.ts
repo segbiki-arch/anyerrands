@@ -17,8 +17,6 @@ export interface Errand {
   requesterName: string;
   requesterLocation: string;
   /** @nullable */
-  requesterAddress?: string | null;
-  /** @nullable */
   requesterPhone?: string | null;
   /** @nullable */
   estimatedDuration?: string | null;

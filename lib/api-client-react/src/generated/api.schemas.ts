@@ -79,8 +79,6 @@ export interface Errand {
   requesterName: string;
   requesterLocation: string;
   /** @nullable */
-  requesterAddress?: string | null;
-  /** @nullable */
   requesterPhone?: string | null;
   /** @nullable */
   estimatedDuration?: string | null;
@@ -126,8 +124,6 @@ export interface ErrandInput {
   category: string;
   requesterName: string;
   requesterLocation: string;
-  requesterAddress?: string;
-  requesterPhone?: string;
   estimatedDuration?: string;
   budgetAmount?: number;
   tripFrom?: string;
@@ -165,8 +161,6 @@ export interface AcceptErrandInput {
 }
 
 export interface ErrandContactInput {
-  /** @minLength 3 */
-  requesterAddress: string;
   /** @minLength 5 */
   requesterPhone: string;
 }

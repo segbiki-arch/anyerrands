@@ -7,8 +7,6 @@
  */
 
 export interface ErrandContactInput {
-  /** @minLength 3 */
-  requesterAddress: string;
   /** @minLength 5 */
   requesterPhone: string;
 }
