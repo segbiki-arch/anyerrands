@@ -6,7 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type MarkAllNotificationsReadBody = {
-  helperId?: number;
-  userId?: string;
-};
+export interface ErrandContactInput {
+  /** @minLength 3 */
+  requesterAddress: string;
+  /** @minLength 5 */
+  requesterPhone: string;
+}

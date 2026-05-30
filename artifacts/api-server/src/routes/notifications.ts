@@ -12,18 +12,20 @@ function formatNotification(n: typeof notificationsTable.$inferSelect) {
   };
 }
 
+// A user's notifications are private. We always scope to the logged-in user
+// (req.user.id) and ignore any client-supplied id, so nobody can read or alter
+// someone else's notifications by guessing an id.
 router.get("/notifications", async (req, res) => {
-  const helperId = req.query.helperId ? Number(req.query.helperId) : undefined;
+  if (!req.user) return res.status(401).json({ error: "You must be logged in." });
   const unreadOnly = req.query.unreadOnly === "true";
 
-  const conditions = [];
-  if (helperId != null) conditions.push(eq(notificationsTable.helperId, helperId));
+  const conditions = [eq(notificationsTable.userId, req.user.id)];
   if (unreadOnly) conditions.push(eq(notificationsTable.read, false));
 
   const rows = await db
     .select()
     .from(notificationsTable)
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .where(and(...conditions))
     .orderBy(desc(notificationsTable.createdAt))
     .limit(50);
 
@@ -31,26 +33,26 @@ router.get("/notifications", async (req, res) => {
 });
 
 router.patch("/notifications/mark-all-read", async (req, res) => {
-  const { helperId } = req.body as { helperId?: number };
-  if (!helperId) return res.status(400).json({ error: "helperId required" });
+  if (!req.user) return res.status(401).json({ error: "You must be logged in." });
 
   const rows = await db
     .update(notificationsTable)
     .set({ read: true })
-    .where(and(eq(notificationsTable.helperId, helperId), eq(notificationsTable.read, false)))
+    .where(and(eq(notificationsTable.userId, req.user.id), eq(notificationsTable.read, false)))
     .returning();
 
   return res.json({ updated: rows.length });
 });
 
 router.patch("/notifications/:id/read", async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: "You must be logged in." });
   const id = Number(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
 
   const [row] = await db
     .update(notificationsTable)
     .set({ read: true })
-    .where(eq(notificationsTable.id, id))
+    .where(and(eq(notificationsTable.id, id), eq(notificationsTable.userId, req.user.id)))
     .returning();
 
   if (!row) return res.status(404).json({ error: "Notification not found" });

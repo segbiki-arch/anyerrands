@@ -13,6 +13,7 @@ export * from './authUserEnvelope';
 export * from './beginBrowserLoginParams';
 export * from './category';
 export * from './errand';
+export * from './errandContactInput';
 export * from './errandInput';
 export * from './errandPaymentStatus';
 export * from './errandStats';

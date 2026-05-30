@@ -75,7 +75,11 @@ export type Category = typeof categoriesTable.$inferSelect;
 
 export const notificationsTable = pgTable("notifications", {
   id: serial("id").primaryKey(),
-  helperId: integer("helper_id").references(() => helpersTable.id).notNull(),
+  // A notification targets either a helper (e.g. "new errand nearby") or a
+  // logged-in user by userId (e.g. requester: "your errand was accepted").
+  // Both are nullable so each kind only sets what it needs.
+  userId: text("user_id").references(() => usersTable.id),
+  helperId: integer("helper_id").references(() => helpersTable.id),
   errandId: integer("errand_id").references(() => errandsTable.id).notNull(),
   message: text("message").notNull(),
   read: boolean("read").notNull().default(false),

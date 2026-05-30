@@ -9,35 +9,37 @@ import {
 import { useListNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getListNotificationsQueryKey } from "@workspace/api-client-react";
-
-const DEMO_HELPER_ID = 1;
+import { useAuth } from "@workspace/replit-auth-web";
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const userId = user?.id;
 
-  const { data: notifications = [] } = useListNotifications({ helperId: DEMO_HELPER_ID });
+  const { data: notifications = [] } = useListNotifications(
+    { userId: userId ?? "" },
+    { query: { enabled: !!userId } },
+  );
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  const invalidate = () => {
+    if (userId) {
+      queryClient.invalidateQueries({ queryKey: getListNotificationsQueryKey({ userId }) });
+    }
+  };
+
   const { mutate: markRead } = useMarkNotificationRead({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListNotificationsQueryKey({ helperId: DEMO_HELPER_ID }) });
-      },
-    },
+    mutation: { onSuccess: invalidate },
   });
 
   const { mutate: markAllRead } = useMarkAllNotificationsRead({
-    mutation: {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getListNotificationsQueryKey({ helperId: DEMO_HELPER_ID }) });
-      },
-    },
+    mutation: { onSuccess: invalidate },
   });
 
   function handleMarkAllRead() {
-    markAllRead({ data: { helperId: DEMO_HELPER_ID } });
+    if (userId) markAllRead({ data: { userId } });
   }
 
   function handleMarkRead(id: number) {

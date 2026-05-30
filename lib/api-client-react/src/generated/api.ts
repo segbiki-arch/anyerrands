@@ -25,6 +25,7 @@ import type {
   BeginBrowserLoginParams,
   Category,
   Errand,
+  ErrandContactInput,
   ErrandInput,
   ErrandStats,
   ErrandUpdate,
@@ -1053,6 +1054,78 @@ export const useAcceptErrand = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getAcceptErrandMutationOptions(options));
+    }
+
+export const getSetErrandContactUrl = (id: number,) => {
+
+
+
+
+  return `/api/errands/${id}/contact`
+}
+
+/**
+ * @summary Requester sets their contact details (address + phone) after acceptance
+ */
+export const setErrandContact = async (id: number,
+    errandContactInput: ErrandContactInput, options?: RequestInit): Promise<Errand> => {
+
+  return customFetch<Errand>(getSetErrandContactUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      errandContactInput,)
+  }
+);}
+
+
+
+
+export const getSetErrandContactMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setErrandContact>>, TError,{id: number;data: BodyType<ErrandContactInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setErrandContact>>, TError,{id: number;data: BodyType<ErrandContactInput>}, TContext> => {
+
+const mutationKey = ['setErrandContact'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setErrandContact>>, {id: number;data: BodyType<ErrandContactInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  setErrandContact(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetErrandContactMutationResult = NonNullable<Awaited<ReturnType<typeof setErrandContact>>>
+    export type SetErrandContactMutationBody = BodyType<ErrandContactInput>
+    export type SetErrandContactMutationError = ErrorType<void>
+
+    /**
+ * @summary Requester sets their contact details (address + phone) after acceptance
+ */
+export const useSetErrandContact = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setErrandContact>>, TError,{id: number;data: BodyType<ErrandContactInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof setErrandContact>>,
+        TError,
+        {id: number;data: BodyType<ErrandContactInput>},
+        TContext
+      > => {
+      return useMutation(getSetErrandContactMutationOptions(options));
     }
 
 export const getCompleteErrandUrl = (id: number,) => {
@@ -2494,7 +2567,7 @@ export const getListNotificationsUrl = (params?: ListNotificationsParams,) => {
 }
 
 /**
- * @summary List notifications for a helper
+ * @summary List notifications for a helper or user
  */
 export const listNotifications = async (params?: ListNotificationsParams, options?: RequestInit): Promise<Notification[]> => {
 
@@ -2541,7 +2614,7 @@ export type ListNotificationsQueryError = ErrorType<unknown>
 
 
 /**
- * @summary List notifications for a helper
+ * @summary List notifications for a helper or user
  */
 
 export function useListNotifications<TData = Awaited<ReturnType<typeof listNotifications>>, TError = ErrorType<unknown>>(
@@ -2641,7 +2714,7 @@ export const getMarkAllNotificationsReadUrl = () => {
 }
 
 /**
- * @summary Mark all notifications as read for a helper
+ * @summary Mark all notifications as read for a helper or user
  */
 export const markAllNotificationsRead = async (markAllNotificationsReadBody: MarkAllNotificationsReadBody, options?: RequestInit): Promise<MarkAllNotificationsRead200> => {
 
@@ -2690,7 +2763,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type MarkAllNotificationsReadMutationError = ErrorType<unknown>
 
     /**
- * @summary Mark all notifications as read for a helper
+ * @summary Mark all notifications as read for a helper or user
  */
 export const useMarkAllNotificationsRead = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markAllNotificationsRead>>, TError,{data: BodyType<MarkAllNotificationsReadBody>}, TContext>, request?: SecondParameter<typeof customFetch>}

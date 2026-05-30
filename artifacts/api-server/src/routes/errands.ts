@@ -11,6 +11,8 @@ import {
   DeleteErrandParams,
   AcceptErrandParams,
   AcceptErrandBody,
+  SetErrandContactParams,
+  SetErrandContactBody,
   CompleteErrandParams,
   AbortErrandParams,
   GetRecentErrandsQueryParams,
@@ -23,19 +25,40 @@ import { refundAndReopenErrand } from "../lib/refunds";
 
 const router = Router();
 
-function formatErrand(e: typeof errandsTable.$inferSelect, currentUserId?: string) {
+// Look up the helper profile id (if any) owned by the given user, so we can
+// tell whether the viewer is the assigned helper on an errand.
+async function getViewerHelperId(userId?: string): Promise<number | null> {
+  if (!userId) return null;
+  const [h] = await db
+    .select({ id: helpersTable.id })
+    .from(helpersTable)
+    .where(eq(helpersTable.userId, userId));
+  return h?.id ?? null;
+}
+
+function formatErrand(
+  e: typeof errandsTable.$inferSelect,
+  currentUserId?: string,
+  viewerHelperId?: number | null,
+) {
   const isOpen = e.status === "open";
+  const isRequester = !!currentUserId && e.requesterUserId === currentUserId;
+  const isAssignedHelper = viewerHelperId != null && e.helperId === viewerHelperId;
+  // Address + phone are private contact details: only the requester who posted
+  // the errand and the helper assigned to it may see them. Everyone else (and
+  // anyone viewing an open errand) gets null.
+  const canSeeContact = !isOpen && (isRequester || isAssignedHelper);
   return {
     ...e,
-    requesterAddress: isOpen ? null : e.requesterAddress,
-    requesterPhone: isOpen ? null : e.requesterPhone,
+    requesterAddress: canSeeContact ? e.requesterAddress : null,
+    requesterPhone: canSeeContact ? e.requesterPhone : null,
     budgetAmount: e.budgetAmount ? Number(e.budgetAmount) : null,
     paidAmount: e.paidAmount ? Number(e.paidAmount) : null,
     platformFee: e.platformFee ? Number(e.platformFee) : null,
     paidAt: e.paidAt ? e.paidAt.toISOString() : null,
     createdAt: e.createdAt.toISOString(),
     updatedAt: e.updatedAt ? e.updatedAt.toISOString() : null,
-    isRequester: !!currentUserId && e.requesterUserId === currentUserId,
+    isRequester,
   };
 }
 
@@ -58,7 +81,8 @@ router.get("/errands", async (req, res) => {
     .limit(limit)
     .offset(offset);
 
-  return res.json(rows.map((r) => formatErrand(r, req.user?.id)));
+  const viewerHelperId = await getViewerHelperId(req.user?.id);
+  return res.json(rows.map((r) => formatErrand(r, req.user?.id, viewerHelperId)));
 });
 
 router.post("/errands", async (req, res) => {
@@ -98,6 +122,9 @@ router.post("/errands", async (req, res) => {
     await db.insert(notificationsTable).values(
       recipients.map((h) => ({
         helperId: h.id,
+        // Target the helper's login too so it shows in their notification bell,
+        // which is keyed by the logged-in user.
+        userId: h.userId ?? null,
         errandId: row.id,
         message: `New errand in ${locationKeyword}: "${row.title}"`,
       }))
@@ -140,7 +167,8 @@ router.get("/errands/recent", async (req, res) => {
     .from(errandsTable)
     .orderBy(desc(errandsTable.createdAt))
     .limit(limit);
-  return res.json(rows.map((r) => formatErrand(r, req.user?.id)));
+  const viewerHelperId = await getViewerHelperId(req.user?.id);
+  return res.json(rows.map((r) => formatErrand(r, req.user?.id, viewerHelperId)));
 });
 
 router.get("/errands/:id", async (req, res) => {
@@ -148,7 +176,8 @@ router.get("/errands/:id", async (req, res) => {
   if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
   const [row] = await db.select().from(errandsTable).where(eq(errandsTable.id, parsed.data.id));
   if (!row) return res.status(404).json({ error: "Not found" });
-  return res.json(formatErrand(row, req.user?.id));
+  const viewerHelperId = await getViewerHelperId(req.user?.id);
+  return res.json(formatErrand(row, req.user?.id, viewerHelperId));
 });
 
 router.patch("/errands/:id", async (req, res) => {
@@ -210,7 +239,52 @@ router.post("/errands/:id/accept", async (req, res) => {
     .returning();
 
   if (!row) return res.status(404).json({ error: "Errand not found" });
+
+  // Let the requester know a helper picked up their errand. Only possible when
+  // the errand has a logged-in owner (anonymous/legacy errands have no userId).
+  if (row.requesterUserId) {
+    await db.insert(notificationsTable).values({
+      userId: row.requesterUserId,
+      helperId: helper.id,
+      errandId: row.id,
+      message: `${helper.name} accepted your errand "${row.title}". Add your contact details so they can reach you.`,
+    });
+  }
+
   return res.json(formatErrand(row, req.user?.id));
+});
+
+// The requester shares their address + phone with the assigned helper after
+// acceptance. Gated to the errand's owner so nobody else can change the contact
+// details that get shown to the helper.
+router.post("/errands/:id/contact", async (req, res) => {
+  const paramParsed = SetErrandContactParams.safeParse({ id: Number(req.params.id) });
+  if (!paramParsed.success) return res.status(400).json({ error: "Invalid id" });
+  const bodyParsed = SetErrandContactBody.safeParse(req.body);
+  if (!bodyParsed.success) return res.status(400).json({ error: "Invalid body", details: bodyParsed.error });
+
+  if (!req.user) {
+    return res.status(401).json({ error: "You must be logged in to update contact details." });
+  }
+
+  const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, paramParsed.data.id));
+  if (!errand) return res.status(404).json({ error: "Not found" });
+
+  if (errand.requesterUserId !== req.user.id) {
+    return res.status(403).json({ error: "Only the person who posted this errand can set its contact details." });
+  }
+
+  const [row] = await db
+    .update(errandsTable)
+    .set({
+      requesterAddress: bodyParsed.data.requesterAddress.trim(),
+      requesterPhone: bodyParsed.data.requesterPhone.trim(),
+      updatedAt: new Date(),
+    })
+    .where(eq(errandsTable.id, paramParsed.data.id))
+    .returning();
+
+  return res.json(formatErrand(row!, req.user?.id));
 });
 
 router.post("/errands/:id/complete", async (req, res) => {

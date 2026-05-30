@@ -293,6 +293,35 @@ paths:
         "404":
           description: Not found
 
+  /errands/{id}/contact:
+    post:
+      operationId: setErrandContact
+      tags: [errands]
+      summary: Requester sets their contact details (address + phone) after acceptance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ErrandContactInput"
+      responses:
+        "200":
+          description: Contact details saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errand"
+        "403":
+          description: Only the requester can set contact details
+        "404":
+          description: Not found
+
   /errands/{id}/complete:
     post:
       operationId: completeErrand
@@ -701,13 +730,18 @@ paths:
     get:
       operationId: listNotifications
       tags: [notifications]
-      summary: List notifications for a helper
+      summary: List notifications for a helper or user
       parameters:
         - name: helperId
           in: query
           required: false
           schema:
             type: integer
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
         - name: unreadOnly
           in: query
           required: false
@@ -748,17 +782,18 @@ paths:
     patch:
       operationId: markAllNotificationsRead
       tags: [notifications]
-      summary: Mark all notifications as read for a helper
+      summary: Mark all notifications as read for a helper or user
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [helperId]
               properties:
                 helperId:
                   type: integer
+                userId:
+                  type: string
       responses:
         "200":
           description: Count of notifications updated
@@ -985,6 +1020,17 @@ components:
       properties:
         helperId:
           type: integer
+
+    ErrandContactInput:
+      type: object
+      required: [requesterAddress, requesterPhone]
+      properties:
+        requesterAddress:
+          type: string
+          minLength: 3
+        requesterPhone:
+          type: string
+          minLength: 5
 
     ErrandStats:
       type: object
@@ -1254,12 +1300,14 @@ components:
 
     Notification:
       type: object
-      required: [id, helperId, errandId, message, read, createdAt]
+      required: [id, errandId, message, read, createdAt]
       properties:
         id:
           type: integer
+        userId:
+          type: ["string", "null"]
         helperId:
-          type: integer
+          type: ["integer", "null"]
         errandId:
           type: integer
         message:

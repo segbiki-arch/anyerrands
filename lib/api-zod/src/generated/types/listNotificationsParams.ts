@@ -8,5 +8,6 @@
 
 export type ListNotificationsParams = {
 helperId?: number;
+userId?: string;
 unreadOnly?: boolean;
 };

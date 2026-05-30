@@ -8,7 +8,10 @@
 
 export interface Notification {
   id: number;
-  helperId: number;
+  /** @nullable */
+  userId?: string | null;
+  /** @nullable */
+  helperId?: number | null;
   errandId: number;
   message: string;
   read: boolean;

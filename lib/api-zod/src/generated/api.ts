@@ -304,6 +304,54 @@ export const AcceptErrandResponse = zod.object({
 
 
 /**
+ * @summary Requester sets their contact details (address + phone) after acceptance
+ */
+export const SetErrandContactParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const setErrandContactBodyRequesterAddressMin = 3;
+
+export const setErrandContactBodyRequesterPhoneMin = 5;
+
+
+
+export const SetErrandContactBody = zod.object({
+  "requesterAddress": zod.string().min(setErrandContactBodyRequesterAddressMin),
+  "requesterPhone": zod.string().min(setErrandContactBodyRequesterPhoneMin)
+})
+
+export const SetErrandContactResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "category": zod.string(),
+  "status": zod.enum(['open', 'accepted', 'completed']),
+  "requesterName": zod.string(),
+  "requesterLocation": zod.string(),
+  "requesterAddress": zod.string().nullish(),
+  "requesterPhone": zod.string().nullish(),
+  "estimatedDuration": zod.string().nullish(),
+  "budgetAmount": zod.number().nullish(),
+  "tripFrom": zod.string().nullish(),
+  "tripTo": zod.string().nullish(),
+  "tripWhen": zod.string().nullish(),
+  "passengers": zod.number().nullish(),
+  "returnTrip": zod.boolean().optional(),
+  "helperId": zod.number().nullish(),
+  "helperName": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
+  "paidAmount": zod.number().nullish(),
+  "platformFee": zod.number().nullish(),
+  "paidAt": zod.string().nullish(),
+  "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().nullish(),
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+})
+
+
+/**
  * @summary Mark an errand as completed
  */
 export const CompleteErrandParams = zod.object({
@@ -741,16 +789,18 @@ export const UpdateReportStatusResponse = zod.object({
 
 
 /**
- * @summary List notifications for a helper
+ * @summary List notifications for a helper or user
  */
 export const ListNotificationsQueryParams = zod.object({
   "helperId": zod.coerce.number().optional(),
+  "userId": zod.coerce.string().optional(),
   "unreadOnly": zod.coerce.boolean().optional()
 })
 
 export const ListNotificationsResponseItem = zod.object({
   "id": zod.number(),
-  "helperId": zod.number(),
+  "userId": zod.string().nullish(),
+  "helperId": zod.number().nullish(),
   "errandId": zod.number(),
   "message": zod.string(),
   "read": zod.boolean(),
@@ -768,7 +818,8 @@ export const MarkNotificationReadParams = zod.object({
 
 export const MarkNotificationReadResponse = zod.object({
   "id": zod.number(),
-  "helperId": zod.number(),
+  "userId": zod.string().nullish(),
+  "helperId": zod.number().nullish(),
   "errandId": zod.number(),
   "message": zod.string(),
   "read": zod.boolean(),
@@ -777,10 +828,11 @@ export const MarkNotificationReadResponse = zod.object({
 
 
 /**
- * @summary Mark all notifications as read for a helper
+ * @summary Mark all notifications as read for a helper or user
  */
 export const MarkAllNotificationsReadBody = zod.object({
-  "helperId": zod.number()
+  "helperId": zod.number().optional(),
+  "userId": zod.string().optional()
 })
 
 export const MarkAllNotificationsReadResponse = zod.object({

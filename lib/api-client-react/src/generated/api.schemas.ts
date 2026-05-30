@@ -164,6 +164,13 @@ export interface AcceptErrandInput {
   helperId: number;
 }
 
+export interface ErrandContactInput {
+  /** @minLength 3 */
+  requesterAddress: string;
+  /** @minLength 5 */
+  requesterPhone: string;
+}
+
 export interface ErrandStats {
   totalOpen: number;
   totalAccepted: number;
@@ -377,7 +384,10 @@ export interface ReportWithContext {
 
 export interface Notification {
   id: number;
-  helperId: number;
+  /** @nullable */
+  userId?: string | null;
+  /** @nullable */
+  helperId?: number | null;
   errandId: number;
   message: string;
   read: boolean;
@@ -437,11 +447,13 @@ export const ListReportsStatus = {
 
 export type ListNotificationsParams = {
 helperId?: number;
+userId?: string;
 unreadOnly?: boolean;
 };
 
 export type MarkAllNotificationsReadBody = {
-  helperId: number;
+  helperId?: number;
+  userId?: string;
 };
 
 export type MarkAllNotificationsRead200 = {

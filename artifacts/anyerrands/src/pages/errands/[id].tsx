@@ -6,6 +6,7 @@ import {
   useAcceptErrand, 
   useCompleteErrand, 
   useAbortErrand,
+  useSetErrandContact,
   useListHelpers,
   useCreateReview,
   ErrandStatus,
@@ -67,6 +68,9 @@ export default function ErrandDetailPage() {
   const [isReporting, setIsReporting] = useState(false);
   const [alreadyReported, setAlreadyReported] = useState(false);
 
+  const [contactAddress, setContactAddress] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [reviewerName, setReviewerName] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
@@ -90,6 +94,7 @@ export default function ErrandDetailPage() {
   const acceptErrand = useAcceptErrand();
   const completeErrand = useCompleteErrand();
   const abortErrand = useAbortErrand();
+  const setErrandContact = useSetErrandContact();
   const createReview = useCreateReview();
 
   if (isNaN(errandId) || error) {
@@ -168,6 +173,29 @@ export default function ErrandDetailPage() {
         toast({ title: "Couldn't back out", description: message, variant: "destructive" });
       },
     });
+  };
+
+  const handleSaveContact = () => {
+    if (contactAddress.trim().length < 3) {
+      toast({ title: "Please enter your address", variant: "destructive" }); return;
+    }
+    if (contactPhone.trim().length < 5) {
+      toast({ title: "Please enter a phone number", variant: "destructive" }); return;
+    }
+    setErrandContact.mutate(
+      { id: errandId, data: { requesterAddress: contactAddress.trim(), requesterPhone: contactPhone.trim() } },
+      {
+        onSuccess: (updated) => {
+          queryClient.setQueryData(getGetErrandQueryKey(errandId), updated);
+          setContactAddress(""); setContactPhone("");
+          toast({ title: "Contact details saved", description: "Your helper can now reach you." });
+        },
+        onError: (e) => {
+          const message = (e as { data?: { error?: string } })?.data?.error ?? "Please try again.";
+          toast({ title: "Couldn't save details", description: message, variant: "destructive" });
+        },
+      }
+    );
   };
 
   const handleReview = () => {
@@ -324,15 +352,111 @@ export default function ErrandDetailPage() {
             </CardContent>
           </Card>
 
-          {errand.status !== ErrandStatus.open && (
-            <Card className="border-border/60 shadow-sm bg-muted/30">
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-2">Helper Assignment</h3>
-                {errand.helperName ? (
-                  <p className="text-muted-foreground">Assigned to: <span className="font-medium text-foreground">{errand.helperName}</span></p>
-                ) : (
-                  <p className="text-muted-foreground italic">Helper info unavailable</p>
-                )}
+          {errand.status !== ErrandStatus.open && (() => {
+            const assignedHelper = errand.helperId != null
+              ? helpers?.find((h) => h.id === errand.helperId)
+              : undefined;
+            const initials = assignedHelper?.avatarInitials
+              || (errand.helperName ?? "")
+                .split(" ")
+                .map((p) => p[0])
+                .filter(Boolean)
+                .slice(0, 2)
+                .join("")
+                .toUpperCase();
+            return (
+              <Card className="border-border/60 shadow-sm bg-muted/30">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold mb-4">Your helper</h3>
+                  {errand.helperName ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center shrink-0 font-semibold text-foreground">
+                          {initials || <User className="w-5 h-5 text-primary" />}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-semibold text-foreground truncate">{errand.helperName}</p>
+                          {assignedHelper && (
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              {assignedHelper.rating != null && (
+                                <span className="flex items-center gap-1">
+                                  <Star className="w-3.5 h-3.5 fill-primary text-primary" />
+                                  {assignedHelper.rating.toFixed(1)}
+                                </span>
+                              )}
+                              <span>{assignedHelper.errandsCompleted} errand{assignedHelper.errandsCompleted === 1 ? "" : "s"} done</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {assignedHelper?.location && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="w-4 h-4 text-primary shrink-0" />
+                          <span>{assignedHelper.location}</span>
+                        </div>
+                      )}
+                      {assignedHelper?.bio && (
+                        <p className="text-sm text-muted-foreground">{assignedHelper.bio}</p>
+                      )}
+                      {assignedHelper?.skills && assignedHelper.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {assignedHelper.skills.map((skill) => (
+                            <span key={skill} className="text-xs rounded-full bg-primary/10 text-foreground px-2.5 py-0.5">
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground italic">Helper info unavailable</p>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()}
+
+          {errand.status === ErrandStatus.accepted && errand.isRequester
+            && !(errand.requesterAddress && errand.requesterPhone) && (
+            <Card className="border-primary/30 shadow-sm bg-primary/5">
+              <CardContent className="p-6 space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-1">Share your contact details</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Add the address where the errand should happen and a phone number so {errand.helperName ?? "your helper"} can reach you. Only your assigned helper can see this.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="contact-address">Address</Label>
+                    <Input
+                      id="contact-address"
+                      placeholder="e.g. 12 Main Street, Nenagh"
+                      value={contactAddress}
+                      onChange={(e) => setContactAddress(e.target.value)}
+                      data-testid="input-contact-address"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="contact-phone">Phone number</Label>
+                    <Input
+                      id="contact-phone"
+                      type="tel"
+                      placeholder="e.g. 087 123 4567"
+                      value={contactPhone}
+                      onChange={(e) => setContactPhone(e.target.value)}
+                      data-testid="input-contact-phone"
+                    />
+                  </div>
+                </div>
+                <Button
+                  className="w-full rounded-full"
+                  onClick={handleSaveContact}
+                  disabled={setErrandContact.isPending}
+                  data-testid="btn-save-contact"
+                >
+                  {setErrandContact.isPending ? "Saving…" : "Save contact details"}
+                </Button>
               </CardContent>
             </Card>
           )}
@@ -472,7 +596,7 @@ export default function ErrandDetailPage() {
                               </p>
                             )}
                           </div>
-                        ) : (
+                        ) : errand.isRequester ? (
                           <>
                             <Button
                               className="w-full rounded-full" size="lg"
@@ -486,6 +610,10 @@ export default function ErrandDetailPage() {
                             </Button>
                             <p className="text-xs text-center text-muted-foreground">Pay securely by card — no account needed · 90% goes to the helper · 10% platform fee</p>
                           </>
+                        ) : (
+                          <p className="text-xs text-center text-muted-foreground bg-muted/50 rounded-md px-2 py-1.5" data-testid="text-awaiting-payment">
+                            Waiting for the requester to pay. Your payment is held safely and only released once they confirm the job is done.
+                          </p>
                         )}
                       </>
                     )}
