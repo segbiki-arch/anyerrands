@@ -24,7 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import {
   MapPin, Star, CheckCircle2, ArrowLeft, CalendarDays,
-  Banknote, ExternalLink, AlertCircle, Loader2, ShieldCheck, Wallet, TrendingUp
+  Banknote, ExternalLink, AlertCircle, Loader2, ShieldCheck, Wallet, TrendingUp, ListChecks
 } from "lucide-react";
 
 function formatEuro(n: number) {
@@ -118,6 +118,11 @@ export default function HelperProfilePage() {
   const isConnected = connectStatus?.detailsSubmitted === true;
   const isPending = connectStatus?.connected && !connectStatus?.detailsSubmitted;
 
+  // Jobs this helper has accepted but not yet completed — the ones they still
+  // need to act on. Surfaced prominently (owner-only) so they never have to go
+  // hunting through the browse list to find their own work.
+  const activeJobs = (errands ?? []).filter((e) => e.status === "accepted");
+
   return (
     <div className="max-w-5xl mx-auto p-6 md:p-8 space-y-8 pb-20">
       <Button variant="ghost" onClick={() => setLocation("/helpers")} className="-ml-4 text-muted-foreground hover:text-foreground">
@@ -191,6 +196,44 @@ export default function HelperProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Active jobs — only the helper themselves sees the errands they've
+          accepted and still need to complete, so they're always one click away. */}
+      {helper.isOwner && (
+      <Card className="border-primary/30 bg-primary/5 shadow-sm">
+        <CardContent className="p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <ListChecks className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-bold">Errands you've accepted</h2>
+            {activeJobs.length > 0 && (
+              <Badge className="ml-1 rounded-full bg-primary text-primary-foreground">{activeJobs.length}</Badge>
+            )}
+          </div>
+
+          {errandsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Skeleton className="h-64 w-full rounded-xl" />
+              <Skeleton className="h-64 w-full rounded-xl" />
+            </div>
+          ) : activeJobs.length > 0 ? (
+            <>
+              <p className="text-sm text-muted-foreground -mt-1">
+                These are jobs you've taken on. Tap one to see the requester's contact details and get it done.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {activeJobs.map((errand) => (
+                  <ErrandCard key={errand.id} errand={errand} />
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              You have no active jobs right now. When you accept an errand, it'll appear here so you don't have to go searching for it.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+      )}
 
       {/* Earnings summary — only the profile owner can see their earnings */}
       {helper.isOwner && (
