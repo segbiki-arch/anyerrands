@@ -1,9 +1,8 @@
 import { Link } from "wouter";
 import { Helper } from "@workspace/api-client-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MapPin, Star, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { helperPhotoUrl } from "@/lib/avatars";
 
 export function HelperCard({ helper }: { helper: Helper }) {
   const initials = helper.avatarInitials || helper.name.substring(0, 2).toUpperCase();
@@ -16,7 +15,6 @@ export function HelperCard({ helper }: { helper: Helper }) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             <Avatar className="w-14 h-14 shrink-0 ring-2 ring-primary/30">
-              <AvatarImage src={helperPhotoUrl(helper.id, 200)} alt={helper.name} />
               <AvatarFallback className="bg-primary text-primary-foreground text-base font-bold">
                 {initials}
               </AvatarFallback>

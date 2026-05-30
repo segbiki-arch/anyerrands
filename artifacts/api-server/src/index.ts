@@ -3,6 +3,7 @@ import { getStripeSync, getUncachableStripeClient, getStripePublishableKey } fro
 import app from "./app";
 import { logger } from "./lib/logger";
 import { ensureDefaultCategories } from "./lib/seedCategories";
+import { ensureDemoErrands } from "./lib/seedErrands";
 import { runAutoRefundSweep } from "./lib/refunds";
 
 async function checkStripeMode() {
@@ -58,6 +59,12 @@ try {
   await ensureDefaultCategories();
 } catch (err) {
   logger.error({ err }, "Category seed failed");
+}
+
+try {
+  await ensureDemoErrands();
+} catch (err) {
+  logger.error({ err }, "Demo errand seed failed");
 }
 
 app.listen(port, (err) => {
