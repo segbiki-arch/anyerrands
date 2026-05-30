@@ -12,6 +12,7 @@ import {
   ListChecks,
   Car,
   LifeBuoy,
+  LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useIsAdmin } from "@/hooks/use-is-admin";
@@ -42,6 +43,7 @@ const actionItems = [
 ];
 
 const adminItems = [
+  { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/reports", label: "Reports Admin", icon: ShieldAlert },
   { href: "/admin/helpers", label: "Helper Profiles", icon: Users },
 ];

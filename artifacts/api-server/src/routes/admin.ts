@@ -135,4 +135,37 @@ router.delete("/admin/helpers/:id", requireAdmin, async (req, res) => {
   return res.status(204).send();
 });
 
+// Headline numbers for the owner/admin overview: how many people have signed up,
+// how many helper profiles exist, how many errands (split by status) and how many
+// open reports need attention.
+router.get("/admin/stats", requireAdmin, async (_req, res) => {
+  const [[users], [helpers], [reports], errandRows] = await Promise.all([
+    db.select({ value: count() }).from(usersTable),
+    db.select({ value: count() }).from(helpersTable),
+    db.select({ value: count() }).from(reportsTable),
+    db
+      .select({ status: errandsTable.status, value: count() })
+      .from(errandsTable)
+      .groupBy(errandsTable.status),
+  ]);
+
+  const errandsByStatus = { open: 0, accepted: 0, completed: 0 };
+  let totalErrands = 0;
+  for (const row of errandRows) {
+    const c = Number(row.value);
+    totalErrands += c;
+    if (row.status === "open") errandsByStatus.open = c;
+    else if (row.status === "accepted") errandsByStatus.accepted = c;
+    else if (row.status === "completed") errandsByStatus.completed = c;
+  }
+
+  return res.json({
+    totalUsers: Number(users?.value ?? 0),
+    totalHelpers: Number(helpers?.value ?? 0),
+    totalReports: Number(reports?.value ?? 0),
+    totalErrands,
+    errandsByStatus,
+  });
+});
+
 export default router;

@@ -18,6 +18,7 @@ import MapPage from "@/pages/map";
 import ProfilePage from "@/pages/profile";
 import AdminReportsPage from "@/pages/admin/reports";
 import AdminHelpersPage from "@/pages/admin/helpers";
+import AdminOverviewPage from "@/pages/admin/overview";
 import TermsPage from "@/pages/terms";
 import HelpCenterPage from "@/pages/help-center";
 import NotFound from "@/pages/not-found";
@@ -28,6 +29,13 @@ function AdminRoute() {
   if (isLoading) return null;
   if (!isAdmin) return <NotFound />;
   return <AdminReportsPage />;
+}
+
+function AdminOverviewRoute() {
+  const { isAdmin, isLoading } = useIsAdmin();
+  if (isLoading) return null;
+  if (!isAdmin) return <NotFound />;
+  return <AdminOverviewPage />;
 }
 
 function AdminHelpersRoute() {
@@ -61,6 +69,7 @@ function Router() {
         <Route path="/helpers/:id" component={HelperProfilePage} />
         <Route path="/map" component={MapPage} />
         <Route path="/profile" component={ProfilePage} />
+        <Route path="/admin" component={AdminOverviewRoute} />
         <Route path="/admin/reports" component={AdminRoute} />
         <Route path="/admin/helpers" component={AdminHelpersRoute} />
         <Route path="/terms" component={TermsPage} />
