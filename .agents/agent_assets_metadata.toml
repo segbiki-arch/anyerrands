@@ -95,3 +95,15 @@ id = "3Uot6NKAYcWH5fQFIcsun"
 uri = "file://attached_assets/stock_images/errand_drive5_2.jpg"
 type = "image"
 title = "man driving car smiling, photo taken from passenger seat, real photograph"
+
+[[outputs]]
+id = "5HoRdnT8ZtOHBtO5kJ-Jw"
+uri = "file://attached_assets/anyerrands-logo/anyerrands-ig-yellow.png"
+type = "image"
+title = "AnyErrands Instagram logo — yellow (recommended)"
+
+[[outputs]]
+id = "5_VrHRT7UpZpwHGjAlUfg"
+uri = "file://attached_assets/anyerrands-logo/anyerrands-ig-black.png"
+type = "image"
+title = "AnyErrands Instagram logo — black variant"
