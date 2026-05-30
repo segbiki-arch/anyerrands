@@ -107,3 +107,15 @@ id = "5_VrHRT7UpZpwHGjAlUfg"
 uri = "file://attached_assets/anyerrands-logo/anyerrands-ig-black.png"
 type = "image"
 title = "AnyErrands Instagram logo — black variant"
+
+[[outputs]]
+id = "OqtBc_8TYfQrCYkoc0k5h"
+uri = "file://deliverables/AnyErrands-Blueprint.pdf"
+type = "pdf"
+title = "AnyErrands Blueprint (PDF — ready to download)"
+
+[[outputs]]
+id = "M-7xSy0oLt87_y1R8p0nY"
+uri = "file://deliverables/AnyErrands-Blueprint.md"
+type = "text"
+title = "AnyErrands Blueprint (editable text version)"
