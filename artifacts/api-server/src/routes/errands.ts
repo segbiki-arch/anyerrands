@@ -539,6 +539,36 @@ router.post("/errands/:id/complete", async (req, res) => {
     return res.status(outcome.status).json({ error: outcome.error });
   }
 
+  // Let the helper know their work was confirmed (and that their money is on the
+  // way, if a payment was held). Keyed to the helper's login so it lands in their
+  // notification bell. Best-effort: the payment is already released at this point,
+  // so a failed alert must never fail the request — just log it.
+  if (outcome.row.helperId) {
+    try {
+      const [helper] = await db
+        .select()
+        .from(helpersTable)
+        .where(eq(helpersTable.id, outcome.row.helperId));
+      if (helper?.userId) {
+        const wasPaid = !!outcome.row.transferId;
+        const message = wasPaid
+          ? `Your errand "${outcome.row.title}" is complete and your payment has been released — it's on its way to your payout account.`
+          : `Your errand "${outcome.row.title}" has been marked complete. Thanks for helping out!`;
+        await db.insert(notificationsTable).values({
+          userId: helper.userId,
+          helperId: helper.id,
+          errandId: outcome.row.id,
+          message,
+        });
+      }
+    } catch (err) {
+      req.log.error(
+        { err, errandId: outcome.row.id },
+        "Failed to create helper completion notification",
+      );
+    }
+  }
+
   return res.json(formatErrand(outcome.row, req.user?.id));
 });
 
