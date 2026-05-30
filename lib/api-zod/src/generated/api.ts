@@ -107,7 +107,8 @@ export const ListErrandsQueryParams = zod.object({
   "status": zod.enum(['open', 'accepted', 'completed']).optional(),
   "category": zod.coerce.string().optional(),
   "limit": zod.coerce.number().default(listErrandsQueryLimitDefault),
-  "offset": zod.coerce.number().default(listErrandsQueryOffsetDefault)
+  "offset": zod.coerce.number().default(listErrandsQueryOffsetDefault),
+  "mine": zod.coerce.boolean().optional().describe('When true, only return errands posted by the logged-in user.')
 })
 
 export const ListErrandsResponseItem = zod.object({

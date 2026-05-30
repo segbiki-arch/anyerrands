@@ -9,6 +9,7 @@ import {
   LogOut,
   ShieldAlert,
   ClipboardList,
+  ListChecks,
   Car,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -86,6 +87,20 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
+          {isAuthenticated && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive("/my-errands")}
+                className={NAV_BTN}
+              >
+                <Link href="/my-errands" data-testid="link-nav-your-errands">
+                  <ListChecks className="w-4 h-4 shrink-0" />
+                  <span>Your Errands</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
 
         {/* Separator */}

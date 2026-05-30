@@ -315,6 +315,44 @@ export default function ErrandDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left: details */}
         <div className="lg:col-span-2 space-y-6">
+          {errand.status === ErrandStatus.accepted && errand.isRequester && (
+            <Card className="border-primary/40 shadow-sm bg-primary/10" data-testid="banner-accepted">
+              <CardContent className="p-6 space-y-3">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
+                  <h3 className="text-lg font-bold text-foreground">
+                    {errand.helperName ?? "A helper"} accepted your errand!
+                  </h3>
+                </div>
+                <p className="text-sm text-foreground/80">Here's what happens next:</p>
+                <ol className="space-y-2 text-sm text-foreground/90">
+                  {requiresPayment && (
+                    <li className="flex items-start gap-2">
+                      <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${errand.paymentStatus === "paid" ? "bg-green-500 text-white" : "bg-foreground text-background"}`}>
+                        {errand.paymentStatus === "paid" ? "✓" : "1"}
+                      </span>
+                      <span>
+                        {errand.paymentStatus === "paid"
+                          ? "Payment made — held safely until you confirm the job is done."
+                          : "Pay securely below. Your money is held safely and only sent to the helper once you confirm the job is done."}
+                      </span>
+                    </li>
+                  )}
+                  <li className="flex items-start gap-2">
+                    <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${errand.requesterPhone ? "bg-green-500 text-white" : "bg-foreground text-background"}`}>
+                      {errand.requesterPhone ? "✓" : requiresPayment ? "2" : "1"}
+                    </span>
+                    <span>
+                      {errand.requesterPhone
+                        ? `Your number is shared — ${errand.helperName ?? "your helper"} can now WhatsApp or call you.`
+                        : `Share your phone number so ${errand.helperName ?? "your helper"} can WhatsApp or call you to sort out the details.`}
+                    </span>
+                  </li>
+                </ol>
+              </CardContent>
+            </Card>
+          )}
+
           {errand.tripFrom && errand.tripTo && (
             <Card className="border-primary/30 shadow-sm overflow-hidden">
               <div className="h-1.5 bg-primary w-full" />
@@ -583,7 +621,15 @@ export default function ErrandDetailPage() {
 
               <div className="pt-6 border-t border-border/40 space-y-3">
                 {errand.status === ErrandStatus.open && (
-                  <Button className="w-full rounded-full" size="lg" onClick={() => setIsAcceptOpen(true)} data-testid="btn-accept-errand">
+                  <Button
+                    className="w-full rounded-full"
+                    size="lg"
+                    onClick={() => {
+                      if (myHelper) setSelectedHelperId(String(myHelper.id));
+                      setIsAcceptOpen(true);
+                    }}
+                    data-testid="btn-accept-errand"
+                  >
                     I can help with this
                   </Button>
                 )}
@@ -764,13 +810,13 @@ export default function ErrandDetailPage() {
                 <SelectValue placeholder="Select a helper profile" />
               </SelectTrigger>
               <SelectContent>
-                {helpers?.map(h => (
+                {helpers?.filter(h => h.isOwner).map(h => (
                   <SelectItem key={h.id} value={h.id.toString()}>{h.name} — {h.location}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {!helpers?.length && (
-              <p className="text-sm text-amber-600 mt-2">No helpers found. Please register as a helper first.</p>
+            {!helpers?.some(h => h.isOwner) && (
+              <p className="text-sm text-amber-600 mt-2">You need a helper profile to accept errands. Please register as a helper first.</p>
             )}
           </div>
           <DialogFooter>

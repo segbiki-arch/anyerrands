@@ -8,4 +8,5 @@
 - [Deploy env scope](deploy-env-scope.md) — "shared" env vars may NOT reach the published app; set explicitly in production+development scopes (this is why admin was hidden live)
 - [PWA setup](pwa-setup.md) — installable PWA; SW registered PROD-only (breaks dev HMR otherwise); verify /sw.js & /manifest aren't caught by SPA rewrite; icons via ImageMagick
 - [Notifications & contact privacy](notifications-and-contact-privacy.md) — notif bell keyed to logged-in user.id; /notifications scoped to req.user.id (ignore client ids); requesterAddress/phone gated in formatErrand to requester+assigned helper only
+- [Posting requires login](posting-requires-login.md) — create errand needs an owner (for accept notifications + history); ?mine=true read via raw req.query (zod.coerce.boolean treats "false" as true)
 - [Reviews system](reviews-system.md) — one review per completed errand (unique errandId + 23505 catch); helpers.rating = avg; review create is requester-only (must be logged-in poster via errands.requesterUserId); anon/legacy errands can't be reviewed

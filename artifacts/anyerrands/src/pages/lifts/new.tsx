@@ -7,6 +7,7 @@ import { useCreateErrand, getListErrandsQueryKey, getGetErrandStatsQueryKey, get
 import { useAuth } from "@workspace/replit-auth-web";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { LoginRequired } from "@/components/login-required";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -34,7 +35,7 @@ export default function NewLiftPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const accountName = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
   const createErrand = useCreateErrand();
@@ -95,6 +96,16 @@ export default function NewLiftPage() {
           });
         },
       }
+    );
+  }
+
+  if (authLoading) return null;
+  if (!isAuthenticated) {
+    return (
+      <LoginRequired
+        title="Log in to request a lift"
+        description="You need an account so we can let you know the moment a driver offers you a ride, and keep your history."
+      />
     );
   }
 

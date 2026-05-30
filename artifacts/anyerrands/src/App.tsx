@@ -9,6 +9,7 @@ import Home from "@/pages/home";
 import ErrandsPage from "@/pages/errands/index";
 import NewErrandPage from "@/pages/errands/new";
 import NewLiftPage from "@/pages/lifts/new";
+import MyErrandsPage from "@/pages/my-errands";
 import ErrandDetailPage from "@/pages/errands/[id]";
 import HelpersPage from "@/pages/helpers/index";
 import NewHelperPage from "@/pages/helpers/new";
@@ -51,6 +52,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/errands" component={ErrandsPage} />
         <Route path="/errands/new" component={NewErrandPage} />
+        <Route path="/my-errands" component={MyErrandsPage} />
         <Route path="/lifts/new" component={NewLiftPage} />
         <Route path="/errands/:id" component={ErrandDetailPage} />
         <Route path="/helpers" component={HelpersPage} />

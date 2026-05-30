@@ -411,6 +411,10 @@ status?: ListErrandsStatus;
 category?: string;
 limit?: number;
 offset?: number;
+/**
+ * When true, only return errands posted by the logged-in user.
+ */
+mine?: boolean;
 };
 
 export type ListErrandsStatus = typeof ListErrandsStatus[keyof typeof ListErrandsStatus];

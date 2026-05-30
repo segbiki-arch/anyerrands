@@ -7,6 +7,7 @@ import { useCreateErrand, useListCategories, getListErrandsQueryKey, getGetErran
 import { useAuth } from "@workspace/replit-auth-web";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { LoginRequired } from "@/components/login-required";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -32,7 +33,7 @@ export default function NewErrandPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: categories } = useListCategories();
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   
   const [isOptionalOpen, setIsOptionalOpen] = useState(false);
 
@@ -81,6 +82,16 @@ export default function NewErrandPage() {
           });
         }
       }
+    );
+  }
+
+  if (authLoading) return null;
+  if (!isAuthenticated) {
+    return (
+      <LoginRequired
+        title="Log in to post an errand"
+        description="You need an account so we can let you know the moment a helper accepts, and keep your errand history."
+      />
     );
   }
 

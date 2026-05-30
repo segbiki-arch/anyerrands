@@ -178,6 +178,11 @@ paths:
           schema:
             type: integer
             default: 0
+        - name: mine
+          in: query
+          description: When true, only return errands posted by the logged-in user.
+          schema:
+            type: boolean
       responses:
         "200":
           description: List of errands

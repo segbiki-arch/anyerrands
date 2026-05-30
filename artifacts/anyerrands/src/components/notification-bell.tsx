@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,7 @@ import { useAuth } from "@workspace/replit-auth-web";
 
 export function NotificationBell() {
   const [open, setOpen] = useState(false);
+  const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const userId = user?.id;
@@ -44,6 +46,12 @@ export function NotificationBell() {
 
   function handleMarkRead(id: number) {
     markRead({ id });
+  }
+
+  function handleOpenNotification(n: { id: number; read: boolean; errandId: number }) {
+    if (!n.read) markRead({ id: n.id });
+    setOpen(false);
+    setLocation(`/errands/${n.errandId}`);
   }
 
   function timeAgo(iso: string) {
@@ -98,7 +106,7 @@ export function NotificationBell() {
             notifications.map((n) => (
               <button
                 key={n.id}
-                onClick={() => !n.read && handleMarkRead(n.id)}
+                onClick={() => handleOpenNotification(n)}
                 className={`w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors ${!n.read ? "bg-primary/5" : ""}`}
                 data-testid={`notification-item-${n.id}`}
               >

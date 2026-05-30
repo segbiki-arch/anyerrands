@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { errandsTable, helpersTable, notificationsTable, reviewsTable } from "@workspace/db";
+import { errandsTable, helpersTable, notificationsTable, reviewsTable, reportsTable } from "@workspace/db";
 import { eq, desc, and, sql, avg, count } from "drizzle-orm";
 import {
   ListErrandsQueryParams,
@@ -75,6 +75,12 @@ router.get("/errands", async (req, res) => {
   if (status) conditions.push(eq(errandsTable.status, status as "open" | "accepted" | "completed"));
   if (category) conditions.push(eq(errandsTable.category, category));
 
+  // "mine" returns only the logged-in user's own posts, for their errand history.
+  if (req.query.mine === "true") {
+    if (!req.user) return res.status(401).json({ error: "You must be logged in to view your errands." });
+    conditions.push(eq(errandsTable.requesterUserId, req.user.id));
+  }
+
   const rows = await db
     .select()
     .from(errandsTable)
@@ -88,6 +94,12 @@ router.get("/errands", async (req, res) => {
 });
 
 router.post("/errands", async (req, res) => {
+  // Posting requires login so the errand has an owner — this is what lets us
+  // reliably notify the requester when a helper accepts, and power their
+  // errand history.
+  if (!req.user) {
+    return res.status(401).json({ error: "Please log in to post an errand so we can notify you when a helper accepts." });
+  }
   const parsed = CreateErrandBody.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid body", details: parsed.error });
@@ -98,7 +110,7 @@ router.post("/errands", async (req, res) => {
     .insert(errandsTable)
     .values({
       ...rest,
-      requesterUserId: req.user?.id ?? null,
+      requesterUserId: req.user.id,
       requesterAddress: null,
       requesterPhone: null,
       budgetAmount: budgetAmount != null ? String(budgetAmount) : null,
@@ -203,9 +215,37 @@ router.patch("/errands/:id", async (req, res) => {
 });
 
 router.delete("/errands/:id", async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: "You must be logged in." });
   const parsed = DeleteErrandParams.safeParse({ id: Number(req.params.id) });
   if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
-  await db.delete(errandsTable).where(eq(errandsTable.id, parsed.data.id));
+  const id = parsed.data.id;
+
+  const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, id));
+  if (!errand) return res.status(404).json({ error: "Errand not found" });
+
+  // Only the owner can delete their own errand.
+  if (errand.requesterUserId !== req.user.id) {
+    return res.status(403).json({ error: "You can only delete your own errands." });
+  }
+
+  // Don't allow deleting an errand whose payment is still being held — the funds
+  // need to be released to the helper (complete) or refunded first.
+  if (errand.paymentStatus === "paid") {
+    return res.status(400).json({
+      error:
+        "This errand has a payment being held. Mark it complete to pay your helper, or wait for a refund, before deleting it.",
+    });
+  }
+
+  // There are no ON DELETE CASCADE rules, so clear child rows that reference the
+  // errand before removing it, all in one transaction.
+  await db.transaction(async (tx) => {
+    await tx.delete(notificationsTable).where(eq(notificationsTable.errandId, id));
+    await tx.delete(reportsTable).where(eq(reportsTable.errandId, id));
+    await tx.delete(reviewsTable).where(eq(reviewsTable.errandId, id));
+    await tx.delete(errandsTable).where(eq(errandsTable.id, id));
+  });
+
   return res.status(204).send();
 });
 
@@ -215,11 +255,25 @@ router.post("/errands/:id/accept", async (req, res) => {
   const bodyParsed = AcceptErrandBody.safeParse(req.body);
   if (!bodyParsed.success) return res.status(400).json({ error: "Invalid body" });
 
+  if (!req.user) return res.status(401).json({ error: "You must be logged in to accept an errand." });
+
   const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, bodyParsed.data.helperId));
   if (!helper) return res.status(404).json({ error: "Helper not found" });
 
+  // Only the owner of a helper profile can accept errands as that helper —
+  // otherwise anyone could assign someone else's profile to an errand and
+  // fire off bogus acceptance notifications.
+  if (helper.userId !== req.user.id) {
+    return res.status(403).json({ error: "You can only accept errands with your own helper profile." });
+  }
+
   const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, paramParsed.data.id));
   if (!errand) return res.status(404).json({ error: "Errand not found" });
+
+  // Can't accept an errand that's already been picked up or completed.
+  if (errand.status !== "open") {
+    return res.status(400).json({ error: "This errand has already been accepted." });
+  }
 
   // For paid errands, the helper must have a working Stripe payout account
   // before accepting — otherwise the requester's payment cannot be routed to
@@ -249,7 +303,7 @@ router.post("/errands/:id/accept", async (req, res) => {
       userId: row.requesterUserId,
       helperId: helper.id,
       errandId: row.id,
-      message: `${helper.name} accepted your errand "${row.title}". Add your contact details so they can reach you.`,
+      message: `${helper.name} accepted your errand "${row.title}". Tap to pay and share your number so they can WhatsApp or call you.`,
     });
   }
 
