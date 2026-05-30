@@ -107,6 +107,8 @@ export function Layout({ children }: { children: ReactNode }) {
               <div className="flex items-center gap-5 text-xs">
                 <Link href="/errands" className="hover:text-primary transition-colors">Browse errands</Link>
                 <Link href="/helpers/new" className="hover:text-primary transition-colors">Become a helper</Link>
+                <a href="/terms#safety" className="hover:text-primary transition-colors">Safety</a>
+                <a href="/terms#guidelines" className="hover:text-primary transition-colors">Community</a>
                 <a href="mailto:hello@anyerrands.live" className="hover:text-primary transition-colors">Contact</a>
                 <Link href="/terms" className="hover:text-primary transition-colors">Terms & Privacy</Link>
               </div>
