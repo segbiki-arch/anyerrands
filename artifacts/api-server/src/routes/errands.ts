@@ -275,26 +275,28 @@ router.post("/errands/:id/accept", async (req, res) => {
     return res.status(400).json({ error: "This errand has already been accepted." });
   }
 
-  // For paid errands, the helper must have a working Stripe payout account
-  // before accepting — otherwise the requester's payment cannot be routed to
-  // them and the 10% platform fee cannot be split correctly.
-  if (errand.budgetAmount && Number(errand.budgetAmount) > 0) {
-    const ready = await isHelperChargesEnabled(helper);
-    if (!ready) {
-      return res.status(400).json({
-        error:
-          "Please connect your payout account before accepting a paid errand. Go to your helper profile and set up payouts so you get paid and the platform fee is handled correctly.",
-      });
-    }
+  // Every helper must have a working Stripe payout account connected before they
+  // can accept ANY errand — paid or volunteer. This guarantees that if money is
+  // involved it can always be routed correctly with the platform fee split, and
+  // keeps every helper who takes on work verified through Stripe.
+  const ready = await isHelperChargesEnabled(helper);
+  if (!ready) {
+    return res.status(400).json({
+      error:
+        "Please set up your payout account before accepting errands. Go to your helper profile and connect payouts so you can be paid and verified.",
+    });
   }
 
+  // Accept atomically: the update only succeeds while the errand is still open,
+  // so two helpers can never both win the same errand, and once it's taken it can
+  // never be accepted by anyone else.
   const [row] = await db
     .update(errandsTable)
     .set({ status: "accepted", helperId: bodyParsed.data.helperId, helperName: helper.name, updatedAt: new Date() })
-    .where(eq(errandsTable.id, paramParsed.data.id))
+    .where(and(eq(errandsTable.id, paramParsed.data.id), eq(errandsTable.status, "open")))
     .returning();
 
-  if (!row) return res.status(404).json({ error: "Errand not found" });
+  if (!row) return res.status(409).json({ error: "This errand has already been accepted by someone else." });
 
   // Let the requester know a helper picked up their errand. Only possible when
   // the errand has a logged-in owner (anonymous/legacy errands have no userId).

@@ -145,7 +145,10 @@ export default function ErrandDetailPage() {
           setIsAcceptOpen(false);
           toast({ title: "Errand accepted!", description: "You are now assigned to this errand." });
         },
-        onError: () => toast({ title: "Failed to accept", variant: "destructive" }),
+        onError: (e) => {
+          const message = (e as { data?: { error?: string } })?.data?.error ?? "Please try again.";
+          toast({ title: "Couldn't accept errand", description: message, variant: "destructive" });
+        },
       }
     );
   };

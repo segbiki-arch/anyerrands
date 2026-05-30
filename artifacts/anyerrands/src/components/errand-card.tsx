@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { formatDistanceToNow } from "date-fns";
 import { Errand, ErrandStatus } from "@workspace/api-client-react";
-import { MapPin, Clock, Car, ArrowRight, Users } from "lucide-react";
+import { MapPin, Clock, Car, ArrowRight, Users, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { requesterAvatarUrl } from "@/lib/avatars";
 
@@ -53,6 +53,17 @@ export function ErrandCard({ errand }: { errand: Errand }) {
           <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
             {errand.description}
           </p>
+          {errand.status !== ErrandStatus.open && errand.helperName && (
+            <div
+              className="flex items-center gap-1.5 text-xs font-semibold text-foreground bg-foreground/5 rounded-lg px-2.5 py-1.5 w-fit max-w-full"
+              data-testid={`errand-assignee-${errand.id}`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+              <span className="truncate">
+                {errand.status === ErrandStatus.completed ? "Completed by" : "Assigned to"} {errand.helperName}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Meta row */}
