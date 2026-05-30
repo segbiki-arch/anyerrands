@@ -622,6 +622,7 @@ export default function ErrandDetailPage() {
                                 : <><CreditCard className="w-4 h-4 mr-2" />Pay €{errand.budgetAmount}</>}
                             </Button>
                             <p className="text-xs text-center text-muted-foreground">Pay securely by card — no account needed · 90% goes to the helper · 10% platform fee</p>
+                            <p className="text-xs text-center text-muted-foreground">Your payment is held safely and only sent to the helper once you confirm the job is done.</p>
                           </>
                         ) : (
                           <p className="text-xs text-center text-muted-foreground bg-muted/50 rounded-md px-2 py-1.5" data-testid="text-awaiting-payment">
