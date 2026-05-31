@@ -57,12 +57,24 @@ router.post("/helpers", async (req, res) => {
     .toUpperCase()
     .slice(0, 2);
 
-  const [row] = await db
-    .insert(helpersTable)
-    .values({ ...parsed.data, userId: req.user.id, avatarInitials: initials })
-    .returning();
+  try {
+    const [row] = await db
+      .insert(helpersTable)
+      .values({ ...parsed.data, userId: req.user.id, avatarInitials: initials })
+      .returning();
 
-  return res.status(201).json(formatHelper(row, req.user.id));
+    return res.status(201).json(formatHelper(row, req.user.id));
+  } catch (err) {
+    // A unique constraint on helpers.user_id guarantees one helper profile per
+    // account forever. If two requests race, the loser hits 23505 — return their
+    // single existing profile instead of erroring so they can never end up with
+    // (or be blocked by) a duplicate.
+    if (err && typeof err === "object" && "code" in err && err.code === "23505") {
+      const [dup] = await db.select().from(helpersTable).where(eq(helpersTable.userId, req.user.id));
+      if (dup) return res.status(200).json(formatHelper(dup, req.user.id));
+    }
+    throw err;
+  }
 });
 
 router.get("/helpers/:id", async (req, res) => {

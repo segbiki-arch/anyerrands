@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useCreateHelper, getListHelpersQueryKey } from "@workspace/api-client-react";
+import { useCreateHelper, useListHelpers, getListHelpersQueryKey } from "@workspace/api-client-react";
 import { useAuth } from "@workspace/replit-auth-web";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -34,6 +34,18 @@ export default function NewHelperPage() {
 
   const [skillInput, setSkillInput] = useState("");
   const createHelper = useCreateHelper();
+
+  // A helper profile is permanent and one-per-account. If this logged-in user
+  // already has one, never show the creation form again — send them straight to
+  // their existing profile so they can't create or "open" a second one.
+  const { data: allHelpers, isLoading: helpersLoading } = useListHelpers(undefined, {
+    query: { enabled: isAuthenticated },
+  });
+  const existingHelper = allHelpers?.find((h) => h.isOwner);
+
+  useEffect(() => {
+    if (existingHelper) setLocation(`/helpers/${existingHelper.id}`, { replace: true });
+  }, [existingHelper, setLocation]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,7 +100,10 @@ export default function NewHelperPage() {
     );
   }
 
-  if (authLoading) {
+  // Show a spinner while we confirm the account has no helper profile yet (and
+  // during the redirect for those who do) so the form never flashes for someone
+  // who already has one.
+  if (authLoading || (isAuthenticated && helpersLoading) || existingHelper) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />

@@ -9,7 +9,7 @@ export const errandStatusEnum = pgEnum("errand_status", ["open", "accepted", "co
 
 export const helpersTable = pgTable("helpers", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").references(() => usersTable.id),
+  userId: text("user_id").references(() => usersTable.id).unique(),
   name: text("name").notNull(),
   location: text("location").notNull(),
   bio: text("bio").notNull(),
