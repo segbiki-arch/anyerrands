@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+<rect width="1080" height="1080" fill="#0D0D0D"/>
+    <circle cx="1080" cy="0" r="340" fill="#F5C400" opacity="0.10"/>
+    <circle cx="40" cy="1080" r="260" fill="#F5C400" opacity="0.06"/>
+<g transform="translate(80,70) scale(0.75)">
+    <rect width="80" height="80" rx="20" fill="#F5C400"/>
+    <circle cx="40" cy="22" r="8" fill="#0D0D0D"/>
+    <path d="M28 44 C28 36 34 33 40 33 C46 33 52 36 52 44" stroke="#0D0D0D" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <path d="M33 44 L28 58" stroke="#0D0D0D" stroke-width="5" stroke-linecap="round"/>
+    <path d="M47 44 L54 56" stroke="#0D0D0D" stroke-width="5" stroke-linecap="round"/>
+    <path d="M33 38 L24 48" stroke="#0D0D0D" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M47 38 L57 44" stroke="#0D0D0D" stroke-width="4.5" stroke-linecap="round"/>
+    <rect x="17" y="46" width="10" height="9" rx="2" fill="#0D0D0D"/>
+    <line x1="14" y1="30" x2="20" y2="30" stroke="#0D0D0D" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+    <line x1="12" y1="37" x2="19" y2="37" stroke="#0D0D0D" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+    <line x1="14" y1="44" x2="20" y2="44" stroke="#0D0D0D" stroke-width="3" stroke-linecap="round" opacity="0.2"/>
+  </g>
+    <text x="156" y="116" font-family="DejaVu Sans" font-weight="bold" font-size="40" letter-spacing="-1">
+      <tspan fill="#FFFFFF">Any</tspan><tspan fill="#F5C400">Errands</tspan>
+    </text>
+
+    <g transform="translate(80,250)">
+    <rect width="250" height="64" rx="32" fill="#F5C400"/>
+    <text x="125" y="42" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="30" letter-spacing="2" fill="#0D0D0D">EARN MONEY</text>
+  </g>
+    <text x="80" y="430" font-family="DejaVu Sans" font-weight="bold" font-size="92" letter-spacing="-2" fill="#FFFFFF">Get paid to</text>
+    <text x="80" y="528" font-family="DejaVu Sans" font-weight="bold" font-size="92" letter-spacing="-2" fill="#F5C400">help out</text>
+    <g transform="translate(80,620)">
+      <circle cx="34" cy="0" r="34" fill="#F5C400"/>
+      <text x="34" y="14" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="40" fill="#0D0D0D">1</text>
+      <text x="92" y="13" font-family="DejaVu Sans" font-size="37" fill="#FFFFFF">Set up your free Helper profile</text>
+    </g><g transform="translate(80,720)">
+      <circle cx="34" cy="0" r="34" fill="#F5C400"/>
+      <text x="34" y="14" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="40" fill="#0D0D0D">2</text>
+      <text x="92" y="13" font-family="DejaVu Sans" font-size="37" fill="#FFFFFF">Accept errands &amp; lifts near you</text>
+    </g><g transform="translate(80,820)">
+      <circle cx="34" cy="0" r="34" fill="#F5C400"/>
+      <text x="34" y="14" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="40" fill="#0D0D0D">3</text>
+      <text x="92" y="13" font-family="DejaVu Sans" font-size="37" fill="#FFFFFF">Get the job done for a neighbour</text>
+    </g><g transform="translate(80,920)">
+      <circle cx="34" cy="0" r="34" fill="#F5C400"/>
+      <text x="34" y="14" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="40" fill="#0D0D0D">4</text>
+      <text x="92" y="13" font-family="DejaVu Sans" font-size="37" fill="#FFFFFF">Get paid securely once it's complete</text>
+    </g>
+    <g transform="translate(0,982)">
+    <rect x="80" y="0" width="920" height="76" rx="38" fill="#F5C400"/>
+    <text x="540" y="51" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="33" fill="#0D0D0D">Become a Helper · anyerrands.live</text>
+  </g>
+  
+</svg>

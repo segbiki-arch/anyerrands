@@ -119,3 +119,21 @@ id = "M-7xSy0oLt87_y1R8p0nY"
 uri = "file://deliverables/AnyErrands-Blueprint.md"
 type = "text"
 title = "AnyErrands Blueprint (editable text version)"
+
+[[outputs]]
+id = "6yM50QcL08qdlnybsB4po"
+uri = "file://deliverables/instagram/1-what-is-anyerrands.png"
+type = "image"
+title = "Post 1 — What AnyErrands is"
+
+[[outputs]]
+id = "79MoYx-4kwybhqGjuXnyh"
+uri = "file://deliverables/instagram/2-how-to-earn-money.png"
+type = "image"
+title = "Post 2 — How to earn money"
+
+[[outputs]]
+id = "lJ7RWTqq_lPBwrKgONLex"
+uri = "file://deliverables/instagram/3-how-posting-works.png"
+type = "image"
+title = "Post 3 — How posting a task works"
