@@ -59,13 +59,13 @@ export default function Home() {
 
           <div className="space-y-6 max-w-4xl mx-auto animate-fade-up">
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold tracking-tight text-foreground leading-[1.1]">
-              Need a hand with something?
+              Earn money helping people in your local area
             </h1>
             <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Ask your neighbours to pick up the shopping, help with a small job, or give you a lift into town.
+              AnyErrands connects trusted local helpers with people who need errands, lifts, and small jobs done.
             </p>
-            <p className="text-base sm:text-lg font-serif italic text-foreground/70 max-w-2xl mx-auto pt-2">
-              Small acts of help. Stronger communities.
+            <p className="text-base sm:text-lg font-medium text-foreground/80 max-w-2xl mx-auto pt-2">
+              Flexible work. You choose when you accept tasks. Get paid instantly.
             </p>
           </div>
 
@@ -74,18 +74,18 @@ export default function Home() {
               asChild
               size="lg"
               className="rounded-full font-bold px-10 h-16 text-lg shadow-lg bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105 transition-all"
-              data-testid="btn-hero-post"
+              data-testid="btn-hero-helper"
             >
-              <Link href="/errands/new">Ask for help</Link>
+              <Link href="/helpers/new">Start earning</Link>
             </Button>
             <Button
               asChild
               variant="outline"
               size="lg"
               className="rounded-full font-bold px-10 h-16 text-lg border-2 border-border hover:bg-muted hover:scale-105 transition-all"
-              data-testid="btn-hero-helper"
+              data-testid="btn-hero-post"
             >
-              <Link href="/helpers/new">Offer to help</Link>
+              <Link href="/errands/new">Ask for help</Link>
             </Button>
           </div>
         </div>
