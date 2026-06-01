@@ -479,3 +479,9 @@ id = "mLdBqqF_YbHq5cF0_cEvj"
 uri = "file://attached_assets/stock_images/liv2_lift_5.jpg"
 type = "image"
 title = "two happy friends smiling and laughing inside a car, real candid photo"
+
+[[outputs]]
+id = "GcFZuV8PlVqdkwW28Fab7"
+uri = "file://screenshots/anyerrands-home.jpg"
+type = "image"
+title = "AnyErrands Home Page"
