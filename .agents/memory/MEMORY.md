@@ -10,4 +10,5 @@
 - [Notifications & contact privacy](notifications-and-contact-privacy.md) — notif bell keyed to logged-in user.id; /notifications scoped to req.user.id (ignore client ids); requesterAddress/phone gated in formatErrand to requester+assigned helper only
 - [Posting requires login](posting-requires-login.md) — create errand needs an owner (for accept notifications + history); ?mine=true read via raw req.query (zod.coerce.boolean treats "false" as true)
 - [Route authorization rules](route-authz-rules.md) — every mutating route needs login + ownership + ATOMIC state guard in WHERE; status NOT settable via PATCH (lifecycle only); report is owner-only; map popup escapeHtml is safe (semgrep false positive)
+- [GitHub mirror/sync](github-sync.md) — public repo segbiki-arch/anyerrands; push via connector token + async spawn; code+schema-only, NEVER user data/secrets; commit then push each change (no auto-sync)
 - [Reviews system](reviews-system.md) — one review per completed errand (unique errandId + 23505 catch); helpers.rating = avg; review create is requester-only (must be logged-in poster via errands.requesterUserId); anon/legacy errands can't be reviewed
