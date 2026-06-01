@@ -84,11 +84,17 @@ export function Layout({ children }: { children: ReactNode }) {
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
           <header className="sticky top-0 z-30 flex h-13 items-center justify-between border-b border-border bg-card px-5 gap-2">
-            <SidebarTrigger
-              className="h-8 w-8 text-foreground/70 hover:text-foreground hover:bg-muted"
-              aria-label="Toggle menu"
-              data-testid="button-sidebar-toggle"
-            />
+            <div className="flex items-center gap-2 min-w-0">
+              <SidebarTrigger
+                className="h-8 w-8 text-foreground/70 hover:text-foreground hover:bg-muted"
+                aria-label="Toggle menu"
+                data-testid="button-sidebar-toggle"
+              />
+              <Link href="/" className="font-bold text-base tracking-tight truncate">
+                <span className="text-foreground">Any</span>
+                <span className="text-primary">Errands</span>
+              </Link>
+            </div>
             <div className="flex items-center gap-2">
               <NotificationBell />
               {!onNewErrand && (
