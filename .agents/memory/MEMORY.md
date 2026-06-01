@@ -11,4 +11,5 @@
 - [Posting requires login](posting-requires-login.md) — create errand needs an owner (for accept notifications + history); ?mine=true read via raw req.query (zod.coerce.boolean treats "false" as true)
 - [Route authorization rules](route-authz-rules.md) — every mutating route needs login + ownership + ATOMIC state guard in WHERE; status NOT settable via PATCH (lifecycle only); report is owner-only; map popup escapeHtml is safe (semgrep false positive)
 - [GitHub mirror/sync](github-sync.md) — public repo segbiki-arch/anyerrands; push via connector token + async spawn; code+schema-only, NEVER user data/secrets; commit then push each change (no auto-sync)
+- [Signup admin notifications](signup-admin-notifications.md) — admins get a bell alert per new signup; needs nullable errandId + atomic ON CONFLICT DO NOTHING new-user detection (pre-read is race-prone)
 - [Reviews system](reviews-system.md) — one review per completed errand (unique errandId + 23505 catch); helpers.rating = avg; review create is requester-only (must be logged-in poster via errands.requesterUserId); anon/legacy errands can't be reviewed
