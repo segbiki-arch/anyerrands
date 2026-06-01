@@ -6,8 +6,9 @@ import {
   ExchangeMobileAuthorizationCodeResponse,
   LogoutMobileSessionResponse,
 } from "@workspace/api-zod";
-import { db, usersTable } from "@workspace/db";
-import { isAdminEmail } from "../lib/admin";
+import { db, usersTable, notificationsTable } from "@workspace/db";
+import { eq, inArray, sql } from "drizzle-orm";
+import { isAdminEmail, getAdminEmails } from "../lib/admin";
 import {
   clearSession,
   getOidcConfig,
@@ -69,18 +70,69 @@ async function upsertUser(claims: Record<string, unknown>) {
       | null,
   };
 
-  const [user] = await db
+  // Atomically detect a brand-new user: try to INSERT, and only if no row
+  // already exists will a row be returned. This avoids a race where two
+  // concurrent first-logins (e.g. web + mobile) both read "no row" and each
+  // fire a duplicate signup notification.
+  const inserted = await db
     .insert(usersTable)
     .values(userData)
-    .onConflictDoUpdate({
-      target: usersTable.id,
-      set: {
-        ...userData,
-        updatedAt: new Date(),
-      },
-    })
+    .onConflictDoNothing({ target: usersTable.id })
     .returning();
-  return user;
+
+  if (inserted.length > 0) {
+    return { user: inserted[0], isNew: true };
+  }
+
+  const [user] = await db
+    .update(usersTable)
+    .set({
+      ...userData,
+      updatedAt: new Date(),
+    })
+    .where(eq(usersTable.id, userData.id))
+    .returning();
+  return { user, isNew: false };
+}
+
+// When a brand-new user signs up, notify every admin (by ADMIN_EMAILS) in
+// their notification bell. Failures here must never block login, so this is
+// wrapped in try/catch.
+async function notifyAdminsOfSignup(
+  newUser: {
+    id: string;
+    email: string | null;
+    firstName: string | null;
+    lastName: string | null;
+  },
+  log?: { error: (obj: unknown, msg?: string) => void },
+) {
+  try {
+    const adminEmails = getAdminEmails();
+    if (adminEmails.length === 0) return;
+
+    const admins = await db
+      .select({ id: usersTable.id })
+      .from(usersTable)
+      .where(inArray(sql`lower(${usersTable.email})`, adminEmails));
+
+    const recipients = admins.filter((a) => a.id !== newUser.id);
+    if (recipients.length === 0) return;
+
+    const who =
+      [newUser.firstName, newUser.lastName].filter(Boolean).join(" ").trim() ||
+      newUser.email ||
+      "Someone new";
+
+    await db.insert(notificationsTable).values(
+      recipients.map((a) => ({
+        userId: a.id,
+        message: `New sign-up: ${who} just joined AnyErrands.`,
+      })),
+    );
+  } catch (err) {
+    log?.error({ err }, "Failed to notify admins of new signup");
+  }
 }
 
 router.get("/auth/user", (req: Request, res: Response) => {
@@ -167,9 +219,10 @@ router.get("/callback", async (req: Request, res: Response) => {
     return;
   }
 
-  const dbUser = await upsertUser(
+  const { user: dbUser, isNew } = await upsertUser(
     claims as unknown as Record<string, unknown>,
   );
+  if (isNew) await notifyAdminsOfSignup(dbUser, req.log);
 
   const now = Math.floor(Date.now() / 1000);
   const sessionData: SessionData = {
@@ -237,9 +290,10 @@ router.post(
         return;
       }
 
-      const dbUser = await upsertUser(
+      const { user: dbUser, isNew } = await upsertUser(
         claims as unknown as Record<string, unknown>,
       );
+      if (isNew) await notifyAdminsOfSignup(dbUser, req.log);
 
       const now = Math.floor(Date.now() / 1000);
       const sessionData: SessionData = {

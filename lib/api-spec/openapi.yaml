@@ -1293,7 +1293,7 @@ components:
 
     Notification:
       type: object
-      required: [id, errandId, message, read, createdAt]
+      required: [id, message, read, createdAt]
       properties:
         id:
           type: integer
@@ -1302,7 +1302,7 @@ components:
         helperId:
           type: ["integer", "null"]
         errandId:
-          type: integer
+          type: ["integer", "null"]
         message:
           type: string
         read:

@@ -372,7 +372,8 @@ export interface Notification {
   userId?: string | null;
   /** @nullable */
   helperId?: number | null;
-  errandId: number;
+  /** @nullable */
+  errandId?: number | null;
   message: string;
   read: boolean;
   createdAt: string;

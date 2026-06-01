@@ -80,7 +80,9 @@ export const notificationsTable = pgTable("notifications", {
   // Both are nullable so each kind only sets what it needs.
   userId: text("user_id").references(() => usersTable.id),
   helperId: integer("helper_id").references(() => helpersTable.id),
-  errandId: integer("errand_id").references(() => errandsTable.id).notNull(),
+  // Nullable: most notifications relate to an errand, but some (e.g. admin
+  // "new sign-up" alerts) have no errand attached.
+  errandId: integer("errand_id").references(() => errandsTable.id),
   message: text("message").notNull(),
   read: boolean("read").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),

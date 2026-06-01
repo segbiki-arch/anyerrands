@@ -48,10 +48,10 @@ export function NotificationBell() {
     markRead({ id });
   }
 
-  function handleOpenNotification(n: { id: number; read: boolean; errandId: number }) {
+  function handleOpenNotification(n: { id: number; read: boolean; errandId: number | null }) {
     if (!n.read) markRead({ id: n.id });
     setOpen(false);
-    setLocation(`/errands/${n.errandId}`);
+    if (n.errandId != null) setLocation(`/errands/${n.errandId}`);
   }
 
   function timeAgo(iso: string) {

@@ -787,7 +787,7 @@ export const ListNotificationsResponseItem = zod.object({
   "id": zod.number(),
   "userId": zod.string().nullish(),
   "helperId": zod.number().nullish(),
-  "errandId": zod.number(),
+  "errandId": zod.number().nullish(),
   "message": zod.string(),
   "read": zod.boolean(),
   "createdAt": zod.string()
@@ -806,7 +806,7 @@ export const MarkNotificationReadResponse = zod.object({
   "id": zod.number(),
   "userId": zod.string().nullish(),
   "helperId": zod.number().nullish(),
-  "errandId": zod.number(),
+  "errandId": zod.number().nullish(),
   "message": zod.string(),
   "read": zod.boolean(),
   "createdAt": zod.string()
