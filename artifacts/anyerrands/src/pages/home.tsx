@@ -1,10 +1,10 @@
 import { Link } from "wouter";
-import heroShopping from "@assets/stock_images/errand_shopping.jpg";
-import heroCouple from "@assets/stock_images/errand_garden5_2.jpg";
-import heroAirport from "@assets/stock_images/errand_airport_lift.jpg";
-import heroDog from "@assets/stock_images/errand_dog_walk2.jpg";
-import heroWalk from "@assets/stock_images/errand_garden5_1.jpg";
-import heroBoxes from "@assets/stock_images/errand_help4.jpg";
+import heroErrandsBags from "@assets/stock_images/hero_errands_bags.jpg";
+import heroShoppingBags from "@assets/stock_images/hero_shopping_bags.jpg";
+import heroElderCouple from "@assets/stock_images/hero_elder_couple.jpg";
+import heroElderCane from "@assets/stock_images/hero_elder_cane.jpg";
+import heroCarpool from "@assets/stock_images/hero_carpool.jpg";
+import heroDriver from "@assets/stock_images/hero_driver.jpg";
 import { useGetErrandStats, useGetRecentErrands } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,7 +24,7 @@ import {
   Car,
 } from "lucide-react";
 
-const heroPhotos = [heroShopping, heroCouple, heroAirport, heroDog, heroWalk, heroBoxes];
+const heroPhotos = [heroErrandsBags, heroElderCouple, heroCarpool, heroShoppingBags, heroElderCane, heroDriver];
 
 export default function Home() {
   const { data: stats, isLoading: statsLoading } = useGetErrandStats();
@@ -35,7 +35,7 @@ export default function Home() {
       {/* ──────────────── HERO ──────────────── */}
       <section className="relative w-full bg-white overflow-hidden border-b border-border/40">
         {/* Real neighbours, real errands — photo montage background */}
-        <div aria-hidden className="absolute inset-0 z-0 grid grid-cols-3 md:grid-cols-6">
+        <div aria-hidden className="absolute inset-0 z-0 grid grid-cols-2 md:grid-cols-3">
           {heroPhotos.map((src, i) => (
             <img
               key={i}
@@ -46,8 +46,9 @@ export default function Home() {
             />
           ))}
         </div>
-        <div aria-hidden className="absolute inset-0 z-[1] bg-white/65" />
-        <div aria-hidden className="absolute inset-0 z-[1] bg-gradient-to-b from-white/55 via-white/65 to-white" />
+        <div aria-hidden className="absolute inset-0 z-[1] bg-white/30" />
+        <div aria-hidden className="absolute inset-0 z-[1] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.92),rgba(255,255,255,0)_70%)]" />
+        <div aria-hidden className="absolute inset-0 z-[1] bg-gradient-to-b from-transparent via-transparent to-white" />
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-24 md:py-32 flex flex-col items-center justify-center text-center space-y-8">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-foreground text-sm font-medium px-4 py-2 rounded-full shadow-sm animate-fade-down">
             <span className="relative flex w-2 h-2">

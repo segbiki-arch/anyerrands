@@ -79,7 +79,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const onNewErrand = location === "/errands/new";
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen w-full flex bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
