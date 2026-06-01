@@ -485,3 +485,9 @@ id = "GcFZuV8PlVqdkwW28Fab7"
 uri = "file://screenshots/anyerrands-home.jpg"
 type = "image"
 title = "AnyErrands Home Page"
+
+[[outputs]]
+id = "1ZXetT2AvtQGNkIXisumu"
+uri = "file://screenshots/anyerrands-home-large.jpg"
+type = "image"
+title = "AnyErrands Home Page (Large)"
