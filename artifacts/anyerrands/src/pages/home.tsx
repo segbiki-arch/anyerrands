@@ -1,10 +1,10 @@
 import { Link } from "wouter";
-import heroErrandsBags from "@assets/stock_images/hero_errands_bags.jpg";
-import heroShoppingBags from "@assets/stock_images/hero_shopping_bags.jpg";
-import heroElderCouple from "@assets/stock_images/hero_elder_couple.jpg";
-import heroElderCane from "@assets/stock_images/hero_elder_cane.jpg";
-import heroCarpool from "@assets/stock_images/hero_carpool.jpg";
-import heroDriver from "@assets/stock_images/hero_driver.jpg";
+import heroErrandsBags from "@assets/stock_images/gen_errands_bags.png";
+import heroElderGarden from "@assets/stock_images/gen_elder_garden.png";
+import heroLiftFriends from "@assets/stock_images/gen_lift_friends.png";
+import heroErrandsHandoff from "@assets/stock_images/gen_errands_handoff.png";
+import heroElderWalk from "@assets/stock_images/gen_elder_walk.png";
+import heroLiftDriver from "@assets/stock_images/gen_lift_driver.png";
 import { useGetErrandStats, useGetRecentErrands } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,7 +24,7 @@ import {
   Car,
 } from "lucide-react";
 
-const heroPhotos = [heroErrandsBags, heroElderCouple, heroCarpool, heroShoppingBags, heroElderCane, heroDriver];
+const heroPhotos = [heroErrandsBags, heroElderGarden, heroLiftFriends, heroErrandsHandoff, heroElderWalk, heroLiftDriver];
 
 export default function Home() {
   const { data: stats, isLoading: statsLoading } = useGetErrandStats();

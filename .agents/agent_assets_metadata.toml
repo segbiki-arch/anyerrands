@@ -6,6 +6,42 @@ uri = "file://artifacts/anyerrands/public/hero-bg.png"
 type = "image"
 title = "community errands hero background"
 
+[[generated]]
+id = "vjaDYeKf5IQVMT2feQEdG"
+uri = "file://attached_assets/stock_images/gen_errands_bags.png"
+type = "image"
+title = "hero errands smile"
+
+[[generated]]
+id = "eCTaq2T3wpIBKE89CnQ4A"
+uri = "file://attached_assets/stock_images/gen_errands_handoff.png"
+type = "image"
+title = "hero errand handoff"
+
+[[generated]]
+id = "VxM-zcj4oIw8YPcNivh7b"
+uri = "file://attached_assets/stock_images/gen_elder_garden.png"
+type = "image"
+title = "hero elder garden"
+
+[[generated]]
+id = "zYFrlc0YM8y7dQTPk2YpF"
+uri = "file://attached_assets/stock_images/gen_elder_walk.png"
+type = "image"
+title = "hero elder walk"
+
+[[generated]]
+id = "jxmTp13BfDZB8Vgqu-IyS"
+uri = "file://attached_assets/stock_images/gen_lift_friends.png"
+type = "image"
+title = "hero lift friends"
+
+[[generated]]
+id = "FKFWitEpcB1ot6eVHeHXS"
+uri = "file://attached_assets/stock_images/gen_lift_driver.png"
+type = "image"
+title = "hero lift driver"
+
 [[outputs]]
 id = "dmVNkLgye3U0faXJ_QVE_"
 uri = "file://attached_assets/stock_images/errand_shopping.jpg"
@@ -263,3 +299,183 @@ id = "VnomR_c3umXxVWt6jGwsp"
 uri = "file://attached_assets/stock_images/cand_elder3_4.jpg"
 type = "image"
 title = "nurse or family member assisting a senior citizen with a cane walking outdoors"
+
+[[outputs]]
+id = "GP59TwNwnVv07Pu7K6C9L"
+uri = "file://attached_assets/stock_images/liv_elderly_1.jpg"
+type = "image"
+title = "joyful elderly person laughing happily with a young helper, bright warm sunny candid real photo"
+
+[[outputs]]
+id = "fNRuJyH89bJpto_KjE_4Q"
+uri = "file://attached_assets/stock_images/liv_elderly_2.jpg"
+type = "image"
+title = "joyful elderly person laughing happily with a young helper, bright warm sunny candid real photo"
+
+[[outputs]]
+id = "hAQeMNdLFvX_193tDNZqL"
+uri = "file://attached_assets/stock_images/liv_elderly_3.jpg"
+type = "image"
+title = "joyful elderly person laughing happily with a young helper, bright warm sunny candid real photo"
+
+[[outputs]]
+id = "XbMcf_eFPq2sjsY2TVsjz"
+uri = "file://attached_assets/stock_images/liv_elderly_4.jpg"
+type = "image"
+title = "joyful elderly person laughing happily with a young helper, bright warm sunny candid real photo"
+
+[[outputs]]
+id = "4q5F-VvE0PfPsIqNQaI0G"
+uri = "file://attached_assets/stock_images/liv_elderly_5.jpg"
+type = "image"
+title = "joyful elderly person laughing happily with a young helper, bright warm sunny candid real photo"
+
+[[outputs]]
+id = "MpAyKuArVPjplkH04doiF"
+uri = "file://attached_assets/stock_images/liv_lifts_1.jpg"
+type = "image"
+title = "happy friends laughing together inside a car on a sunny road trip, joyful candid real photo"
+
+[[outputs]]
+id = "QBsxVoV3joa04NHvK_XfS"
+uri = "file://attached_assets/stock_images/liv_lifts_2.jpg"
+type = "image"
+title = "happy friends laughing together inside a car on a sunny road trip, joyful candid real photo"
+
+[[outputs]]
+id = "wyboQ2rOXfSfZTENu01d0"
+uri = "file://attached_assets/stock_images/liv_lifts_3.jpg"
+type = "image"
+title = "happy friends laughing together inside a car on a sunny road trip, joyful candid real photo"
+
+[[outputs]]
+id = "61wqVLMwacebu0mO9vDRf"
+uri = "file://attached_assets/stock_images/liv_lifts_4.jpg"
+type = "image"
+title = "happy friends laughing together inside a car on a sunny road trip, joyful candid real photo"
+
+[[outputs]]
+id = "LQzrCC2ChguKCo4TZtm95"
+uri = "file://attached_assets/stock_images/liv_lifts_5.jpg"
+type = "image"
+title = "happy friends laughing together inside a car on a sunny road trip, joyful candid real photo"
+
+[[outputs]]
+id = "P_UEO5KzbKR_i2qgUF2MD"
+uri = "file://attached_assets/stock_images/liv_err_1.jpg"
+type = "image"
+title = "smiling woman holding grocery shopping bags, sunny bright happy, real photo"
+
+[[outputs]]
+id = "5trlbDcZxzAzep_cqILmk"
+uri = "file://attached_assets/stock_images/liv_err_2.jpg"
+type = "image"
+title = "smiling woman holding grocery shopping bags, sunny bright happy, real photo"
+
+[[outputs]]
+id = "EggwfjnHtLT6Nfg1Km9o4"
+uri = "file://attached_assets/stock_images/liv_err_3.jpg"
+type = "image"
+title = "smiling woman holding grocery shopping bags, sunny bright happy, real photo"
+
+[[outputs]]
+id = "vPqGPKuxuSouxjxN8LM4Y"
+uri = "file://attached_assets/stock_images/liv_err_4.jpg"
+type = "image"
+title = "smiling woman holding grocery shopping bags, sunny bright happy, real photo"
+
+[[outputs]]
+id = "AD4yythWOed-Ssq05RKN2"
+uri = "file://attached_assets/stock_images/liv_err_5.jpg"
+type = "image"
+title = "smiling woman holding grocery shopping bags, sunny bright happy, real photo"
+
+[[outputs]]
+id = "xr4bjYvMpfVj_-YanprlS"
+uri = "file://attached_assets/stock_images/liv2_elder_1.jpg"
+type = "image"
+title = "happy senior woman laughing and smiling outdoors, bright sunny, real candid photo"
+
+[[outputs]]
+id = "f83PUow--e6bTsG_Um3ID"
+uri = "file://attached_assets/stock_images/liv2_elder_2.jpg"
+type = "image"
+title = "happy senior woman laughing and smiling outdoors, bright sunny, real candid photo"
+
+[[outputs]]
+id = "WT-K7jOLICoGCwoO9x3Ln"
+uri = "file://attached_assets/stock_images/liv2_elder_3.jpg"
+type = "image"
+title = "happy senior woman laughing and smiling outdoors, bright sunny, real candid photo"
+
+[[outputs]]
+id = "8xNyVAGmllTfDGIXlxIcv"
+uri = "file://attached_assets/stock_images/liv2_elder_4.jpg"
+type = "image"
+title = "happy senior woman laughing and smiling outdoors, bright sunny, real candid photo"
+
+[[outputs]]
+id = "nU7aVXXejtJOUlNMgCGYl"
+uri = "file://attached_assets/stock_images/liv2_elder_5.jpg"
+type = "image"
+title = "happy senior woman laughing and smiling outdoors, bright sunny, real candid photo"
+
+[[outputs]]
+id = "6NlAO0lOrGvVEBNy5hA85"
+uri = "file://attached_assets/stock_images/liv2_err_1.jpg"
+type = "image"
+title = "smiling man holding brown paper grocery bags, happy, real photo"
+
+[[outputs]]
+id = "lzYunzaSTTbLkUWt-AmXv"
+uri = "file://attached_assets/stock_images/liv2_err_2.jpg"
+type = "image"
+title = "smiling man holding brown paper grocery bags, happy, real photo"
+
+[[outputs]]
+id = "54SJINCKBzUDDJOX9_pO_"
+uri = "file://attached_assets/stock_images/liv2_err_3.jpg"
+type = "image"
+title = "smiling man holding brown paper grocery bags, happy, real photo"
+
+[[outputs]]
+id = "ZW59pQ2fKJUCqlHeRelaf"
+uri = "file://attached_assets/stock_images/liv2_err_4.jpg"
+type = "image"
+title = "smiling man holding brown paper grocery bags, happy, real photo"
+
+[[outputs]]
+id = "WQ4JN27wO8VnoYuSub4vc"
+uri = "file://attached_assets/stock_images/liv2_err_5.jpg"
+type = "image"
+title = "smiling man holding brown paper grocery bags, happy, real photo"
+
+[[outputs]]
+id = "dNopZs2mtoxFOSxnRUpco"
+uri = "file://attached_assets/stock_images/liv2_lift_1.jpg"
+type = "image"
+title = "two happy friends smiling and laughing inside a car, real candid photo"
+
+[[outputs]]
+id = "5M1IaWR7-ZCsgt-laOiEA"
+uri = "file://attached_assets/stock_images/liv2_lift_2.jpg"
+type = "image"
+title = "two happy friends smiling and laughing inside a car, real candid photo"
+
+[[outputs]]
+id = "RfimT3lQ-bSKCm9qQs7Ga"
+uri = "file://attached_assets/stock_images/liv2_lift_3.jpg"
+type = "image"
+title = "two happy friends smiling and laughing inside a car, real candid photo"
+
+[[outputs]]
+id = "4eShg0NTg75UKPMkcibr8"
+uri = "file://attached_assets/stock_images/liv2_lift_4.jpg"
+type = "image"
+title = "two happy friends smiling and laughing inside a car, real candid photo"
+
+[[outputs]]
+id = "mLdBqqF_YbHq5cF0_cEvj"
+uri = "file://attached_assets/stock_images/liv2_lift_5.jpg"
+type = "image"
+title = "two happy friends smiling and laughing inside a car, real candid photo"
