@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
 import { Toaster } from "@/components/ui/toaster";
 import { Link, useLocation } from "wouter";
@@ -83,14 +83,21 @@ export function Layout({ children }: { children: ReactNode }) {
       <div className="min-h-screen w-full flex bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col min-w-0">
-          <header className="sticky top-0 z-30 flex h-13 items-center justify-end border-b border-border bg-card px-5 gap-2">
-            <NotificationBell />
-            {!onNewErrand && (
-              <Button asChild size="sm" className="rounded-full h-8 px-4 text-sm font-medium">
-                <Link href="/errands/new">Post an Errand</Link>
-              </Button>
-            )}
-            <UserMenu />
+          <header className="sticky top-0 z-30 flex h-13 items-center justify-between border-b border-border bg-card px-5 gap-2">
+            <SidebarTrigger
+              className="h-8 w-8 text-foreground/70 hover:text-foreground hover:bg-muted"
+              aria-label="Toggle menu"
+              data-testid="button-sidebar-toggle"
+            />
+            <div className="flex items-center gap-2">
+              <NotificationBell />
+              {!onNewErrand && (
+                <Button asChild size="sm" className="rounded-full h-8 px-4 text-sm font-medium">
+                  <Link href="/errands/new">Post an Errand</Link>
+                </Button>
+              )}
+              <UserMenu />
+            </div>
           </header>
           <main className="flex-1 overflow-y-auto">
             {children}
