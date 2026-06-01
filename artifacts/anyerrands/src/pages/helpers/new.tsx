@@ -31,6 +31,10 @@ export default function NewHelperPage() {
   const { user, isLoading: authLoading, isAuthenticated, login } = useAuth();
 
   const accountName = [user?.firstName, user?.lastName].filter(Boolean).join(" ").trim();
+  // Some accounts (e.g. email-only sign-ins) have no name on file. In that case
+  // the field must be editable so the helper can type their name — otherwise it
+  // stays empty AND locked and they can never submit the form.
+  const hasAccountName = accountName.length > 0;
 
   const [skillInput, setSkillInput] = useState("");
   const createHelper = useCreateHelper();
@@ -150,9 +154,13 @@ export default function NewHelperPage() {
                     <FormItem>
                       <FormLabel>Full Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} disabled readOnly data-testid="input-helper-name" />
+                        <Input placeholder="John Doe" {...field} disabled={hasAccountName} readOnly={hasAccountName} data-testid="input-helper-name" />
                       </FormControl>
-                      <FormDescription>From your account — keeps your profile tied to you.</FormDescription>
+                      <FormDescription>
+                        {hasAccountName
+                          ? "From your account — keeps your profile tied to you."
+                          : "Enter the name you'd like neighbors to see."}
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
