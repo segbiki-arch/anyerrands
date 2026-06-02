@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, ShieldCheck } from "lucide-react";
 
 function UserMenu() {
   const { user, isLoading, isAuthenticated, login, logout } = useAuth();
@@ -125,6 +125,15 @@ export function Layout({ children }: { children: ReactNode }) {
                 <a href="/help#contact" className="hover:text-primary transition-colors">Contact</a>
                 <Link href="/terms" className="hover:text-primary transition-colors">Terms & Privacy</Link>
               </div>
+            </div>
+            <div className="max-w-6xl mx-auto mt-5 pt-4 border-t border-background/15 flex justify-center">
+              <span
+                className="inline-flex items-center gap-2 rounded-full border border-background/25 bg-background/5 px-3.5 py-1.5 text-xs font-medium text-background/90"
+                data-testid="badge-stripe-connect"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                Payments secured &amp; powered by <span className="font-bold text-background">Stripe Connect</span>
+              </span>
             </div>
           </footer>
         </div>
