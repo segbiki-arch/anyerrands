@@ -14,4 +14,5 @@
 - [Signup admin notifications](signup-admin-notifications.md) — admins get a bell alert per new signup; needs nullable errandId + atomic ON CONFLICT DO NOTHING new-user detection (pre-read is race-prone)
 - [Completion PIN flow](completion-pin-flow.md) — paid errands complete+pay out only when helper enters requester's secret 4-digit code; all authz+payout invariants re-checked under row lock; code requester-only in BOTH formatErrands
 - [Reviews system](reviews-system.md) — one review per completed errand (unique errandId + 23505 catch); helpers.rating = avg; review create is requester-only (must be logged-in poster via errands.requesterUserId); anon/legacy errands can't be reviewed
+- [Two-way reporting](two-way-reporting.md) — one reports table, reportType helper|requester; helper→customer route is assigned-helper-only + needs requesterUserId; admin UI branches on reportType to label party
 - [Welcome experience](welcome-experience.md) — one-time popup/notification/email for new customers & helpers; gated server-side via welcomeSeenAt; sends are fire-and-forget; email is env-key (RESEND_API_KEY) not a connector, no-ops if unset
