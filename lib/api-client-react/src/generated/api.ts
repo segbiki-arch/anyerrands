@@ -49,6 +49,7 @@ import type {
   Notification,
   Report,
   ReportHelperInput,
+  ReportRequesterInput,
   ReportWithContext,
   Review,
   ReviewInput,
@@ -2467,6 +2468,78 @@ export const useReportHelper = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getReportHelperMutationOptions(options));
+    }
+
+export const getReportRequesterUrl = (id: number,) => {
+
+
+
+
+  return `/api/errands/${id}/report-requester`
+}
+
+/**
+ * @summary Report the customer (requester) of an errand
+ */
+export const reportRequester = async (id: number,
+    reportRequesterInput: ReportRequesterInput, options?: RequestInit): Promise<Report> => {
+
+  return customFetch<Report>(getReportRequesterUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      reportRequesterInput,)
+  }
+);}
+
+
+
+
+export const getReportRequesterMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reportRequester>>, TError,{id: number;data: BodyType<ReportRequesterInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof reportRequester>>, TError,{id: number;data: BodyType<ReportRequesterInput>}, TContext> => {
+
+const mutationKey = ['reportRequester'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reportRequester>>, {id: number;data: BodyType<ReportRequesterInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  reportRequester(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReportRequesterMutationResult = NonNullable<Awaited<ReturnType<typeof reportRequester>>>
+    export type ReportRequesterMutationBody = BodyType<ReportRequesterInput>
+    export type ReportRequesterMutationError = ErrorType<void>
+
+    /**
+ * @summary Report the customer (requester) of an errand
+ */
+export const useReportRequester = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reportRequester>>, TError,{id: number;data: BodyType<ReportRequesterInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof reportRequester>>,
+        TError,
+        {id: number;data: BodyType<ReportRequesterInput>},
+        TContext
+      > => {
+      return useMutation(getReportRequesterMutationOptions(options));
     }
 
 export const getListReportsUrl = (params?: ListReportsParams,) => {

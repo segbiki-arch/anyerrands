@@ -15,4 +15,7 @@ export const ReportWithContextReason = {
   no_show: 'no_show',
   late: 'late',
   other: 'other',
+  payment_issue: 'payment_issue',
+  unsafe: 'unsafe',
+  inaccurate_details: 'inaccurate_details',
 } as const;

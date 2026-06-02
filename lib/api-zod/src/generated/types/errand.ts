@@ -69,4 +69,6 @@ export interface Errand {
   updatedAt?: string | null;
   /** True when the authenticated user is the person who posted this errand. */
   isRequester?: boolean;
+  /** True when this errand was posted by a logged-in user (so the customer can be reported by the helper). */
+  hasRegisteredRequester?: boolean;
 }

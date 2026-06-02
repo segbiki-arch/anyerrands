@@ -80,6 +80,7 @@ function formatErrand(
     createdAt: e.createdAt.toISOString(),
     updatedAt: e.updatedAt ? e.updatedAt.toISOString() : null,
     isRequester,
+    hasRegisteredRequester: !!e.requesterUserId,
   };
 }
 

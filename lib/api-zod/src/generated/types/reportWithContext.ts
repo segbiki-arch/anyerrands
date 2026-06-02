@@ -6,17 +6,20 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ReportWithContextReason } from './reportWithContextReason';
+import type { ReportWithContextReportType } from './reportWithContextReportType';
 import type { ReportWithContextStatus } from './reportWithContextStatus';
 
 export interface ReportWithContext {
   id: number;
   errandId: number;
-  helperId: number;
+  reportType: ReportWithContextReportType;
+  helperId?: number | null;
   reporterName: string;
   reason: ReportWithContextReason;
   description: string;
   status: ReportWithContextStatus;
   createdAt: string;
   errandTitle?: string;
-  helperName?: string;
+  helperName?: string | null;
+  requesterName?: string | null;
 }

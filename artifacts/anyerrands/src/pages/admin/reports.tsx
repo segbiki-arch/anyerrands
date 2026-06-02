@@ -47,7 +47,20 @@ const REASON_LABELS: Record<string, string> = {
   no_show: "No-show",
   late: "Late",
   other: "Other",
+  payment_issue: "Payment issue",
+  unsafe: "Unsafe behaviour",
+  inaccurate_details: "Inaccurate details",
 };
+
+// Who a report is filed against. "helper" reports are filed by the customer
+// against the helper; "requester" reports are filed by the helper against the
+// customer.
+function reportedParty(report: ReportWithContext): { label: string; name: string } {
+  if (report.reportType === "requester") {
+    return { label: "Customer", name: report.requesterName ?? "Unknown customer" };
+  }
+  return { label: "Helper", name: report.helperName ?? `#${report.helperId ?? "?"}` };
+}
 
 const STATUS_CONFIG = {
   pending:  { label: "Pending",  color: "bg-amber-100 text-amber-800 border-amber-200",  icon: Clock },
@@ -77,6 +90,9 @@ function ReasonBadge({ reason }: { reason: string }) {
     no_show: "bg-purple-50 text-purple-700 border-purple-200",
     late: "bg-yellow-50 text-yellow-700 border-yellow-200",
     other: "bg-gray-50 text-gray-700 border-gray-200",
+    payment_issue: "bg-red-50 text-red-700 border-red-200",
+    unsafe: "bg-red-50 text-red-700 border-red-200",
+    inaccurate_details: "bg-orange-50 text-orange-700 border-orange-200",
   };
   return (
     <Badge variant="outline" className={`border font-medium text-xs ${colorMap[reason] ?? "bg-gray-50 text-gray-700"}`}>
@@ -144,7 +160,7 @@ export default function AdminReportsPage() {
             </div>
             <h1 className="text-3xl font-serif font-bold">Reports Admin</h1>
           </div>
-          <p className="text-muted-foreground ml-[52px]">Review and act on helper reports from the community.</p>
+          <p className="text-muted-foreground ml-[52px]">Review and act on reports from the community — both customers reporting helpers and helpers reporting customers.</p>
         </div>
 
         <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as StatusFilter)}>
@@ -244,7 +260,7 @@ export default function AdminReportsPage() {
                 <div className="flex flex-wrap gap-6 text-sm text-muted-foreground mb-3">
                   <span className="flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5" />
-                    Helper: <span className="font-medium text-foreground">{report.helperName ?? `#${report.helperId}`}</span>
+                    {reportedParty(report).label} reported: <span className="font-medium text-foreground">{reportedParty(report).name}</span>
                   </span>
                   <span className="flex items-center gap-1.5">
                     <Flag className="w-3.5 h-3.5" />
@@ -288,8 +304,8 @@ export default function AdminReportsPage() {
                   <p className="font-medium">{selectedReport.errandTitle ?? `#${selectedReport.errandId}`}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Helper</p>
-                  <p className="font-medium">{selectedReport.helperName ?? `#${selectedReport.helperId}`}</p>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">{reportedParty(selectedReport).label} reported</p>
+                  <p className="font-medium">{reportedParty(selectedReport).name}</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-0.5">Reported by</p>

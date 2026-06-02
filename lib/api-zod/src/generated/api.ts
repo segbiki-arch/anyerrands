@@ -140,7 +140,8 @@ export const ListErrandsResponseItem = zod.object({
   "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
-  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.'),
+  "hasRegisteredRequester": zod.boolean().optional().describe('True when this errand was posted by a logged-in user (so the customer can be reported by the helper).')
 })
 export const ListErrandsResponse = zod.array(ListErrandsResponseItem)
 
@@ -208,7 +209,8 @@ export const GetErrandResponse = zod.object({
   "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
-  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.'),
+  "hasRegisteredRequester": zod.boolean().optional().describe('True when this errand was posted by a logged-in user (so the customer can be reported by the helper).')
 })
 
 
@@ -257,7 +259,8 @@ export const UpdateErrandResponse = zod.object({
   "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
-  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.'),
+  "hasRegisteredRequester": zod.boolean().optional().describe('True when this errand was posted by a logged-in user (so the customer can be reported by the helper).')
 })
 
 
@@ -309,7 +312,8 @@ export const AcceptErrandResponse = zod.object({
   "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
-  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.'),
+  "hasRegisteredRequester": zod.boolean().optional().describe('True when this errand was posted by a logged-in user (so the customer can be reported by the helper).')
 })
 
 
@@ -357,7 +361,8 @@ export const SetErrandContactResponse = zod.object({
   "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
-  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.'),
+  "hasRegisteredRequester": zod.boolean().optional().describe('True when this errand was posted by a logged-in user (so the customer can be reported by the helper).')
 })
 
 
@@ -397,7 +402,8 @@ export const CompleteErrandResponse = zod.object({
   "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
-  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.'),
+  "hasRegisteredRequester": zod.boolean().optional().describe('True when this errand was posted by a logged-in user (so the customer can be reported by the helper).')
 })
 
 
@@ -444,7 +450,8 @@ export const VerifyPinResponse = zod.object({
   "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
-  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.'),
+  "hasRegisteredRequester": zod.boolean().optional().describe('True when this errand was posted by a logged-in user (so the customer can be reported by the helper).')
 })
 
 
@@ -484,7 +491,8 @@ export const AbortErrandResponse = zod.object({
   "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
-  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.'),
+  "hasRegisteredRequester": zod.boolean().optional().describe('True when this errand was posted by a logged-in user (so the customer can be reported by the helper).')
 })
 
 
@@ -538,7 +546,8 @@ export const GetRecentErrandsResponseItem = zod.object({
   "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
-  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.'),
+  "hasRegisteredRequester": zod.boolean().optional().describe('True when this errand was posted by a logged-in user (so the customer can be reported by the helper).')
 })
 export const GetRecentErrandsResponse = zod.array(GetRecentErrandsResponseItem)
 
@@ -667,7 +676,8 @@ export const GetHelperErrandsResponseItem = zod.object({
   "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
-  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.'),
+  "hasRegisteredRequester": zod.boolean().optional().describe('True when this errand was posted by a logged-in user (so the customer can be reported by the helper).')
 })
 export const GetHelperErrandsResponse = zod.array(GetHelperErrandsResponseItem)
 
@@ -811,6 +821,26 @@ export const ReportHelperBody = zod.object({
 
 
 /**
+ * @summary Report the customer (requester) of an errand
+ */
+export const ReportRequesterParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const reportRequesterBodyReporterNameMin = 2;
+
+export const reportRequesterBodyDescriptionMin = 10;
+
+
+
+export const ReportRequesterBody = zod.object({
+  "reporterName": zod.string().min(reportRequesterBodyReporterNameMin),
+  "reason": zod.enum(['no_show', 'payment_issue', 'unsafe', 'inaccurate_details', 'other']),
+  "description": zod.string().min(reportRequesterBodyDescriptionMin)
+})
+
+
+/**
  * @summary List all reports (admin)
  */
 export const ListReportsQueryParams = zod.object({
@@ -820,14 +850,16 @@ export const ListReportsQueryParams = zod.object({
 export const ListReportsResponseItem = zod.object({
   "id": zod.number(),
   "errandId": zod.number(),
-  "helperId": zod.number(),
+  "reportType": zod.enum(['helper', 'requester']),
+  "helperId": zod.number().nullish(),
   "reporterName": zod.string(),
-  "reason": zod.enum(['work_not_done', 'work_poor_quality', 'no_show', 'late', 'other']),
+  "reason": zod.enum(['work_not_done', 'work_poor_quality', 'no_show', 'late', 'other', 'payment_issue', 'unsafe', 'inaccurate_details']),
   "description": zod.string(),
   "status": zod.enum(['pending', 'reviewed', 'resolved']),
   "createdAt": zod.string(),
   "errandTitle": zod.string().optional(),
-  "helperName": zod.string().optional()
+  "helperName": zod.string().nullish(),
+  "requesterName": zod.string().nullish()
 })
 export const ListReportsResponse = zod.array(ListReportsResponseItem)
 
@@ -846,14 +878,16 @@ export const UpdateReportStatusBody = zod.object({
 export const UpdateReportStatusResponse = zod.object({
   "id": zod.number(),
   "errandId": zod.number(),
-  "helperId": zod.number(),
+  "reportType": zod.enum(['helper', 'requester']),
+  "helperId": zod.number().nullish(),
   "reporterName": zod.string(),
-  "reason": zod.enum(['work_not_done', 'work_poor_quality', 'no_show', 'late', 'other']),
+  "reason": zod.enum(['work_not_done', 'work_poor_quality', 'no_show', 'late', 'other', 'payment_issue', 'unsafe', 'inaccurate_details']),
   "description": zod.string(),
   "status": zod.enum(['pending', 'reviewed', 'resolved']),
   "createdAt": zod.string(),
   "errandTitle": zod.string().optional(),
-  "helperName": zod.string().optional()
+  "helperName": zod.string().nullish(),
+  "requesterName": zod.string().nullish()
 })
 
 

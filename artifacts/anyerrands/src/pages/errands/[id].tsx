@@ -51,6 +51,14 @@ const REPORT_REASONS = [
   { value: "other",             label: "Other issue" },
 ];
 
+const REPORT_CUSTOMER_REASONS = [
+  { value: "no_show",            label: "Customer didn't show up" },
+  { value: "payment_issue",      label: "Payment problem / didn't pay" },
+  { value: "unsafe",             label: "Unsafe or abusive behaviour" },
+  { value: "inaccurate_details", label: "Errand details were inaccurate" },
+  { value: "other",              label: "Other issue" },
+];
+
 function toWhatsAppLink(phone: string): string {
   let digits = phone.replace(/\D/g, "");
   if (digits.startsWith("00")) digits = digits.slice(2);
@@ -77,6 +85,13 @@ export default function ErrandDetailPage() {
   const [reportDescription, setReportDescription] = useState("");
   const [isReporting, setIsReporting] = useState(false);
   const [alreadyReported, setAlreadyReported] = useState(false);
+
+  const [isReportCustomerOpen, setIsReportCustomerOpen] = useState(false);
+  const [custReporterName, setCustReporterName] = useState("");
+  const [custReportReason, setCustReportReason] = useState("");
+  const [custReportDescription, setCustReportDescription] = useState("");
+  const [isReportingCustomer, setIsReportingCustomer] = useState(false);
+  const [alreadyReportedCustomer, setAlreadyReportedCustomer] = useState(false);
 
   const [contactPhone, setContactPhone] = useState("");
 
@@ -299,6 +314,38 @@ export default function ErrandDetailPage() {
       toast({ title: "Failed to submit report", description: (e as Error).message, variant: "destructive" });
     } finally {
       setIsReporting(false);
+    }
+  };
+
+  const handleReportCustomer = async () => {
+    if (!custReporterName.trim() || custReporterName.trim().length < 2) {
+      toast({ title: "Please enter your name", variant: "destructive" }); return;
+    }
+    if (!custReportReason) {
+      toast({ title: "Please select a reason", variant: "destructive" }); return;
+    }
+    if (custReportDescription.trim().length < 10) {
+      toast({ title: "Please add more detail (at least 10 characters)", variant: "destructive" }); return;
+    }
+    setIsReportingCustomer(true);
+    try {
+      const res = await fetch(`/api/errands/${errandId}/report-requester`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reporterName: custReporterName.trim(), reason: custReportReason, description: custReportDescription.trim() }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(err.error ?? "Failed to submit report");
+      }
+      setIsReportCustomerOpen(false);
+      setAlreadyReportedCustomer(true);
+      setCustReporterName(""); setCustReportReason(""); setCustReportDescription("");
+      toast({ title: "Report submitted", description: "We'll review this and take action if needed. Thank you." });
+    } catch (e) {
+      toast({ title: "Failed to submit report", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setIsReportingCustomer(false);
     }
   };
 
@@ -580,6 +627,41 @@ export default function ErrandDetailPage() {
                   data-testid="btn-report-helper"
                 >
                   <Flag className="w-3.5 h-3.5" /> Report Helper
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Report customer section — shown to the assigned helper on accepted/completed errands */}
+          {isAssignedHelper && (errand.status === ErrandStatus.accepted || errand.status === ErrandStatus.completed) && errand.hasRegisteredRequester && (
+            <div className="flex items-center justify-between p-4 rounded-xl border border-border/60 bg-card">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">Issue with the customer?</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Report the customer if there was a no-show, payment problem or unsafe behaviour.</p>
+                </div>
+              </div>
+              {alreadyReportedCustomer ? (
+                <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> Reported
+                </span>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 gap-2 text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive rounded-full"
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      toast({ title: "Please log in to report a customer" });
+                      login();
+                      return;
+                    }
+                    setIsReportCustomerOpen(true);
+                  }}
+                  data-testid="btn-report-customer"
+                >
+                  <Flag className="w-3.5 h-3.5" /> Report Customer
                 </Button>
               )}
             </div>
@@ -1018,6 +1100,73 @@ export default function ErrandDetailPage() {
               data-testid="btn-submit-report"
             >
               {isReporting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting…</> : "Submit Report"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Report customer dialog */}
+      <Dialog open={isReportCustomerOpen} onOpenChange={setIsReportCustomerOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="w-5 h-5 text-destructive" />
+              Report Customer
+            </DialogTitle>
+            <DialogDescription>
+              Tell us what went wrong. Reports are reviewed by the AnyErrands team and kept confidential.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="cust-reporter-name">Your name</Label>
+              <Input
+                id="cust-reporter-name"
+                placeholder="e.g. Siobhán O'Brien"
+                value={custReporterName}
+                onChange={e => setCustReporterName(e.target.value)}
+                data-testid="input-cust-reporter-name"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="cust-report-reason">What happened?</Label>
+              <Select value={custReportReason} onValueChange={setCustReportReason}>
+                <SelectTrigger id="cust-report-reason" data-testid="select-cust-report-reason">
+                  <SelectValue placeholder="Select a reason…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {REPORT_CUSTOMER_REASONS.map(r => (
+                    <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="cust-report-description">Give us more detail</Label>
+              <Textarea
+                id="cust-report-description"
+                placeholder="Describe what happened in a few sentences…"
+                rows={4}
+                value={custReportDescription}
+                onChange={e => setCustReportDescription(e.target.value)}
+                data-testid="textarea-cust-report-description"
+              />
+              <p className="text-xs text-muted-foreground">{custReportDescription.trim().length}/10 characters minimum</p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsReportCustomerOpen(false)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              onClick={handleReportCustomer}
+              disabled={isReportingCustomer}
+              data-testid="btn-submit-cust-report"
+            >
+              {isReportingCustomer ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Submitting…</> : "Submit Report"}
             </Button>
           </DialogFooter>
         </DialogContent>

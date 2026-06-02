@@ -6,12 +6,15 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ReportReason } from './reportReason';
+import type { ReportReportType } from './reportReportType';
 import type { ReportStatus } from './reportStatus';
 
 export interface Report {
   id: number;
   errandId: number;
-  helperId: number;
+  reportType: ReportReportType;
+  helperId?: number | null;
+  reportedUserId?: string | null;
   reporterName: string;
   reason: ReportReason;
   description: string;

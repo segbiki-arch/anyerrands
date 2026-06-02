@@ -15,6 +15,7 @@ router.get("/admin/reports", requireAdmin, async (req, res) => {
     .select({
       id: reportsTable.id,
       errandId: reportsTable.errandId,
+      reportType: reportsTable.reportType,
       helperId: reportsTable.helperId,
       reporterName: reportsTable.reporterName,
       reason: reportsTable.reason,
@@ -23,6 +24,7 @@ router.get("/admin/reports", requireAdmin, async (req, res) => {
       createdAt: reportsTable.createdAt,
       errandTitle: errandsTable.title,
       helperName: helpersTable.name,
+      requesterName: errandsTable.requesterName,
     })
     .from(reportsTable)
     .leftJoin(errandsTable, eq(reportsTable.errandId, errandsTable.id))
@@ -59,6 +61,7 @@ router.patch("/admin/reports/:id", requireAdmin, async (req, res) => {
     .select({
       id: reportsTable.id,
       errandId: reportsTable.errandId,
+      reportType: reportsTable.reportType,
       helperId: reportsTable.helperId,
       reporterName: reportsTable.reporterName,
       reason: reportsTable.reason,
@@ -67,6 +70,7 @@ router.patch("/admin/reports/:id", requireAdmin, async (req, res) => {
       createdAt: reportsTable.createdAt,
       errandTitle: errandsTable.title,
       helperName: helpersTable.name,
+      requesterName: errandsTable.requesterName,
     })
     .from(reportsTable)
     .leftJoin(errandsTable, eq(reportsTable.errandId, errandsTable.id))

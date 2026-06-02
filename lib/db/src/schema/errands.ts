@@ -1,6 +1,7 @@
 import { pgTable, serial, text, numeric, integer, boolean, timestamp, pgEnum } from "drizzle-orm/pg-core";
-export const reportReasonEnum = pgEnum("report_reason", ["work_not_done", "work_poor_quality", "no_show", "late", "other"]);
+export const reportReasonEnum = pgEnum("report_reason", ["work_not_done", "work_poor_quality", "no_show", "late", "other", "payment_issue", "unsafe", "inaccurate_details"]);
 export const reportStatusEnum = pgEnum("report_status", ["pending", "reviewed", "resolved"]);
+export const reportTypeEnum = pgEnum("report_type", ["helper", "requester"]);
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./auth";
@@ -104,7 +105,11 @@ export type Notification = typeof notificationsTable.$inferSelect;
 export const reportsTable = pgTable("reports", {
   id: serial("id").primaryKey(),
   errandId: integer("errand_id").references(() => errandsTable.id).notNull(),
-  helperId: integer("helper_id").references(() => helpersTable.id).notNull(),
+  // Who is being reported. "helper" reports name a helperId; "requester" reports
+  // name a reportedUserId (the customer who posted the errand).
+  reportType: reportTypeEnum("report_type").notNull().default("helper"),
+  helperId: integer("helper_id").references(() => helpersTable.id),
+  reportedUserId: text("reported_user_id").references(() => usersTable.id),
   reporterName: text("reporter_name").notNull(),
   reason: reportReasonEnum("reason").notNull(),
   description: text("description").notNull(),
@@ -112,12 +117,21 @@ export const reportsTable = pgTable("reports", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Requester-side reports (filed by the requester against the helper).
 export const insertReportSchema = z.object({
   reporterName: z.string().min(2),
   reason: z.enum(["work_not_done", "work_poor_quality", "no_show", "late", "other"]),
   description: z.string().min(10),
 });
 export type InsertReport = z.infer<typeof insertReportSchema>;
+
+// Helper-side reports (filed by the assigned helper against the requester).
+export const insertRequesterReportSchema = z.object({
+  reporterName: z.string().min(2),
+  reason: z.enum(["no_show", "payment_issue", "unsafe", "inaccurate_details", "other"]),
+  description: z.string().min(10),
+});
+export type InsertRequesterReport = z.infer<typeof insertRequesterReportSchema>;
 export type Report = typeof reportsTable.$inferSelect;
 
 export const reviewsTable = pgTable("reviews", {

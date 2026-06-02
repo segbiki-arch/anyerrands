@@ -138,6 +138,8 @@ export interface Errand {
   updatedAt?: string | null;
   /** True when the authenticated user is the person who posted this errand. */
   isRequester?: boolean;
+  /** True when this errand was posted by a logged-in user (so the customer can be reported by the helper). */
+  hasRegisteredRequester?: boolean;
 }
 
 export interface ErrandInput {
@@ -313,6 +315,33 @@ export interface ReportHelperInput {
   description: string;
 }
 
+export type ReportRequesterInputReason = typeof ReportRequesterInputReason[keyof typeof ReportRequesterInputReason];
+
+
+export const ReportRequesterInputReason = {
+  no_show: 'no_show',
+  payment_issue: 'payment_issue',
+  unsafe: 'unsafe',
+  inaccurate_details: 'inaccurate_details',
+  other: 'other',
+} as const;
+
+export interface ReportRequesterInput {
+  /** @minLength 2 */
+  reporterName: string;
+  reason: ReportRequesterInputReason;
+  /** @minLength 10 */
+  description: string;
+}
+
+export type ReportReportType = typeof ReportReportType[keyof typeof ReportReportType];
+
+
+export const ReportReportType = {
+  helper: 'helper',
+  requester: 'requester',
+} as const;
+
 export type ReportReason = typeof ReportReason[keyof typeof ReportReason];
 
 
@@ -322,6 +351,9 @@ export const ReportReason = {
   no_show: 'no_show',
   late: 'late',
   other: 'other',
+  payment_issue: 'payment_issue',
+  unsafe: 'unsafe',
+  inaccurate_details: 'inaccurate_details',
 } as const;
 
 export type ReportStatus = typeof ReportStatus[keyof typeof ReportStatus];
@@ -336,7 +368,9 @@ export const ReportStatus = {
 export interface Report {
   id: number;
   errandId: number;
-  helperId: number;
+  reportType: ReportReportType;
+  helperId?: number | null;
+  reportedUserId?: string | null;
   reporterName: string;
   reason: ReportReason;
   description: string;
@@ -357,6 +391,14 @@ export interface UpdateReportStatusInput {
   status: UpdateReportStatusInputStatus;
 }
 
+export type ReportWithContextReportType = typeof ReportWithContextReportType[keyof typeof ReportWithContextReportType];
+
+
+export const ReportWithContextReportType = {
+  helper: 'helper',
+  requester: 'requester',
+} as const;
+
 export type ReportWithContextReason = typeof ReportWithContextReason[keyof typeof ReportWithContextReason];
 
 
@@ -366,6 +408,9 @@ export const ReportWithContextReason = {
   no_show: 'no_show',
   late: 'late',
   other: 'other',
+  payment_issue: 'payment_issue',
+  unsafe: 'unsafe',
+  inaccurate_details: 'inaccurate_details',
 } as const;
 
 export type ReportWithContextStatus = typeof ReportWithContextStatus[keyof typeof ReportWithContextStatus];
@@ -380,14 +425,16 @@ export const ReportWithContextStatus = {
 export interface ReportWithContext {
   id: number;
   errandId: number;
-  helperId: number;
+  reportType: ReportWithContextReportType;
+  helperId?: number | null;
   reporterName: string;
   reason: ReportWithContextReason;
   description: string;
   status: ReportWithContextStatus;
   createdAt: string;
   errandTitle?: string;
-  helperName?: string;
+  helperName?: string | null;
+  requesterName?: string | null;
 }
 
 export interface Notification {

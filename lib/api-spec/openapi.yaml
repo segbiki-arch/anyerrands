@@ -718,6 +718,41 @@ paths:
                 $ref: "#/components/schemas/Report"
         "400":
           description: Invalid input or errand not in reportable state
+        "401":
+          description: Not authenticated
+        "404":
+          description: Errand not found
+
+  /errands/{id}/report-requester:
+    post:
+      operationId: reportRequester
+      tags: [errands]
+      summary: Report the customer (requester) of an errand
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportRequesterInput"
+      responses:
+        "201":
+          description: Report submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "400":
+          description: Invalid input or errand not in reportable state
+        "401":
+          description: Not authenticated
+        "403":
+          description: Only the assigned helper can report the customer
         "404":
           description: Errand not found
 
@@ -1067,6 +1102,9 @@ components:
         isRequester:
           type: boolean
           description: True when the authenticated user is the person who posted this errand.
+        hasRegisteredRequester:
+          type: boolean
+          description: True when this errand was posted by a logged-in user (so the customer can be reported by the helper).
 
     ErrandInput:
       type: object
@@ -1340,21 +1378,42 @@ components:
           type: string
           minLength: 10
 
+    ReportRequesterInput:
+      type: object
+      required: [reporterName, reason, description]
+      properties:
+        reporterName:
+          type: string
+          minLength: 2
+        reason:
+          type: string
+          enum: [no_show, payment_issue, unsafe, inaccurate_details, other]
+        description:
+          type: string
+          minLength: 10
+
     Report:
       type: object
-      required: [id, errandId, helperId, reporterName, reason, description, status, createdAt]
+      required: [id, errandId, reportType, reporterName, reason, description, status, createdAt]
       properties:
         id:
           type: integer
         errandId:
           type: integer
+        reportType:
+          type: string
+          enum: [helper, requester]
         helperId:
           type: integer
+          nullable: true
+        reportedUserId:
+          type: string
+          nullable: true
         reporterName:
           type: string
         reason:
           type: string
-          enum: [work_not_done, work_poor_quality, no_show, late, other]
+          enum: [work_not_done, work_poor_quality, no_show, late, other, payment_issue, unsafe, inaccurate_details]
         description:
           type: string
         status:
@@ -1373,19 +1432,23 @@ components:
 
     ReportWithContext:
       type: object
-      required: [id, errandId, helperId, reporterName, reason, description, status, createdAt]
+      required: [id, errandId, reportType, reporterName, reason, description, status, createdAt]
       properties:
         id:
           type: integer
         errandId:
           type: integer
+        reportType:
+          type: string
+          enum: [helper, requester]
         helperId:
           type: integer
+          nullable: true
         reporterName:
           type: string
         reason:
           type: string
-          enum: [work_not_done, work_poor_quality, no_show, late, other]
+          enum: [work_not_done, work_poor_quality, no_show, late, other, payment_issue, unsafe, inaccurate_details]
         description:
           type: string
         status:
@@ -1397,6 +1460,10 @@ components:
           type: string
         helperName:
           type: string
+          nullable: true
+        requesterName:
+          type: string
+          nullable: true
 
     Notification:
       type: object

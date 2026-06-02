@@ -6,16 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ReportReason = typeof ReportReason[keyof typeof ReportReason];
+export type ReportRequesterInputReason = typeof ReportRequesterInputReason[keyof typeof ReportRequesterInputReason];
 
 
-export const ReportReason = {
-  work_not_done: 'work_not_done',
-  work_poor_quality: 'work_poor_quality',
+export const ReportRequesterInputReason = {
   no_show: 'no_show',
-  late: 'late',
-  other: 'other',
   payment_issue: 'payment_issue',
   unsafe: 'unsafe',
   inaccurate_details: 'inaccurate_details',
+  other: 'other',
 } as const;
