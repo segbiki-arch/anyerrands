@@ -19,6 +19,8 @@ export const helpersTable = pgTable("helpers", {
   available: boolean("available").notNull().default(true),
   avatarInitials: text("avatar_initials"),
   stripeAccountId: text("stripe_account_id"),
+  // Null until the user has dismissed the one-time helper welcome popup.
+  welcomeSeenAt: timestamp("welcome_seen_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
