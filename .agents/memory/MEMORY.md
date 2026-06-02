@@ -13,3 +13,4 @@
 - [GitHub mirror/sync](github-sync.md) — public repo segbiki-arch/anyerrands; push via connector token + async spawn; code+schema-only, NEVER user data/secrets; commit then push each change (no auto-sync)
 - [Signup admin notifications](signup-admin-notifications.md) — admins get a bell alert per new signup; needs nullable errandId + atomic ON CONFLICT DO NOTHING new-user detection (pre-read is race-prone)
 - [Reviews system](reviews-system.md) — one review per completed errand (unique errandId + 23505 catch); helpers.rating = avg; review create is requester-only (must be logged-in poster via errands.requesterUserId); anon/legacy errands can't be reviewed
+- [Welcome experience](welcome-experience.md) — one-time popup/notification/email for new customers & helpers; gated server-side via welcomeSeenAt; sends are fire-and-forget; email is env-key (RESEND_API_KEY) not a connector, no-ops if unset
