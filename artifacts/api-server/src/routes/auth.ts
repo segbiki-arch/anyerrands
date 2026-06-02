@@ -9,6 +9,7 @@ import {
 import { db, usersTable, notificationsTable } from "@workspace/db";
 import { eq, inArray, sql } from "drizzle-orm";
 import { isAdminEmail, getAdminEmails } from "../lib/admin";
+import { sendWelcome } from "../lib/welcome";
 import {
   clearSession,
   getOidcConfig,
@@ -222,7 +223,10 @@ router.get("/callback", async (req: Request, res: Response) => {
   const { user: dbUser, isNew } = await upsertUser(
     claims as unknown as Record<string, unknown>,
   );
-  if (isNew) await notifyAdminsOfSignup(dbUser, req.log);
+  if (isNew) {
+    await notifyAdminsOfSignup(dbUser, req.log);
+    void sendWelcome("customer", dbUser, req.log);
+  }
 
   const now = Math.floor(Date.now() / 1000);
   const sessionData: SessionData = {
@@ -293,7 +297,10 @@ router.post(
       const { user: dbUser, isNew } = await upsertUser(
         claims as unknown as Record<string, unknown>,
       );
-      if (isNew) await notifyAdminsOfSignup(dbUser, req.log);
+      if (isNew) {
+        await notifyAdminsOfSignup(dbUser, req.log);
+        void sendWelcome("customer", dbUser, req.log);
+      }
 
       const now = Math.floor(Date.now() / 1000);
       const sessionData: SessionData = {

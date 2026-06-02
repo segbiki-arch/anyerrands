@@ -54,7 +54,8 @@ import type {
   ReviewInput,
   StripeConnectOnboardResponse,
   StripeConnectStatusResponse,
-  UpdateReportStatusInput
+  UpdateReportStatusInput,
+  WelcomeStatus
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -2774,5 +2775,222 @@ export const useMarkAllNotificationsRead = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getMarkAllNotificationsReadMutationOptions(options));
+    }
+
+export const getGetWelcomeStatusUrl = () => {
+
+
+
+
+  return `/api/welcome`
+}
+
+/**
+ * @summary Whether the current user should see a welcome popup
+ */
+export const getWelcomeStatus = async ( options?: RequestInit): Promise<WelcomeStatus> => {
+
+  return customFetch<WelcomeStatus>(getGetWelcomeStatusUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetWelcomeStatusQueryKey = () => {
+    return [
+    `/api/welcome`
+    ] as const;
+    }
+
+
+export const getGetWelcomeStatusQueryOptions = <TData = Awaited<ReturnType<typeof getWelcomeStatus>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWelcomeStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetWelcomeStatusQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWelcomeStatus>>> = ({ signal }) => getWelcomeStatus({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWelcomeStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetWelcomeStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getWelcomeStatus>>>
+export type GetWelcomeStatusQueryError = ErrorType<void>
+
+
+/**
+ * @summary Whether the current user should see a welcome popup
+ */
+
+export function useGetWelcomeStatus<TData = Awaited<ReturnType<typeof getWelcomeStatus>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWelcomeStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetWelcomeStatusQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getMarkCustomerWelcomeSeenUrl = () => {
+
+
+
+
+  return `/api/welcome/customer/seen`
+}
+
+/**
+ * @summary Dismiss the customer welcome popup for the current user
+ */
+export const markCustomerWelcomeSeen = async ( options?: RequestInit): Promise<WelcomeStatus> => {
+
+  return customFetch<WelcomeStatus>(getMarkCustomerWelcomeSeenUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getMarkCustomerWelcomeSeenMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markCustomerWelcomeSeen>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markCustomerWelcomeSeen>>, TError,void, TContext> => {
+
+const mutationKey = ['markCustomerWelcomeSeen'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markCustomerWelcomeSeen>>, void> = () => {
+
+
+          return  markCustomerWelcomeSeen(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkCustomerWelcomeSeenMutationResult = NonNullable<Awaited<ReturnType<typeof markCustomerWelcomeSeen>>>
+
+    export type MarkCustomerWelcomeSeenMutationError = ErrorType<void>
+
+    /**
+ * @summary Dismiss the customer welcome popup for the current user
+ */
+export const useMarkCustomerWelcomeSeen = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markCustomerWelcomeSeen>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markCustomerWelcomeSeen>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getMarkCustomerWelcomeSeenMutationOptions(options));
+    }
+
+export const getMarkHelperWelcomeSeenUrl = () => {
+
+
+
+
+  return `/api/welcome/helper/seen`
+}
+
+/**
+ * @summary Dismiss the helper welcome popup for the current user
+ */
+export const markHelperWelcomeSeen = async ( options?: RequestInit): Promise<WelcomeStatus> => {
+
+  return customFetch<WelcomeStatus>(getMarkHelperWelcomeSeenUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getMarkHelperWelcomeSeenMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markHelperWelcomeSeen>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markHelperWelcomeSeen>>, TError,void, TContext> => {
+
+const mutationKey = ['markHelperWelcomeSeen'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markHelperWelcomeSeen>>, void> = () => {
+
+
+          return  markHelperWelcomeSeen(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkHelperWelcomeSeenMutationResult = NonNullable<Awaited<ReturnType<typeof markHelperWelcomeSeen>>>
+
+    export type MarkHelperWelcomeSeenMutationError = ErrorType<void>
+
+    /**
+ * @summary Dismiss the helper welcome popup for the current user
+ */
+export const useMarkHelperWelcomeSeen = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markHelperWelcomeSeen>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markHelperWelcomeSeen>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getMarkHelperWelcomeSeenMutationOptions(options));
     }
 

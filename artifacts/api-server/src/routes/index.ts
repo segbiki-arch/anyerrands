@@ -8,6 +8,7 @@ import stripeRouter from "./stripe";
 import authRouter from "./auth";
 import reportsRouter from "./reports";
 import adminRouter from "./admin";
+import welcomeRouter from "./welcome";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(notificationsRouter);
 router.use(stripeRouter);
 router.use(reportsRouter);
 router.use(adminRouter);
+router.use(welcomeRouter);
 
 export default router;

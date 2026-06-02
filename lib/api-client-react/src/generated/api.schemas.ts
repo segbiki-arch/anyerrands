@@ -9,6 +9,13 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface WelcomeStatus {
+  showCustomerWelcome: boolean;
+  showHelperWelcome: boolean;
+  /** @nullable */
+  firstName: string | null;
+}
+
 export interface AuthUser {
   id: string;
   /** @nullable */

@@ -826,3 +826,33 @@ export const MarkAllNotificationsReadResponse = zod.object({
 })
 
 
+/**
+ * @summary Whether the current user should see a welcome popup
+ */
+export const GetWelcomeStatusResponse = zod.object({
+  "showCustomerWelcome": zod.boolean(),
+  "showHelperWelcome": zod.boolean(),
+  "firstName": zod.string().nullable()
+})
+
+
+/**
+ * @summary Dismiss the customer welcome popup for the current user
+ */
+export const MarkCustomerWelcomeSeenResponse = zod.object({
+  "showCustomerWelcome": zod.boolean(),
+  "showHelperWelcome": zod.boolean(),
+  "firstName": zod.string().nullable()
+})
+
+
+/**
+ * @summary Dismiss the helper welcome popup for the current user
+ */
+export const MarkHelperWelcomeSeenResponse = zod.object({
+  "showCustomerWelcome": zod.boolean(),
+  "showHelperWelcome": zod.boolean(),
+  "firstName": zod.string().nullable()
+})
+
+

@@ -811,6 +811,51 @@ paths:
                   updated:
                     type: integer
 
+  /welcome:
+    get:
+      operationId: getWelcomeStatus
+      tags: [welcome]
+      summary: Whether the current user should see a welcome popup
+      responses:
+        "200":
+          description: Welcome status for the current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WelcomeStatus"
+        "401":
+          description: Not logged in
+
+  /welcome/customer/seen:
+    post:
+      operationId: markCustomerWelcomeSeen
+      tags: [welcome]
+      summary: Dismiss the customer welcome popup for the current user
+      responses:
+        "200":
+          description: Updated welcome status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WelcomeStatus"
+        "401":
+          description: Not logged in
+
+  /welcome/helper/seen:
+    post:
+      operationId: markHelperWelcomeSeen
+      tags: [welcome]
+      summary: Dismiss the helper welcome popup for the current user
+      responses:
+        "200":
+          description: Updated welcome status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WelcomeStatus"
+        "401":
+          description: Not logged in
+
 components:
   parameters:
     AuthorizationSessionHeader:
@@ -836,6 +881,17 @@ components:
           type: string
       required:
         - status
+
+    WelcomeStatus:
+      type: object
+      required: [showCustomerWelcome, showHelperWelcome, firstName]
+      properties:
+        showCustomerWelcome:
+          type: boolean
+        showHelperWelcome:
+          type: boolean
+        firstName:
+          type: [string, 'null']
 
     AuthUser:
       type: object

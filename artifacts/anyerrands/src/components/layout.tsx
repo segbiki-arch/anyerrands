@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./notification-bell";
+import { WelcomeManager } from "./welcome-manager";
 import { useAuth } from "@workspace/replit-auth-web";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -148,6 +149,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </div>
       <Toaster />
+      <WelcomeManager />
     </SidebarProvider>
   );
 }

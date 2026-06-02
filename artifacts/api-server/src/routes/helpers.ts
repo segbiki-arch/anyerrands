@@ -11,6 +11,7 @@ import {
   GetHelperEarningsParams,
   GetHelperReviewsParams,
 } from "@workspace/api-zod";
+import { sendWelcome } from "../lib/welcome";
 
 const router = Router();
 
@@ -62,6 +63,14 @@ router.post("/helpers", async (req, res) => {
       .insert(helpersTable)
       .values({ ...parsed.data, userId: req.user.id, avatarInitials: initials })
       .returning();
+
+    // Fire the helper welcome (in-app notification + email) only on a genuine
+    // first-time creation. Never block the 201 on it.
+    void sendWelcome(
+      "helper",
+      { id: req.user.id, email: req.user.email, firstName: req.user.firstName },
+      req.log,
+    );
 
     return res.status(201).json(formatHelper(row, req.user.id));
   } catch (err) {
