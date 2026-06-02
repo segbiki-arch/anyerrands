@@ -348,6 +348,45 @@ paths:
         "404":
           description: Not found
 
+  /errands/{id}/verify-pin:
+    post:
+      operationId: verifyPin
+      tags: [errands]
+      summary: Helper enters the requester's completion code to complete a paid errand and release the payout
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pin]
+              properties:
+                pin:
+                  type: string
+                  pattern: '^[0-9]{4}$'
+                  description: The 4-digit completion code given to the helper by the requester.
+      responses:
+        "200":
+          description: Errand completed and payout released
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errand"
+        "400":
+          description: Wrong or missing code, or errand not in a completable state
+        "403":
+          description: Only the assigned helper can enter the code
+        "404":
+          description: Not found
+        "429":
+          description: Too many incorrect attempts
+
   /errands/{id}/abort:
     post:
       operationId: abortErrand
@@ -1009,6 +1048,18 @@ components:
         helperPaidAt:
           type: ["string", "null"]
           description: When the held payment was released to the helper.
+        completionPin:
+          type: ["string", "null"]
+          description: The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).
+        completionPinVerified:
+          type: boolean
+          description: True once the helper has entered the correct completion code.
+        completedAt:
+          type: ["string", "null"]
+          description: When the errand was marked completed.
+        payoutInitiatedAt:
+          type: ["string", "null"]
+          description: When the payout to the helper was initiated.
         createdAt:
           type: string
         updatedAt:

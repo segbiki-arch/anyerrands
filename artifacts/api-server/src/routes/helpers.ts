@@ -26,9 +26,17 @@ function formatHelper(h: typeof helpersTable.$inferSelect, currentUserId?: strin
 }
 
 function formatErrand(e: typeof errandsTable.$inferSelect) {
+  // The completion code is a requester-only secret — never expose it (or the
+  // attempt counter) on a helper-facing list.
+  const { completionPin: _pin, completionPinAttempts: _attempts, completedAt, payoutInitiatedAt, ...rest } = e;
+  void _pin;
+  void _attempts;
   return {
-    ...e,
+    ...rest,
+    completionPin: null,
     budgetAmount: e.budgetAmount ? Number(e.budgetAmount) : null,
+    completedAt: completedAt ? completedAt.toISOString() : null,
+    payoutInitiatedAt: payoutInitiatedAt ? payoutInitiatedAt.toISOString() : null,
     createdAt: e.createdAt.toISOString(),
     updatedAt: e.updatedAt ? e.updatedAt.toISOString() : null,
   };

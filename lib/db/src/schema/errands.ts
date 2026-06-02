@@ -61,6 +61,15 @@ export const errandsTable = pgTable("errands", {
   paidAt: timestamp("paid_at"),
   transferId: text("transfer_id"),
   helperPaidAt: timestamp("helper_paid_at"),
+  // 4-digit completion code shown ONLY to the requester once payment is held.
+  // The requester shares it with the helper when satisfied; the helper enters it
+  // to mark the errand completed and release the 90% payout. Generated on payment.
+  completionPin: text("completion_pin"),
+  completionPinVerified: boolean("completion_pin_verified").notNull().default(false),
+  // Failed code attempts by the helper; locks the code after a small limit.
+  completionPinAttempts: integer("completion_pin_attempts").notNull().default(0),
+  completedAt: timestamp("completed_at"),
+  payoutInitiatedAt: timestamp("payout_initiated_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at"),
 });

@@ -55,6 +55,7 @@ import type {
   StripeConnectOnboardResponse,
   StripeConnectStatusResponse,
   UpdateReportStatusInput,
+  VerifyPinBody,
   WelcomeStatus
 } from './api.schemas';
 
@@ -1197,6 +1198,78 @@ export const useCompleteErrand = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getCompleteErrandMutationOptions(options));
+    }
+
+export const getVerifyPinUrl = (id: number,) => {
+
+
+
+
+  return `/api/errands/${id}/verify-pin`
+}
+
+/**
+ * @summary Helper enters the requester's completion code to complete a paid errand and release the payout
+ */
+export const verifyPin = async (id: number,
+    verifyPinBody: VerifyPinBody, options?: RequestInit): Promise<Errand> => {
+
+  return customFetch<Errand>(getVerifyPinUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      verifyPinBody,)
+  }
+);}
+
+
+
+
+export const getVerifyPinMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verifyPin>>, TError,{id: number;data: BodyType<VerifyPinBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof verifyPin>>, TError,{id: number;data: BodyType<VerifyPinBody>}, TContext> => {
+
+const mutationKey = ['verifyPin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof verifyPin>>, {id: number;data: BodyType<VerifyPinBody>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  verifyPin(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type VerifyPinMutationResult = NonNullable<Awaited<ReturnType<typeof verifyPin>>>
+    export type VerifyPinMutationBody = BodyType<VerifyPinBody>
+    export type VerifyPinMutationError = ErrorType<void>
+
+    /**
+ * @summary Helper enters the requester's completion code to complete a paid errand and release the payout
+ */
+export const useVerifyPin = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof verifyPin>>, TError,{id: number;data: BodyType<VerifyPinBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof verifyPin>>,
+        TError,
+        {id: number;data: BodyType<VerifyPinBody>},
+        TContext
+      > => {
+      return useMutation(getVerifyPinMutationOptions(options));
     }
 
 export const getAbortErrandUrl = (id: number,) => {

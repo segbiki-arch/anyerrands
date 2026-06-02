@@ -54,4 +54,5 @@ export * from './stripeConnectOnboardResponse';
 export * from './stripeConnectStatusResponse';
 export * from './updateReportStatusInput';
 export * from './updateReportStatusInputStatus';
+export * from './verifyPinBody';
 export * from './welcomeStatus';

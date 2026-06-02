@@ -116,6 +116,23 @@ export interface Errand {
      * @nullable
      */
   helperPaidAt?: string | null;
+  /**
+     * The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).
+     * @nullable
+     */
+  completionPin?: string | null;
+  /** True once the helper has entered the correct completion code. */
+  completionPinVerified?: boolean;
+  /**
+     * When the errand was marked completed.
+     * @nullable
+     */
+  completedAt?: string | null;
+  /**
+     * When the payout to the helper was initiated.
+     * @nullable
+     */
+  payoutInitiatedAt?: string | null;
   createdAt: string;
   /** @nullable */
   updatedAt?: string | null;
@@ -423,6 +440,14 @@ export const ListErrandsStatus = {
   accepted: 'accepted',
   completed: 'completed',
 } as const;
+
+export type VerifyPinBody = {
+  /**
+     * The 4-digit completion code given to the helper by the requester.
+     * @pattern ^[0-9]{4}$
+     */
+  pin: string;
+};
 
 export type GetRecentErrandsParams = {
 limit?: number;

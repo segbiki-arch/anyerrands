@@ -134,6 +134,10 @@ export const ListErrandsResponseItem = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "completionPin": zod.string().nullish().describe('The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).'),
+  "completionPinVerified": zod.boolean().optional().describe('True once the helper has entered the correct completion code.'),
+  "completedAt": zod.string().nullish().describe('When the errand was marked completed.'),
+  "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -198,6 +202,10 @@ export const GetErrandResponse = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "completionPin": zod.string().nullish().describe('The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).'),
+  "completionPinVerified": zod.boolean().optional().describe('True once the helper has entered the correct completion code.'),
+  "completedAt": zod.string().nullish().describe('When the errand was marked completed.'),
+  "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -243,6 +251,10 @@ export const UpdateErrandResponse = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "completionPin": zod.string().nullish().describe('The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).'),
+  "completionPinVerified": zod.boolean().optional().describe('True once the helper has entered the correct completion code.'),
+  "completedAt": zod.string().nullish().describe('When the errand was marked completed.'),
+  "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -291,6 +303,10 @@ export const AcceptErrandResponse = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "completionPin": zod.string().nullish().describe('The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).'),
+  "completionPinVerified": zod.boolean().optional().describe('True once the helper has entered the correct completion code.'),
+  "completedAt": zod.string().nullish().describe('When the errand was marked completed.'),
+  "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -335,6 +351,10 @@ export const SetErrandContactResponse = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "completionPin": zod.string().nullish().describe('The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).'),
+  "completionPinVerified": zod.boolean().optional().describe('True once the helper has entered the correct completion code.'),
+  "completedAt": zod.string().nullish().describe('When the errand was marked completed.'),
+  "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -371,6 +391,57 @@ export const CompleteErrandResponse = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "completionPin": zod.string().nullish().describe('The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).'),
+  "completionPinVerified": zod.boolean().optional().describe('True once the helper has entered the correct completion code.'),
+  "completedAt": zod.string().nullish().describe('When the errand was marked completed.'),
+  "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string().nullish(),
+  "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
+})
+
+
+/**
+ * @summary Helper enters the requester's completion code to complete a paid errand and release the payout
+ */
+export const VerifyPinParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const verifyPinBodyPinRegExp = new RegExp('^[0-9]{4}$');
+
+
+export const VerifyPinBody = zod.object({
+  "pin": zod.string().regex(verifyPinBodyPinRegExp).describe('The 4-digit completion code given to the helper by the requester.')
+})
+
+export const VerifyPinResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "category": zod.string(),
+  "status": zod.enum(['open', 'accepted', 'completed']),
+  "requesterName": zod.string(),
+  "requesterLocation": zod.string(),
+  "requesterPhone": zod.string().nullish(),
+  "estimatedDuration": zod.string().nullish(),
+  "budgetAmount": zod.number().nullish(),
+  "tripFrom": zod.string().nullish(),
+  "tripTo": zod.string().nullish(),
+  "tripWhen": zod.string().nullish(),
+  "passengers": zod.number().nullish(),
+  "returnTrip": zod.boolean().optional(),
+  "helperId": zod.number().nullish(),
+  "helperName": zod.string().nullish(),
+  "paymentStatus": zod.enum(['unpaid', 'paid', 'refunded']).optional(),
+  "paidAmount": zod.number().nullish(),
+  "platformFee": zod.number().nullish(),
+  "paidAt": zod.string().nullish(),
+  "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "completionPin": zod.string().nullish().describe('The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).'),
+  "completionPinVerified": zod.boolean().optional().describe('True once the helper has entered the correct completion code.'),
+  "completedAt": zod.string().nullish().describe('When the errand was marked completed.'),
+  "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -407,6 +478,10 @@ export const AbortErrandResponse = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "completionPin": zod.string().nullish().describe('The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).'),
+  "completionPinVerified": zod.boolean().optional().describe('True once the helper has entered the correct completion code.'),
+  "completedAt": zod.string().nullish().describe('When the errand was marked completed.'),
+  "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -457,6 +532,10 @@ export const GetRecentErrandsResponseItem = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "completionPin": zod.string().nullish().describe('The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).'),
+  "completionPinVerified": zod.boolean().optional().describe('True once the helper has entered the correct completion code.'),
+  "completedAt": zod.string().nullish().describe('When the errand was marked completed.'),
+  "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')
@@ -582,6 +661,10 @@ export const GetHelperErrandsResponseItem = zod.object({
   "platformFee": zod.number().nullish(),
   "paidAt": zod.string().nullish(),
   "helperPaidAt": zod.string().nullish().describe('When the held payment was released to the helper.'),
+  "completionPin": zod.string().nullish().describe('The 4-digit completion code. Returned ONLY to the requester who posted the errand; always null for everyone else (including the helper).'),
+  "completionPinVerified": zod.boolean().optional().describe('True once the helper has entered the correct completion code.'),
+  "completedAt": zod.string().nullish().describe('When the errand was marked completed.'),
+  "payoutInitiatedAt": zod.string().nullish().describe('When the payout to the helper was initiated.'),
   "createdAt": zod.string(),
   "updatedAt": zod.string().nullish(),
   "isRequester": zod.boolean().optional().describe('True when the authenticated user is the person who posted this errand.')

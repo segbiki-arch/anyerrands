@@ -18,10 +18,15 @@ import {
   GetRecentErrandsQueryParams,
   CreateReviewParams,
   CreateReviewBody,
+  VerifyPinParams,
+  VerifyPinBody,
 } from "@workspace/api-zod";
 import { isHelperChargesEnabled } from "../lib/stripeStatus";
 import { getUncachableStripeClient } from "../stripeClient";
 import { refundAndReopenErrand } from "../lib/refunds";
+import { logger } from "../lib/logger";
+
+const MAX_PIN_ATTEMPTS = 5;
 
 const router = Router();
 
@@ -49,11 +54,25 @@ function formatErrand(
   // anyone viewing an open errand) gets null. The legacy requesterAddress column
   // is never returned (phone-only contact model).
   const canSeeContact = !isOpen && (isRequester || isAssignedHelper);
-  const { requesterAddress: _legacyAddress, ...rest } = e;
+  // The completion code is the requester's private secret — it is shown ONLY to
+  // the person who posted the errand, never to the helper or the public. The raw
+  // attempt counter is internal and never surfaced.
+  const {
+    requesterAddress: _legacyAddress,
+    completionPinAttempts: _attempts,
+    completionPin: rawPin,
+    completedAt: rawCompletedAt,
+    payoutInitiatedAt: rawPayoutAt,
+    ...rest
+  } = e;
   void _legacyAddress;
+  void _attempts;
   return {
     ...rest,
     requesterPhone: canSeeContact ? e.requesterPhone : null,
+    completionPin: isRequester ? rawPin : null,
+    completedAt: rawCompletedAt ? rawCompletedAt.toISOString() : null,
+    payoutInitiatedAt: rawPayoutAt ? rawPayoutAt.toISOString() : null,
     budgetAmount: e.budgetAmount ? Number(e.budgetAmount) : null,
     paidAmount: e.paidAmount ? Number(e.paidAmount) : null,
     platformFee: e.platformFee ? Number(e.platformFee) : null,
@@ -62,6 +81,159 @@ function formatErrand(
     updatedAt: e.updatedAt ? e.updatedAt.toISOString() : null,
     isRequester,
   };
+}
+
+// Single source of truth for releasing a held payout and flipping an accepted
+// errand to completed. Used by both the requester's direct completion (volunteer
+// errands) and the helper's PIN verification (paid errands). All work happens
+// under a row lock so it is mutually exclusive with a concurrent abort / auto-
+// refund: a payment is EITHER paid out to the helper OR refunded, never both.
+type CompleteOutcome =
+  | { ok: true; row: typeof errandsTable.$inferSelect }
+  | { ok: false; status: number; error: string };
+
+async function completeErrandWithPayout(
+  errandId: number,
+  opts: { pinVerified?: boolean } = {},
+): Promise<CompleteOutcome> {
+  try {
+    return await db.transaction(async (tx) => {
+      const [locked] = await tx
+        .select()
+        .from(errandsTable)
+        .where(eq(errandsTable.id, errandId))
+        .for("update");
+
+      // Re-validate against the freshly-locked row, never a stale snapshot.
+      if (!locked) return { ok: false as const, status: 404, error: "Not found" };
+      if (locked.status !== "accepted") {
+        return {
+          ok: false as const,
+          status: 409,
+          error: "This errand can no longer be completed — it may have been reopened or already finished.",
+        };
+      }
+
+      const lockedIsPaid = !!locked.budgetAmount && Number(locked.budgetAmount) > 0 && locked.paymentStatus === "paid";
+
+      let transferId = locked.transferId;
+      let helperPaidAt = locked.helperPaidAt;
+      if (lockedIsPaid && locked.helperId && !locked.transferId) {
+        const [helper] = await tx.select().from(helpersTable).where(eq(helpersTable.id, locked.helperId));
+        if (!helper?.stripeAccountId) {
+          return {
+            ok: false as const,
+            status: 400,
+            error: "The helper hasn't connected a payout account, so their payment can't be released yet.",
+          };
+        }
+        if (!locked.paymentIntentId) {
+          return { ok: false as const, status: 400, error: "Missing payment reference; cannot release payment." };
+        }
+
+        const paidCents = Math.round(Number(locked.paidAmount ?? locked.budgetAmount) * 100);
+        const feeCents = Math.round(Number(locked.platformFee ?? 0) * 100);
+        const payoutCents = paidCents - feeCents;
+
+        const stripe = await getUncachableStripeClient();
+        const pi = await stripe.paymentIntents.retrieve(locked.paymentIntentId);
+        const chargeId = typeof pi.latest_charge === "string" ? pi.latest_charge : pi.latest_charge?.id;
+
+        // Split-brain safety net: never pay the helper if the held payment was
+        // already refunded to the requester — confirm against Stripe first.
+        if (chargeId) {
+          const charge = await stripe.charges.retrieve(chargeId);
+          if (charge.refunded || (charge.amount_refunded ?? 0) > 0) {
+            return {
+              ok: false as const,
+              status: 409,
+              error: "This payment has been refunded to the requester and can no longer be released to the helper.",
+            };
+          }
+        }
+
+        const transfer = await stripe.transfers.create(
+          {
+            amount: payoutCents,
+            currency: "eur",
+            destination: helper.stripeAccountId,
+            transfer_group: `errand-${locked.id}`,
+            ...(chargeId ? { source_transaction: chargeId } : {}),
+            metadata: { errandId: String(locked.id) },
+          },
+          { idempotencyKey: `errand-${locked.id}-payout` },
+        );
+        transferId = transfer.id;
+        helperPaidAt = new Date();
+      }
+
+      const [updated] = await tx
+        .update(errandsTable)
+        .set({
+          status: "completed",
+          transferId,
+          helperPaidAt,
+          completedAt: new Date(),
+          // Set only when a transfer was (or had already been) made.
+          payoutInitiatedAt: helperPaidAt,
+          ...(opts.pinVerified ? { completionPinVerified: true } : {}),
+          updatedAt: new Date(),
+        })
+        .where(eq(errandsTable.id, locked.id))
+        .returning();
+
+      if (locked.helperId) {
+        await tx
+          .update(helpersTable)
+          .set({ errandsCompleted: sql`${helpersTable.errandsCompleted} + 1` })
+          .where(eq(helpersTable.id, locked.helperId));
+      }
+
+      return { ok: true as const, row: updated };
+    });
+  } catch (err) {
+    logger.error({ err, errandId }, "Failed to release helper payment");
+    return { ok: false as const, status: 502, error: "Couldn't release the payment to the helper. Please try again." };
+  }
+}
+
+// Best-effort notification that an errand was completed and any held payment
+// released — never fail the request if this insert fails (payment is already
+// settled at this point), just log it.
+async function notifyErrandCompleted(row: typeof errandsTable.$inferSelect): Promise<void> {
+  const wasPaid = !!row.transferId;
+  // Tell the helper their work is confirmed (and money is on the way, if paid).
+  if (row.helperId) {
+    try {
+      const [helper] = await db.select().from(helpersTable).where(eq(helpersTable.id, row.helperId));
+      if (helper?.userId) {
+        await db.insert(notificationsTable).values({
+          userId: helper.userId,
+          helperId: helper.id,
+          errandId: row.id,
+          message: wasPaid
+            ? `Your errand "${row.title}" is complete and your payment has been released — it's on its way to your payout account.`
+            : `Your errand "${row.title}" has been marked complete. Thanks for helping out!`,
+        });
+      }
+    } catch (err) {
+      logger.error({ err, errandId: row.id }, "Failed to create helper completion notification");
+    }
+  }
+  // Tell the requester the errand is done (and money released, if paid).
+  if (row.requesterUserId) {
+    try {
+      await db.insert(notificationsTable).values({
+        userId: row.requesterUserId,
+        errandId: row.id,
+        message: wasPaid
+          ? `Your errand "${row.title}" is complete — the payment has been released to ${row.helperName ?? "your helper"}.`
+          : `Your errand "${row.title}" is marked complete. Thanks for using AnyErrands!`,
+      });
+    } catch (err) {
+      logger.error({ err, errandId: row.id }, "Failed to create requester completion notification");
+    }
+  }
 }
 
 router.get("/errands", async (req, res) => {
@@ -401,173 +573,152 @@ router.post("/errands/:id/complete", async (req, res) => {
   }
 
   const requiresPayment = !!errand.budgetAmount && Number(errand.budgetAmount) > 0;
-  const isPaid = requiresPayment && errand.paymentStatus === "paid";
 
-  // Only the requester may confirm completion — confirming releases the held
-  // payment to the helper, so the helper must not be able to mark their own work
-  // done. The "any logged-in user" fallback is ONLY for unpaid/volunteer errands
-  // with no bound requester (legacy seed data); a paid errand must always be
-  // confirmed by its real requester so money is never released by a stranger.
-  if (errand.requesterUserId) {
-    if (errand.requesterUserId !== req.user.id) {
-      return res.status(403).json({ error: "Only the person who requested this errand can mark it completed." });
-    }
-  } else if (requiresPayment) {
-    return res.status(403).json({ error: "This errand's requester can't be verified, so payment can't be released." });
-  }
-
-  // Block completion of paid errands until payment is confirmed
-  if (requiresPayment && errand.paymentStatus !== "paid") {
+  // PAID errands are completed ONLY through the helper entering the requester's
+  // secret completion code (/verify-pin). That single act is the requester's
+  // completion + satisfaction + payout authorisation, so this direct-confirm
+  // route is reserved for volunteer/unpaid errands and must reject paid ones.
+  if (requiresPayment) {
     return res.status(400).json({
-      error: "Payment not yet received. The requester must pay before this errand can be marked completed.",
+      error: "Paid errands are completed when your helper enters your 4-digit completion code. Share it with them once you're happy with the job.",
     });
   }
 
-  // A paid errand must have a helper to receive the held funds.
-  if (isPaid && !errand.helperId) {
-    return res.status(400).json({ error: "This paid errand has no helper assigned to pay." });
+  // Only the requester may confirm completion. The "any logged-in user" fallback
+  // is ONLY for unpaid/volunteer errands with no bound requester (legacy seed
+  // data) — paid errands never reach here.
+  if (errand.requesterUserId && errand.requesterUserId !== req.user.id) {
+    return res.status(403).json({ error: "Only the person who requested this errand can mark it completed." });
   }
 
-  // Release the held payment (90%) to the helper and flip the status, all under
-  // a row lock so this is mutually exclusive with a concurrent abort / auto-
-  // refund. Whichever transaction grabs the lock first wins; the other re-reads
-  // the new state and bails. This guarantees a payment is EITHER paid out to the
-  // helper OR refunded to the requester, never both. The transfer happens before
-  // the status flip, so if it fails the errand stays accepted and can be retried.
-  let outcome:
-    | { ok: true; row: typeof errand }
-    | { ok: false; status: number; error: string };
-
-  try {
-    outcome = await db.transaction(async (tx) => {
-      const [locked] = await tx
-        .select()
-        .from(errandsTable)
-        .where(eq(errandsTable.id, parsed.data.id))
-        .for("update");
-
-      // Re-validate against the freshly-locked row, never the stale snapshot.
-      // A concurrent abort/auto-refund may have reopened (or someone completed)
-      // this errand between our first read and acquiring the lock.
-      if (!locked) return { ok: false as const, status: 404, error: "Not found" };
-      if (locked.status !== "accepted") {
-        return {
-          ok: false as const,
-          status: 409,
-          error: "This errand can no longer be completed — it may have been reopened or already finished.",
-        };
-      }
-
-      const lockedIsPaid = !!locked.budgetAmount && Number(locked.budgetAmount) > 0 && locked.paymentStatus === "paid";
-
-      let transferId = locked.transferId;
-      let helperPaidAt = locked.helperPaidAt;
-      if (lockedIsPaid && locked.helperId && !locked.transferId) {
-        const [helper] = await tx.select().from(helpersTable).where(eq(helpersTable.id, locked.helperId));
-        if (!helper?.stripeAccountId) {
-          return {
-            ok: false as const,
-            status: 400,
-            error: "The helper hasn't connected a payout account, so their payment can't be released yet.",
-          };
-        }
-        if (!locked.paymentIntentId) {
-          return { ok: false as const, status: 400, error: "Missing payment reference; cannot release payment." };
-        }
-
-        const paidCents = Math.round(Number(locked.paidAmount ?? locked.budgetAmount) * 100);
-        const feeCents = Math.round(Number(locked.platformFee ?? 0) * 100);
-        const payoutCents = paidCents - feeCents;
-
-        const stripe = await getUncachableStripeClient();
-        const pi = await stripe.paymentIntents.retrieve(locked.paymentIntentId);
-        const chargeId = typeof pi.latest_charge === "string" ? pi.latest_charge : pi.latest_charge?.id;
-
-        // Split-brain safety net: our DB says still payable, but the held payment
-        // may already have been refunded to the requester (e.g. a refund that
-        // succeeded in Stripe while its DB write was lost). Never also pay the
-        // helper — confirm against Stripe before releasing funds.
-        if (chargeId) {
-          const charge = await stripe.charges.retrieve(chargeId);
-          if (charge.refunded || (charge.amount_refunded ?? 0) > 0) {
-            return {
-              ok: false as const,
-              status: 409,
-              error: "This payment has been refunded to the requester and can no longer be released to the helper.",
-            };
-          }
-        }
-
-        const transfer = await stripe.transfers.create(
-          {
-            amount: payoutCents,
-            currency: "eur",
-            destination: helper.stripeAccountId,
-            // Deterministic group so a refund can detect an existing payout in
-            // Stripe even if our DB write of transferId was lost.
-            transfer_group: `errand-${locked.id}`,
-            ...(chargeId ? { source_transaction: chargeId } : {}),
-            metadata: { errandId: String(locked.id) },
-          },
-          { idempotencyKey: `errand-${locked.id}-payout` },
-        );
-        transferId = transfer.id;
-        helperPaidAt = new Date();
-      }
-
-      const [updated] = await tx
-        .update(errandsTable)
-        .set({ status: "completed", transferId, helperPaidAt, updatedAt: new Date() })
-        .where(eq(errandsTable.id, locked.id))
-        .returning();
-
-      if (locked.helperId) {
-        await tx
-          .update(helpersTable)
-          .set({ errandsCompleted: sql`${helpersTable.errandsCompleted} + 1` })
-          .where(eq(helpersTable.id, locked.helperId));
-      }
-
-      return { ok: true as const, row: updated };
-    });
-  } catch (err) {
-    req.log.error({ err, errandId: parsed.data.id }, "Failed to release helper payment");
-    return res.status(502).json({ error: "Couldn't release the payment to the helper. Please try again." });
-  }
-
+  // Volunteer errand → just flip to completed (no money moves). The shared helper
+  // runs under a row lock so it stays mutually exclusive with a concurrent abort.
+  const outcome = await completeErrandWithPayout(parsed.data.id);
   if (!outcome.ok) {
     return res.status(outcome.status).json({ error: outcome.error });
   }
 
-  // Let the helper know their work was confirmed (and that their money is on the
-  // way, if a payment was held). Keyed to the helper's login so it lands in their
-  // notification bell. Best-effort: the payment is already released at this point,
-  // so a failed alert must never fail the request — just log it.
-  if (outcome.row.helperId) {
-    try {
-      const [helper] = await db
-        .select()
-        .from(helpersTable)
-        .where(eq(helpersTable.id, outcome.row.helperId));
-      if (helper?.userId) {
-        const wasPaid = !!outcome.row.transferId;
-        const message = wasPaid
-          ? `Your errand "${outcome.row.title}" is complete and your payment has been released — it's on its way to your payout account.`
-          : `Your errand "${outcome.row.title}" has been marked complete. Thanks for helping out!`;
-        await db.insert(notificationsTable).values({
-          userId: helper.userId,
-          helperId: helper.id,
-          errandId: outcome.row.id,
-          message,
-        });
-      }
-    } catch (err) {
-      req.log.error(
-        { err, errandId: outcome.row.id },
-        "Failed to create helper completion notification",
-      );
-    }
+  await notifyErrandCompleted(outcome.row);
+
+  return res.json(formatErrand(outcome.row, req.user?.id));
+});
+
+// The helper finishes a PAID errand by entering the requester's secret 4-digit
+// completion code. The code is the requester's act of completion + satisfaction
+// + payout authorisation: entering it correctly releases the 90% payout and flips
+// the errand to completed. Only the assigned helper may submit, and failed
+// attempts are limited so the code can't be brute-forced.
+router.post("/errands/:id/verify-pin", async (req, res) => {
+  const parsed = VerifyPinParams.safeParse({ id: Number(req.params.id) });
+  if (!parsed.success) return res.status(400).json({ error: "Invalid id" });
+  const bodyParsed = VerifyPinBody.safeParse(req.body);
+  if (!bodyParsed.success) return res.status(400).json({ error: "Please enter the 4-digit completion code." });
+
+  if (!req.user) {
+    return res.status(401).json({ error: "You must be logged in to enter the completion code." });
   }
+
+  const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, parsed.data.id));
+  if (!errand) return res.status(404).json({ error: "Not found" });
+
+  // Only the assigned helper can enter the code — it both authorises the payout
+  // and identifies who is being paid.
+  const viewerHelperId = await getViewerHelperId(req.user.id);
+  if (!errand.helperId || viewerHelperId !== errand.helperId) {
+    return res.status(403).json({ error: "Only the assigned helper can enter the completion code." });
+  }
+
+  if (errand.status === "completed") {
+    return res.status(400).json({ error: "This errand is already complete." });
+  }
+  if (errand.status !== "accepted") {
+    return res.status(400).json({ error: "This errand can't be completed yet." });
+  }
+
+  const requiresPayment = !!errand.budgetAmount && Number(errand.budgetAmount) > 0;
+  if (!requiresPayment || errand.paymentStatus !== "paid") {
+    return res.status(400).json({ error: "There's no held payment on this errand yet." });
+  }
+  if (!errand.completionPin) {
+    return res.status(400).json({
+      error: "No completion code has been generated yet. Ask the customer to refresh after paying.",
+    });
+  }
+
+  // Brute-force guard: the attempts check, the code comparison and the failed-
+  // attempt increment all run under a row lock in one transaction, so concurrent
+  // wrong guesses can never slip past the limit. We never mutate the errand's
+  // lifecycle here — a correct code hands off to completeErrandWithPayout (which
+  // re-locks and re-validates) so this stays mutually exclusive with abort/refund.
+  const submitted = bodyParsed.data.pin.trim();
+  const check = await db.transaction(async (tx) => {
+    const [locked] = await tx
+      .select()
+      .from(errandsTable)
+      .where(eq(errandsTable.id, errand.id))
+      .for("update");
+
+    // Re-validate every payout invariant against the freshly-locked row, not the
+    // earlier snapshot. A concurrent abort/refund + reopen/reaccept could have
+    // changed the assigned helper or cleared the held payment between our first
+    // read and acquiring the lock — without these checks an unassigned (former)
+    // helper who knows an old code could complete the errand or be paid on an
+    // unpaid/refunded one.
+    const lockedRequiresPayment = !!locked && !!locked.budgetAmount && Number(locked.budgetAmount) > 0;
+    if (
+      !locked ||
+      !locked.completionPin ||
+      locked.status !== "accepted" ||
+      !lockedRequiresPayment ||
+      locked.paymentStatus !== "paid"
+    ) {
+      return { result: "stale" as const };
+    }
+    if (locked.helperId !== viewerHelperId) {
+      return { result: "forbidden" as const };
+    }
+    if (locked.completionPinAttempts >= MAX_PIN_ATTEMPTS) {
+      return { result: "locked" as const };
+    }
+    if (submitted !== locked.completionPin) {
+      const [bumped] = await tx
+        .update(errandsTable)
+        .set({ completionPinAttempts: sql`${errandsTable.completionPinAttempts} + 1`, updatedAt: new Date() })
+        .where(eq(errandsTable.id, locked.id))
+        .returning();
+      const remaining = Math.max(0, MAX_PIN_ATTEMPTS - (bumped?.completionPinAttempts ?? MAX_PIN_ATTEMPTS));
+      return { result: "wrong" as const, remaining };
+    }
+    return { result: "correct" as const };
+  });
+
+  if (check.result === "stale") {
+    return res.status(400).json({ error: "This errand can't be completed right now. Please refresh and try again." });
+  }
+  if (check.result === "forbidden") {
+    return res.status(403).json({ error: "Only the assigned helper can enter the completion code." });
+  }
+  if (check.result === "locked") {
+    return res.status(429).json({
+      error: "Too many incorrect attempts. Please ask the customer to double-check the code with you.",
+    });
+  }
+  if (check.result === "wrong") {
+    return res.status(400).json({
+      error:
+        check.remaining > 0
+          ? `That code isn't right. ${check.remaining} ${check.remaining === 1 ? "try" : "tries"} left before it locks.`
+          : "That code isn't right, and you've run out of tries. Ask the customer to double-check the code.",
+    });
+  }
+
+  // Correct code → release the payout and complete the errand.
+  const outcome = await completeErrandWithPayout(errand.id, { pinVerified: true });
+  if (!outcome.ok) {
+    return res.status(outcome.status).json({ error: outcome.error });
+  }
+
+  await notifyErrandCompleted(outcome.row);
 
   return res.json(formatErrand(outcome.row, req.user?.id));
 });

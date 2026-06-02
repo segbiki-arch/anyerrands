@@ -9,6 +9,7 @@ import {
   useSetErrandContact,
   useListHelpers,
   useCreateReview,
+  useVerifyPin,
   ErrandStatus,
   getGetErrandQueryKey,
   getListErrandsQueryKey,
@@ -79,6 +80,8 @@ export default function ErrandDetailPage() {
 
   const [contactPhone, setContactPhone] = useState("");
 
+  const [pinInput, setPinInput] = useState("");
+
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [reviewerName, setReviewerName] = useState("");
   const [reviewRating, setReviewRating] = useState(0);
@@ -104,6 +107,7 @@ export default function ErrandDetailPage() {
   const abortErrand = useAbortErrand();
   const setErrandContact = useSetErrandContact();
   const createReview = useCreateReview();
+  const verifyPin = useVerifyPin();
 
   if (isNaN(errandId) || error) {
     return (
@@ -165,6 +169,29 @@ export default function ErrandDetailPage() {
       },
       onError: () => toast({ title: "Failed to complete", variant: "destructive" }),
     });
+  };
+
+  const handleVerifyPin = () => {
+    if (pinInput.length !== 4) {
+      toast({ title: "Enter the 4-digit code", variant: "destructive" });
+      return;
+    }
+    verifyPin.mutate(
+      { id: errandId, data: { pin: pinInput } },
+      {
+        onSuccess: (updated) => {
+          setPinInput("");
+          queryClient.setQueryData(getGetErrandQueryKey(errandId), updated);
+          queryClient.invalidateQueries({ queryKey: getListErrandsQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getGetErrandStatsQueryKey() });
+          toast({ title: "Code accepted — errand complete!", description: "Your payment is on its way to your payout account." });
+        },
+        onError: (e) => {
+          const message = (e as { data?: { error?: string } })?.data?.error ?? "Please try again.";
+          toast({ title: "Couldn't complete the errand", description: message, variant: "destructive" });
+        },
+      }
+    );
   };
 
   const handleAbort = () => {
@@ -338,8 +365,8 @@ export default function ErrandDetailPage() {
                       </span>
                       <span>
                         {errand.paymentStatus === "paid"
-                          ? "Payment made — held safely until you confirm the job is done."
-                          : "Pay securely below. Your money is held safely and only sent to the helper once you confirm the job is done."}
+                          ? "Payment made — held safely until you share your completion code."
+                          : "Pay securely below. Your money is held safely and only released once you share your completion code with the helper."}
                       </span>
                     </li>
                   )}
@@ -353,6 +380,16 @@ export default function ErrandDetailPage() {
                         : `Share your phone number so ${errand.helperName ?? "your helper"} can WhatsApp or call you to sort out the details.`}
                     </span>
                   </li>
+                  {requiresPayment && (
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold bg-foreground text-background">
+                        3
+                      </span>
+                      <span>
+                        When the job is done to your satisfaction, give your helper the 4-digit completion code below. That releases their payment — so only share it once you're happy.
+                      </span>
+                    </li>
+                  )}
                 </ol>
               </CardContent>
             </Card>
@@ -690,11 +727,24 @@ export default function ErrandDetailPage() {
                       </>
                     )}
                     {(() => {
-                      const paymentMissing = requiresPayment && errand.paymentStatus !== "paid";
-                      // Only the requester can confirm completion — this releases
-                      // the held payment to the helper, so the helper must not be
-                      // able to mark their own work done.
-                      if (!errand.isRequester) {
+                      const isPaid = requiresPayment && errand.paymentStatus === "paid";
+
+                      // VOLUNTEER / UNPAID errands: no money and no code, so the
+                      // requester simply confirms the job is done.
+                      if (!requiresPayment) {
+                        if (errand.isRequester) {
+                          return (
+                            <Button
+                              className="w-full rounded-full" size="lg" variant="outline"
+                              onClick={handleComplete}
+                              disabled={completeErrand.isPending}
+                              data-testid="btn-complete-errand"
+                            >
+                              {completeErrand.isPending ? "Confirming..." : "Mark as Completed"}
+                              <CheckCircle2 className="w-4 h-4 ml-2" />
+                            </Button>
+                          );
+                        }
                         return (
                           <div className="space-y-2">
                             <p className="text-xs text-center text-muted-foreground bg-muted/50 rounded-md px-2 py-1.5">
@@ -711,45 +761,111 @@ export default function ErrandDetailPage() {
                                   {abortErrand.isPending ? "Backing out…" : "Back out of this job"}
                                 </Button>
                                 <p className="text-[11px] text-center text-muted-foreground">
-                                  If you can't do it, back out so someone else can. Any payment is refunded to the requester.
+                                  If you can't do it, back out so someone else can.
                                 </p>
                               </>
                             )}
                           </div>
                         );
                       }
-                      return (
-                        <>
-                          <Button
-                            className="w-full rounded-full" size="lg" variant="outline"
-                            onClick={handleComplete}
-                            disabled={completeErrand.isPending || paymentMissing}
-                            data-testid="btn-complete-errand"
-                          >
-                            {completeErrand.isPending
-                              ? "Confirming..."
-                              : requiresPayment
-                                ? "Confirm done & pay the helper"
-                                : "Mark as Completed"}
-                            <CheckCircle2 className="w-4 h-4 ml-2" />
-                          </Button>
-                          {requiresPayment && !paymentMissing && (
-                            <>
-                              <p className="text-xs text-center text-muted-foreground">
-                                Only confirm once the job is done — this releases the held payment to your helper.
-                              </p>
+
+                      // PAID errands before payment: the pay button is shown in the
+                      // payment block above. Let the assigned helper still back out.
+                      if (!isPaid) {
+                        if (isAssignedHelper) {
+                          return (
+                            <div className="space-y-2">
+                              <Button
+                                className="w-full rounded-full" size="sm" variant="ghost"
+                                onClick={() => setIsAbortOpen(true)}
+                                disabled={abortErrand.isPending}
+                                data-testid="btn-abort-errand"
+                              >
+                                {abortErrand.isPending ? "Backing out…" : "Back out of this job"}
+                              </Button>
                               <p className="text-[11px] text-center text-muted-foreground">
-                                Your payment can't be cancelled, but if the helper backs out — or the job isn't completed within 7 working days — it's automatically refunded to you.
+                                If you can't do it, back out so someone else can. Any payment is refunded to the requester.
                               </p>
-                            </>
-                          )}
-                          {paymentMissing && (
-                            <p className="text-xs text-center text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
-                              Pay first — your payment is held safely and only released to the helper when you confirm the job is done.
+                            </div>
+                          );
+                        }
+                        return null;
+                      }
+
+                      // PAID + accepted → the completion-code flow.
+                      // Requester sees their secret code to share when satisfied.
+                      if (errand.isRequester) {
+                        return (
+                          <div className="rounded-xl border-2 border-primary bg-primary/10 p-4 space-y-3" data-testid="completion-pin-card">
+                            <div className="flex items-center gap-2">
+                              <Lock className="w-4 h-4 text-primary shrink-0" />
+                              <h3 className="font-bold text-foreground">Your completion code</h3>
+                            </div>
+                            {errand.completionPin ? (
+                              <div className="text-center py-1">
+                                <div className="text-4xl font-bold tracking-[0.4em] font-mono text-foreground pl-[0.4em]" data-testid="text-completion-pin">
+                                  {errand.completionPin}
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-center text-muted-foreground py-2">
+                                Generating your code… give it a moment and refresh.
+                              </p>
+                            )}
+                            <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 flex items-start gap-2">
+                              <AlertTriangle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+                              <p className="text-xs text-amber-800">
+                                Only share this code with {errand.helperName ?? "your helper"} once your errand is fully completed to your satisfaction. Sharing this code authorises the payment to be released to them.
+                              </p>
+                            </div>
+                            <p className="text-[11px] text-center text-muted-foreground">
+                              If the job isn't completed within 7 working days, your payment is automatically refunded.
                             </p>
-                          )}
-                        </>
-                      );
+                          </div>
+                        );
+                      }
+
+                      // Assigned helper enters the code to finish and get paid.
+                      if (isAssignedHelper) {
+                        return (
+                          <div className="space-y-3" data-testid="completion-pin-entry">
+                            <div>
+                              <h3 className="font-semibold">Finish the job</h3>
+                              <p className="text-sm text-muted-foreground">
+                                When {errand.requesterName} is happy with the job, ask them for their 4-digit completion code and enter it here to get paid.
+                              </p>
+                            </div>
+                            <Input
+                              inputMode="numeric"
+                              maxLength={4}
+                              placeholder="••••"
+                              value={pinInput}
+                              onChange={(e) => setPinInput(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                              className="text-center text-2xl tracking-[0.3em] font-mono h-14"
+                              data-testid="input-completion-pin"
+                            />
+                            <Button
+                              className="w-full rounded-full" size="lg"
+                              onClick={handleVerifyPin}
+                              disabled={verifyPin.isPending || pinInput.length !== 4}
+                              data-testid="btn-submit-pin"
+                            >
+                              {verifyPin.isPending ? "Checking…" : "Enter code & get paid"}
+                              <CheckCircle2 className="w-4 h-4 ml-2" />
+                            </Button>
+                            <Button
+                              className="w-full rounded-full" size="sm" variant="ghost"
+                              onClick={() => setIsAbortOpen(true)}
+                              disabled={abortErrand.isPending}
+                              data-testid="btn-abort-errand"
+                            >
+                              {abortErrand.isPending ? "Backing out…" : "Back out of this job"}
+                            </Button>
+                          </div>
+                        );
+                      }
+
+                      return null;
                     })()}
                   </>
                 )}

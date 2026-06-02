@@ -3,6 +3,7 @@ import { getStripeSync, getUncachableStripeClient } from './stripeClient';
 import { db, errandsTable } from '@workspace/db';
 import { eq } from 'drizzle-orm';
 import { logger } from './lib/logger';
+import { generateCompletionPin } from './lib/pin';
 
 export class WebhookHandlers {
   static async processWebhook(payload: Buffer, signature: string): Promise<void> {
@@ -75,12 +76,12 @@ export class WebhookHandlers {
     const errandId = parseInt(errandIdRaw, 10);
     if (isNaN(errandId)) return;
 
-    const [errand] = await db.select().from(errandsTable).where(eq(errandsTable.id, errandId));
-    if (!errand) {
+    const [preview] = await db.select().from(errandsTable).where(eq(errandsTable.id, errandId));
+    if (!preview) {
       logger.warn({ errandId, sessionId: session.id }, 'Errand for paid checkout session not found');
       return;
     }
-    if (errand.paymentStatus === 'paid') return; // idempotent
+    if (preview.paymentStatus === 'paid') return; // fast-path idempotency (re-checked under lock)
 
     const stripe = await getUncachableStripeClient();
     let amountCents = session.amount_total ?? 0;
@@ -103,19 +104,39 @@ export class WebhookHandlers {
     // the requester confirms completion.
     const feeCents = Math.round((amountCents * 10) / 100);
 
-    await db
-      .update(errandsTable)
-      .set({
-        paymentStatus: 'paid',
-        paidAmount: (amountCents / 100).toFixed(2),
-        platformFee: (feeCents / 100).toFixed(2),
-        paymentIntentId,
-        checkoutSessionId: session.id,
-        paidAt: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(errandsTable.id, errandId));
+    // Lock the row and re-check inside a transaction so two concurrent webhook
+    // deliveries can't both mark-paid or each mint a different code (which would
+    // rotate the requester's code). Whoever grabs the lock first wins; the other
+    // sees paymentStatus already 'paid' and bails. The pin is minted once via
+    // COALESCE so a redelivery never overwrites the original code.
+    const applied = await db.transaction(async (tx) => {
+      const [locked] = await tx
+        .select()
+        .from(errandsTable)
+        .where(eq(errandsTable.id, errandId))
+        .for('update');
+      if (!locked || locked.paymentStatus === 'paid') return false;
 
-    logger.info({ errandId, sessionId: session.id, amountCents, feeCents }, 'Errand marked paid via webhook');
+      await tx
+        .update(errandsTable)
+        .set({
+          paymentStatus: 'paid',
+          paidAmount: (amountCents / 100).toFixed(2),
+          platformFee: (feeCents / 100).toFixed(2),
+          paymentIntentId,
+          checkoutSessionId: session.id,
+          paidAt: new Date(),
+          completionPin: locked.completionPin ?? generateCompletionPin(),
+          completionPinVerified: false,
+          completionPinAttempts: 0,
+          updatedAt: new Date(),
+        })
+        .where(eq(errandsTable.id, errandId));
+      return true;
+    });
+
+    if (applied) {
+      logger.info({ errandId, sessionId: session.id, amountCents, feeCents }, 'Errand marked paid via webhook');
+    }
   }
 }
