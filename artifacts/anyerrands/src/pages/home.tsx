@@ -63,7 +63,7 @@ export default function Home() {
               Earn money helping people in your local area
             </h1>
             <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              AnyErrands connects trusted local helpers with people who need errands, lifts, and small jobs done.
+              AnyErrands connects trusted local helpers with people who need errands, shared journeys, and small jobs done.
             </p>
             <p className="text-base sm:text-lg font-medium text-foreground/80 max-w-2xl mx-auto pt-2">
               Flexible work. You choose when you accept tasks. Get paid instantly.
@@ -123,18 +123,18 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Lifts / rides banner ── */}
+        {/* ── Journey Sharing banner ── */}
         <section className="relative overflow-hidden rounded-[2rem] bg-white border border-border p-8 md:p-14 shadow-sm hover:shadow-md transition-shadow">
           <div className="relative grid md:grid-cols-[1.2fr_1fr] gap-10 items-center">
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-foreground text-sm font-semibold px-4 py-1.5 rounded-full shadow-sm">
-                <Car className="w-4 h-4 text-primary" /> Lifts & Rides
+                <Car className="w-4 h-4 text-primary" /> Journey Sharing
               </div>
               <h3 className="text-3xl md:text-5xl font-serif font-bold tracking-tight leading-tight">
-                Heading into town?
+                Share your journey. Split travel costs.
               </h3>
               <p className="text-muted-foreground text-lg max-w-lg leading-relaxed">
-                Need a lift to the airport, or just a spin into Nenagh? Ask for a lift from someone who's already going that way.
+                Going the same way as a neighbour? Post your journey and a local driver heading in your direction can share the drive — you just chip in towards fuel and travel costs.
               </p>
               <div className="flex flex-wrap gap-2 pt-2">
                 {["Limerick", "Shannon Airport", "Thurles", "Nenagh Town"].map((p) => (
@@ -151,7 +151,7 @@ export default function Home() {
                 className="rounded-full font-bold px-8 h-14 text-base shadow-lg bg-foreground text-background hover:bg-foreground/90 hover:scale-105 transition-all"
                 data-testid="btn-request-lift"
               >
-                <Link href="/lifts/new">Request a Lift <ArrowRight className="w-4 h-4 ml-2" /></Link>
+                <Link href="/lifts/new">Share a Journey <ArrowRight className="w-4 h-4 ml-2" /></Link>
               </Button>
             </div>
           </div>

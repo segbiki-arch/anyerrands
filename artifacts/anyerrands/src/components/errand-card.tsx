@@ -17,9 +17,14 @@ const STATUS_LABELS: Record<string, string> = {
   [ErrandStatus.completed]: "Done",
 };
 
+const CATEGORY_LABELS: Record<string, string> = {
+  "Lifts & Transport": "Journey Sharing",
+};
+
 export function ErrandCard({ errand }: { errand: Errand }) {
   const statusStyle = STATUS_STYLES[errand.status] ?? "bg-muted text-muted-foreground";
   const statusLabel = STATUS_LABELS[errand.status] ?? errand.status;
+  const categoryLabel = CATEGORY_LABELS[errand.category] ?? errand.category;
 
   return (
     <Link href={`/errands/${errand.id}`} data-testid={`card-errand-${errand.id}`}>
@@ -30,7 +35,7 @@ export function ErrandCard({ errand }: { errand: Errand }) {
         {/* Top row */}
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-semibold bg-foreground text-background px-2.5 py-1 rounded-full truncate max-w-[60%]">
-            {errand.category}
+            {categoryLabel}
           </span>
           <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-full shrink-0", statusStyle)}>
             {statusLabel}

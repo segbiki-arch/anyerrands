@@ -116,7 +116,7 @@ export default function TermsPage() {
           <h1 className="text-3xl font-serif font-bold">Legal, Safety &amp; Community</h1>
         </div>
         <p className="text-muted-foreground">
-          These documents govern your use of {COMPANY}, a community errand and lifts marketplace serving {LOCATION}.<br />
+          These documents govern your use of {COMPANY}, a community errand and journey-sharing marketplace serving {LOCATION}.<br />
           <span className="text-xs">Last updated: {EFFECTIVE_DATE}</span>
         </p>
       </div>
@@ -145,11 +145,11 @@ export default function TermsPage() {
       {activeTab === "terms" && (
         <div className="space-y-3">
           <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-sm text-foreground/80 mb-6">
-            <strong>Summary:</strong> AnyErrands connects people who need help with everyday tasks and lifts to local helpers in the Nenagh area. We are a technology platform only — we are not a party to the agreement between you and another user, and we do not employ helpers. By using this platform you agree to these terms. Please read them carefully.
+            <strong>Summary:</strong> AnyErrands connects people who need help with everyday tasks and shared journeys to local helpers in the Nenagh area. We are a technology platform only — we are not a party to the agreement between you and another user, and we do not employ helpers. By using this platform you agree to these terms. Please read them carefully.
           </div>
 
           <Section title="1. About AnyErrands & Our Role" defaultOpen>
-            <P>{COMPANY} is a community marketplace that connects residents of Nenagh, Co. Tipperary and surrounding areas with local helpers willing to assist with everyday errands and lifts — including grocery shopping, dog walking, cleaning, gardening, deliveries, moving assistance, and transport.</P>
+            <P>{COMPANY} is a community marketplace that connects residents of Nenagh, Co. Tipperary and surrounding areas with local helpers willing to assist with everyday errands and shared journeys — including grocery shopping, dog walking, cleaning, gardening, deliveries, moving assistance, and shared transport (cost-shared journeys between neighbours, not a taxi or hire service).</P>
             <P>We act <strong>solely as a technology platform</strong> facilitating connections between errand requesters ("Clients") and errand helpers ("Helpers"). We are <strong>not a party</strong> to any agreement between Clients and Helpers, we do not supervise, direct, or control the performance of any errand, and we do not employ, engage, or act as an agent for Helpers.</P>
             <P>We do not guarantee that any errand will be accepted, that any Helper or Client will perform as agreed, or that any task will be completed to a particular standard.</P>
           </Section>
@@ -212,7 +212,7 @@ export default function TermsPage() {
           </Section>
 
           <Section title="7. Safety & Assumption of Risk">
-            <P>AnyErrands does not vet, background-check, endorse, or supervise any Client or Helper, and does not inspect any home, vehicle, or task. <strong>You interact with other users, attend locations, give or receive lifts, and allow access to property entirely at your own risk.</strong></P>
+            <P>AnyErrands does not vet, background-check, endorse, or supervise any Client or Helper, and does not inspect any home, vehicle, or task. <strong>You interact with other users, attend locations, give or receive shared journeys, and allow access to property entirely at your own risk.</strong></P>
             <P>You are strongly encouraged to follow our <button onClick={() => selectTab("safety")} className="text-primary underline underline-offset-2">Safety guidance</button>, including meeting in public places first, being cautious about granting access to your home, and reporting suspicious behaviour. To the fullest extent permitted by law, AnyErrands accepts no responsibility for the conduct, acts, or omissions of any user, whether online or in person.</P>
           </Section>
 
@@ -305,7 +305,7 @@ export default function TermsPage() {
             <P><strong>Data you provide directly:</strong></P>
             <UL items={[
               "Account information: your name, email address, and profile photo (provided via secure authentication).",
-              "Errand details: title, description, location, duration, and budget when you post an errand or lift.",
+              "Errand details: title, description, location, duration, and budget when you post an errand or shared journey.",
               "Helper profile: name, location, bio, skills, and availability when you register as a Helper.",
               "Contact details: a phone number you choose to share with your assigned Helper or Client to coordinate a task.",
               "Report submissions: your name, the reason for the report, and your description of the issue.",
@@ -322,7 +322,7 @@ export default function TermsPage() {
           <Section title="3. How We Use Your Data & Legal Bases">
             <P>We use your personal data only for the following purposes:</P>
             <UL items={[
-              "Operating the platform — matching Clients with Helpers and facilitating errands and lifts (legal basis: performance of a contract).",
+              "Operating the platform — matching Clients with Helpers and facilitating errands and shared journeys (legal basis: performance of a contract).",
               "Processing payments — sharing necessary information with Stripe (legal basis: performance of a contract).",
               "Platform communications — sending notifications about errands you've posted or accepted (legal basis: performance of a contract).",
               "Safety & trust — reviewing reports, preventing fraud, and enforcing platform rules (legal basis: legitimate interests).",
@@ -426,7 +426,7 @@ export default function TermsPage() {
               "Meet in public places first, especially with someone new.",
               "Be careful about giving access to your home.",
               "Report anything that feels off — you could protect a neighbour.",
-              "Read our full Safety guidance before your first errand or lift.",
+              "Read our full Safety guidance before your first errand or shared journey.",
             ]} />
             <P><button onClick={() => selectTab("safety")} className="text-primary underline underline-offset-2">Read the full Safety guidance →</button></P>
           </Section>
@@ -451,7 +451,7 @@ export default function TermsPage() {
       {activeTab === "safety" && (
         <div className="space-y-3">
           <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-900 mb-6">
-            <strong>Please read this before your first errand or lift.</strong> AnyErrands does not vet or background-check users and does not supervise tasks. Your safety is in your hands — these steps are strongly encouraged to help keep you safe.
+            <strong>Please read this before your first errand or shared journey.</strong> AnyErrands does not vet or background-check users and does not supervise tasks. Your safety is in your hands — these steps are strongly encouraged to help keep you safe.
           </div>
 
           <Section title="Meet in a public place first" defaultOpen>
@@ -459,7 +459,7 @@ export default function TermsPage() {
             <UL items={[
               "Choose a café, shop, car park, or town-centre spot for a first hand-off or pickup.",
               "Hand over keys, items, or payment-in-kind in public where possible.",
-              "For lifts, agree a clear, public pickup and drop-off point.",
+              "For shared journeys, agree a clear, public pickup and drop-off point.",
               "Build up trust over a few errands before changing these arrangements.",
             ]} />
           </Section>
@@ -490,7 +490,7 @@ export default function TermsPage() {
               "Keep your conversations and payments on the platform — it's there to protect you.",
               "Share only the contact details you're comfortable with, and only with your assigned Helper or Client.",
               "Agree the task, price, and timing clearly before you start.",
-              "For lifts, check the basics (licensed driver, taxed and insured vehicle, seatbelts) and let someone know your journey.",
+              "For shared journeys, check the basics (licensed driver, taxed and insured vehicle, seatbelts) and let someone know your journey.",
               "Don't carry large amounts of cash; use the platform's secure card payment instead.",
             ]} />
           </Section>

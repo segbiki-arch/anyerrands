@@ -41,6 +41,10 @@ const STATUS_LABELS: Record<string, string> = {
   [ErrandStatus.completed]: "Done",
 };
 
+const CATEGORY_LABELS: Record<string, string> = {
+  "Lifts & Transport": "Journey Sharing",
+};
+
 export default function MyErrandsPage() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -128,7 +132,7 @@ export default function MyErrandsPage() {
                       </span>
                       <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
                         {errand.category === "Lifts & Transport" && <Car className="w-3 h-3" />}
-                        {errand.category}
+                        {CATEGORY_LABELS[errand.category] ?? errand.category}
                       </span>
                     </div>
                     <h3 className="font-bold leading-snug truncate text-foreground group-hover:text-primary transition-colors">

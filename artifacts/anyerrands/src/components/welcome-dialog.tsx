@@ -24,7 +24,7 @@ function getContent(variant: WelcomeVariant, firstName?: string | null): Variant
       subtitle:
         "You can now start earning by helping people in your area with everyday tasks and errands.",
       tagsLabel: "Popular helper jobs",
-      tags: ["Deliveries", "Shopping pickup", "Lifts & transport", "Small errands", "Local assistance"],
+      tags: ["Deliveries", "Shopping pickup", "Journey sharing", "Small errands", "Local assistance"],
       highlights: [
         { icon: "💰", text: "Work when you want" },
         { icon: "📍", text: "Help people nearby" },
@@ -40,7 +40,7 @@ function getContent(variant: WelcomeVariant, firstName?: string | null): Variant
     subtitle:
       "Need help with everyday errands? You're in the right place. Find local people to help, fast.",
     tagsLabel: "Get help with",
-    tags: ["Shopping pickup", "Deliveries", "Local lifts", "Small errands", "Everyday tasks"],
+    tags: ["Shopping pickup", "Deliveries", "Shared journeys", "Small errands", "Everyday tasks"],
     highlights: [
       { icon: "⚡", text: "Fast local help" },
       { icon: "💬", text: "Easy communication" },

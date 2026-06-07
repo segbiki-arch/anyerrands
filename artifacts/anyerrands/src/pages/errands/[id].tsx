@@ -376,7 +376,7 @@ export default function ErrandDetailPage() {
       <div className="mb-8 space-y-4">
         <div className="flex flex-wrap items-center gap-3">
           {getStatusBadge()}
-          <Badge variant="secondary" className="text-sm py-1 px-3 font-normal">{errand.category}</Badge>
+          <Badge variant="secondary" className="text-sm py-1 px-3 font-normal">{isLift ? "Journey Sharing" : errand.category}</Badge>
         </div>
         <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground leading-tight">{errand.title}</h1>
         <div className="flex items-center text-muted-foreground gap-4 flex-wrap">
@@ -743,7 +743,7 @@ export default function ErrandDetailPage() {
                   <Euro className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium">Budget</p>
+                  <p className="text-sm text-muted-foreground font-medium">{isLift ? "Contribution (cost share)" : "Budget"}</p>
                   <p className="text-foreground font-medium">
                     {errand.budgetAmount != null ? `€${errand.budgetAmount}` : "Volunteer / Unpaid"}
                   </p>
@@ -761,7 +761,7 @@ export default function ErrandDetailPage() {
                     }}
                     data-testid="btn-accept-errand"
                   >
-                    I can help with this
+                    {isLift ? "Offer to share the drive" : "I can help with this"}
                   </Button>
                 )}
 
@@ -777,7 +777,7 @@ export default function ErrandDetailPage() {
                             </div>
                             {errand.platformFee != null && errand.paidAmount != null && (
                               <p className="text-xs text-green-700/80">
-                                €{(errand.paidAmount - errand.platformFee).toFixed(2)} to helper · €{errand.platformFee.toFixed(2)} platform fee
+                                €{(errand.paidAmount - errand.platformFee).toFixed(2)} to {isLift ? "driver" : "helper"} · €{errand.platformFee.toFixed(2)} service fee
                               </p>
                             )}
                             {errand.paidAt && (
@@ -788,6 +788,33 @@ export default function ErrandDetailPage() {
                           </div>
                         ) : errand.isRequester ? (
                           <>
+                            {isLift && errand.budgetAmount != null && (() => {
+                              const amountCents = Math.round(Number(errand.budgetAmount) * 100);
+                              const feeCents = Math.round(amountCents * 10 / 100);
+                              const total = amountCents / 100;
+                              const fee = feeCents / 100;
+                              const driver = (amountCents - feeCents) / 100;
+                              return (
+                                <div className="rounded-lg border border-border/60 bg-muted/30 p-3 space-y-1.5 text-sm" data-testid="lift-cost-breakdown">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">Your contribution</span>
+                                    <span className="font-medium text-foreground">€{total.toFixed(2)}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">Service fee (10%)</span>
+                                    <span className="font-medium text-foreground">€{fee.toFixed(2)}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between border-t border-border/60 pt-1.5">
+                                    <span className="text-muted-foreground">Total to pay</span>
+                                    <span className="font-bold text-foreground">€{total.toFixed(2)}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-muted-foreground">Driver receives</span>
+                                    <span className="font-medium text-foreground">€{driver.toFixed(2)}</span>
+                                  </div>
+                                </div>
+                              );
+                            })()}
                             <Button
                               className="w-full rounded-full" size="lg"
                               onClick={() => redirectToCheckout(errandId)}
@@ -798,8 +825,16 @@ export default function ErrandDetailPage() {
                                 ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Redirecting...</>
                                 : <><CreditCard className="w-4 h-4 mr-2" />Pay €{errand.budgetAmount}</>}
                             </Button>
-                            <p className="text-xs text-center text-muted-foreground">Pay securely by card — no account needed · 90% goes to the helper · 10% platform fee</p>
-                            <p className="text-xs text-center text-muted-foreground">Your payment is held safely and only sent to the helper once you confirm the job is done.</p>
+                            <p className="text-xs text-center text-muted-foreground">
+                              {isLift
+                                ? "Pay securely by card — no account needed · 90% goes to the driver · 10% service fee"
+                                : "Pay securely by card — no account needed · 90% goes to the helper · 10% platform fee"}
+                            </p>
+                            <p className="text-xs text-center text-muted-foreground">
+                              {isLift
+                                ? "Your payment is held safely and only sent to the driver once you confirm the journey is done."
+                                : "Your payment is held safely and only sent to the helper once you confirm the job is done."}
+                            </p>
                           </>
                         ) : (
                           <p className="text-xs text-center text-muted-foreground bg-muted/50 rounded-md px-2 py-1.5" data-testid="text-awaiting-payment">
@@ -960,7 +995,7 @@ export default function ErrandDetailPage() {
                     {errand.paymentStatus === "paid" && errand.paidAmount != null && (
                       <p className="text-xs text-center text-muted-foreground">
                         Paid €{errand.paidAmount.toFixed(2)}
-                        {errand.platformFee != null && ` · €${(errand.paidAmount - errand.platformFee).toFixed(2)} to helper`}
+                        {errand.platformFee != null && ` · €${(errand.paidAmount - errand.platformFee).toFixed(2)} to ${isLift ? "driver" : "helper"}`}
                       </p>
                     )}
                     {errand.helperId && errand.isRequester && (
@@ -1010,8 +1045,8 @@ export default function ErrandDetailPage() {
       <Dialog open={isAcceptOpen} onOpenChange={setIsAcceptOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Accept this Errand</DialogTitle>
-            <DialogDescription>Select your helper profile to claim this errand.</DialogDescription>
+            <DialogTitle>{isLift ? "Confirm seat sharing" : "Accept this Errand"}</DialogTitle>
+            <DialogDescription>{isLift ? "Select your helper profile to offer this journey." : "Select your helper profile to claim this errand."}</DialogDescription>
           </DialogHeader>
           <div className="py-6">
             <Label htmlFor="helper-select" className="mb-2 block">Who is helping?</Label>
@@ -1032,7 +1067,7 @@ export default function ErrandDetailPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAcceptOpen(false)}>Cancel</Button>
             <Button onClick={handleAccept} disabled={acceptErrand.isPending || !selectedHelperId} data-testid="btn-confirm-accept">
-              {acceptErrand.isPending ? "Accepting..." : "Confirm & Accept"}
+              {acceptErrand.isPending ? "Confirming..." : (isLift ? "Confirm Seat Sharing" : "Confirm & Accept")}
             </Button>
           </DialogFooter>
         </DialogContent>

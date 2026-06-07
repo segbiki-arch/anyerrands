@@ -153,16 +153,16 @@ export default function HelpCenterPage() {
       {activeTab === "works" && (
         <div className="space-y-3">
           <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-sm text-foreground/80 mb-6">
-            <strong>The short version:</strong> someone posts an errand or a lift, a local neighbour accepts it, the job gets done, and payment is released. No app store needed — it runs straight from your phone or computer.
+            <strong>The short version:</strong> someone posts an errand or a shared journey, a local neighbour accepts it, the job gets done, and payment is released. No app store needed — it runs straight from your phone or computer.
           </div>
 
           <Section title="What is AnyErrands?" defaultOpen>
-            <P>AnyErrands is a community marketplace for Nenagh, Co. Tipperary and the surrounding area. It connects people who need a hand with everyday tasks — the shopping, dog walking, cleaning, gardening, deliveries, small jobs, or a lift into town — with local people happy to help and earn.</P>
+            <P>AnyErrands is a community marketplace for Nenagh, Co. Tipperary and the surrounding area. It connects people who need a hand with everyday tasks — the shopping, dog walking, cleaning, gardening, deliveries, small jobs, or a shared journey into town — with local people happy to help and earn.</P>
           </Section>
 
-          <Section title="If you need a hand (posting an errand or lift)">
+          <Section title="If you need a hand (posting an errand or journey)">
             <OL items={[
-              "Log in, then choose “Post an Errand” or “Request a Lift”.",
+              "Log in, then choose “Post an Errand” or “Journey Sharing”.",
               "Describe what you need, where, roughly how long it'll take, and set a budget if there is one.",
               "A local Helper accepts your errand. You'll be notified when they do.",
               "Pay securely by card. Your money is held safely — it is not released yet.",
@@ -175,15 +175,15 @@ export default function HelpCenterPage() {
             <OL items={[
               "Go to “Become a Helper” and set up your helper profile.",
               "Connect a Stripe payout account so you can get paid (this is a quick, secure once-off setup).",
-              "Browse open errands and lifts, and accept the ones that suit you.",
+              "Browse open errands and shared journeys, and accept the ones that suit you.",
               "Do the job, coordinate any details with the requester by phone or WhatsApp.",
               "When the requester confirms it's done, your payment is released to your bank.",
             ]} />
             <P>You keep the large majority of every job — see the <button onClick={() => selectTab("payments")} className="text-primary underline underline-offset-2">Payments</button> section for the exact split.</P>
           </Section>
 
-          <Section title="What's a “lift”?">
-            <P>A lift is just an errand for getting somewhere — a run to an appointment, the shops, the train, or anywhere locally. It works exactly like any other errand: post it, a Helper with a car accepts, and payment is handled the same way.</P>
+          <Section title="What's “Journey Sharing”?">
+            <P>Journey Sharing connects people travelling the same way so they can share the drive and split the travel costs. You post the journey you need — to an appointment, the shops, the airport, or anywhere locally — and a neighbour already heading in that direction can take you along. You simply contribute towards fuel and travel costs; it's cost-sharing between neighbours, not a taxi or hire service. The contribution is held safely and released to the driver once you confirm the journey is done.</P>
           </Section>
 
           <Section title="Do I need to install an app?">
@@ -285,7 +285,7 @@ export default function HelpCenterPage() {
             ]} />
           </Section>
 
-          <Section title="Lifts and transport">
+          <Section title="Journey sharing">
             <UL items={[
               "Share your trip details with someone you trust before setting off.",
               "Check the basics — that the driver and car match what was agreed.",

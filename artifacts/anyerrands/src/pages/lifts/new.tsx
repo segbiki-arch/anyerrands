@@ -21,7 +21,7 @@ const LIFTS_CATEGORY = "Lifts & Transport";
 const formSchema = z.object({
   tripFrom: z.string().min(2, "Tell us where you're starting from"),
   tripTo: z.string().min(2, "Tell us where you need to go"),
-  tripWhen: z.string().min(2, "Let helpers know when you need the lift"),
+  tripWhen: z.string().min(2, "Let drivers know when you'd like to travel"),
   passengers: z.coerce.number().int().min(1, "At least 1 passenger").max(8, "Max 8 passengers"),
   returnTrip: z.boolean().default(false),
   description: z.string().min(10, "Add a few details (min 10 characters)"),
@@ -60,7 +60,7 @@ export default function NewLiftPage() {
   }, [accountName, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const title = `Lift: ${values.tripFrom} → ${values.tripTo}${values.returnTrip ? " (return)" : ""}`;
+    const title = `Journey: ${values.tripFrom} → ${values.tripTo}${values.returnTrip ? " (return)" : ""}`;
     createErrand.mutate(
       {
         data: {
@@ -83,15 +83,15 @@ export default function NewLiftPage() {
           queryClient.invalidateQueries({ queryKey: getGetErrandStatsQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetRecentErrandsQueryKey() });
           toast({
-            title: "Lift requested!",
-            description: "Neighbours with cars can now offer you a ride.",
+            title: "Journey posted!",
+            description: "Drivers heading your way can now offer to share the drive.",
           });
           setLocation(`/errands/${newErrand.id}`);
         },
         onError: () => {
           toast({
             variant: "destructive",
-            title: "Couldn't post your lift",
+            title: "Couldn't post your journey",
             description: "Something went wrong. Please try again.",
           });
         },
@@ -103,8 +103,8 @@ export default function NewLiftPage() {
   if (!isAuthenticated) {
     return (
       <LoginRequired
-        title="Log in to request a lift"
-        description="You need an account so we can let you know the moment a driver offers you a ride, and keep your history."
+        title="Log in to share a journey"
+        description="You need an account so we can let you know the moment a driver offers to share the drive, and keep your history."
       />
     );
   }
@@ -113,11 +113,11 @@ export default function NewLiftPage() {
     <div className="max-w-3xl mx-auto p-6 md:p-8 py-12">
       <div className="mb-8">
         <div className="inline-flex items-center gap-2 rounded-full bg-primary/15 text-foreground px-3 py-1 text-sm font-semibold mb-3">
-          <Car className="w-4 h-4" /> Lifts &amp; Transport
+          <Car className="w-4 h-4" /> Journey Sharing
         </div>
-        <h1 className="text-4xl font-serif font-bold tracking-tight">Request a lift</h1>
+        <h1 className="text-4xl font-serif font-bold tracking-tight">Share a Journey</h1>
         <p className="text-lg text-muted-foreground mt-2">
-          No taxi? Few buses? Ask a neighbour with a car for a ride — to the airport, Limerick, Thurles, or any town nearby.
+          Heading to the airport, Limerick, Thurles or a town nearby? Post your journey and a neighbour driving the same way can share the drive — you just chip in towards fuel and travel costs.
         </p>
       </div>
 
@@ -214,7 +214,7 @@ export default function NewLiftPage() {
                     <FormItem className="flex items-center justify-between rounded-lg border border-border/60 p-4">
                       <div className="space-y-0.5">
                         <FormLabel>Return trip needed</FormLabel>
-                        <FormDescription>Turn on if you also need a lift back</FormDescription>
+                        <FormDescription>Turn on if you also need the return journey</FormDescription>
                       </div>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} data-testid="switch-return" />
@@ -254,14 +254,14 @@ export default function NewLiftPage() {
                   name="budgetAmount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Petrol contribution (€)</FormLabel>
+                      <FormLabel>Your contribution (cost share) (€)</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                           <Input type="number" placeholder="0.00" className="pl-9" {...field} value={field.value ?? ""} data-testid="input-lift-budget" />
                         </div>
                       </FormControl>
-                      <FormDescription>Optional — offer something towards fuel. Leave blank for a free/volunteer lift.</FormDescription>
+                      <FormDescription>Optional — offer something towards fuel and travel costs. Leave blank for a free/volunteer journey.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -270,7 +270,7 @@ export default function NewLiftPage() {
                 <div className="flex items-start gap-2 rounded-lg bg-primary/5 border border-primary/20 p-3">
                   <Lock className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                   <p className="text-sm text-muted-foreground">
-                    Your phone number stays <span className="font-medium text-foreground">private</span> — it's only shared with the driver <span className="font-medium text-foreground">after</span> they offer you the lift.
+                    Your phone number stays <span className="font-medium text-foreground">private</span> — it's only shared with the driver <span className="font-medium text-foreground">after</span> they confirm the journey.
                   </p>
                 </div>
 
@@ -299,7 +299,7 @@ export default function NewLiftPage() {
                   disabled={createErrand.isPending}
                   data-testid="btn-submit-lift"
                 >
-                  {createErrand.isPending ? "Posting..." : (<>Request Lift <Send className="ml-2 w-4 h-4" /></>)}
+                  {createErrand.isPending ? "Posting..." : (<>Share Journey <Send className="ml-2 w-4 h-4" /></>)}
                 </Button>
               </div>
             </form>
